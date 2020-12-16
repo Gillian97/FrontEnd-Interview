@@ -1884,8 +1884,6 @@ dog.name = 'doggi'; // dog 对象此时仅包含自身属性 name
 dog.speak('hello'); // doggi is speaking hello
 ```
 
-
-
 ### __proto\_\_ 属性
 
 继承是让两个对象产生关联, 使用 __proto\_\_, 这个属性每个对象都有. 
@@ -2226,8 +2224,6 @@ console.log(dog.hasOwnProperty('name'), dog.hasOwnProperty('speak')); // true fa
 console.log('name' in dog, 'speak' in dog); // true true
 ```
 
-
-
 ### 继承
 
 继承允许我们构造与已有数据类型相似的数据类型.
@@ -2280,8 +2276,6 @@ console.log(dog instanceof Animal, dog instanceof Object); // true true
 // TO DO 
 console.log(dog instanceof Object.prototype); // TypeError: Right-hand side of 'instanceof' is not callable
 ```
-
-
 
 ## 静态方法
 
@@ -3742,11 +3736,39 @@ Object.defineProperty(obj, prop, descriptor)
 
 
 
+# 设计模式
+
+## 发布订阅模式
+
+## 单例模式
+
+一个类只有一个实例，并且可以全局访问。
+
+如下实现有以下缺点：
+
+1. 容易重名
+2. 容易覆盖
+
+```javascript
+// obj 唯一 & 可全局访问
+// 唯一是通过 let 变量不允许重复声明实现
+let obj = {
+  name : 'Bob',
+  getName(){}
+}
+```
+
+先判断某类的实例是否存在，存在则返回实例，不存在则新建实例。
+
+
+
+## 观察者模式
+
 # 模块化
 
 ## 概述
 
-ES6之前, JS没有模块体系, 使用社区的模块加载方案, 分别是 CommonJS (用于服务器)和 AMD(用于浏览器) 两种, 都只能运行时确定模块的依赖关系.
+ES6 之前, JS 没有模块体系, 使用社区的模块加载方案, 分别是 CommonJS (用于服务器)和 AMD(用于浏览器) 两种, 都只能运行时确定模块的依赖关系.
 
 ### 运行时加载
 
