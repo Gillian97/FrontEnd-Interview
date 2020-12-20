@@ -102,8 +102,6 @@ str = "world";
 console.log(str); // world
 ```
 
-
-
 #### 属性
 
 `length`
@@ -545,11 +543,7 @@ if (!undefined) console.log('undefined if false'); // undefined if false
 if (!null) console.log('null if false'); // null if false
 ```
 
-
-
 ## 引用类型
-
-
 
 ### * 数组 Array
 
@@ -609,8 +603,6 @@ const range = (start，stop，step) => Array.from({ length: (stop - start) / ste
 let res = range(1，10，3);
 console.log(res); // [ 1，4，7，10 ]
 ```
-
-
 
 #### 属性
 
@@ -1511,16 +1503,18 @@ nAdd();
 func(); // a 1000
 ```
 
-证明了`func1`的局部变量`a`一直在内存中，并没有在func1被调用后被自动清除. 
+证明了 `func1` 的局部变量 `a` 一直在内存中，并没有在 `func1` 被调用后被自动清除. 
 
-因为`func1`是`func2`的父函数，而`func2`被赋予了局部变量`func`，导致`func2`一直在内存中，则`func2`依赖的`func1`也一直在内存中，不会在调用结束后，被垃圾回收机制回收.
+因为 `func1 `是 `func2 `的父函数，而 `func2` 被赋予了局部变量 `func`，导致 `func2` 一直在内存中，则 `func2` 依赖的 `func1` 也一直在内存中，不会在调用结束后，被垃圾回收机制回收.
 
-这里`nAdd`也是一个匿名函数，也是一个闭包，相当于一个setter，可以在函数外部对函数内部局部变量进行操作.
+> func2 被赋予局部变量 func，func2 依赖于 func1，因此三者都在内存中不会被回收。
+
+这里 `nAdd` 也是一个匿名函数，也是一个闭包，相当于一个 `setter`，可以在函数外部对函数内部局部变量进行操作。
 
 使用闭包的注意点:
 
-1. 闭包会使函数中的局部变量在内存中，因此会使得内存占用过多，不能滥用. 在退出函数前，将不使用的局部变量全部删除.
-2. 闭包会在函数外部，改变父函数内部变量的值，注意不要随便改变.
+1. 闭包会使函数中的局部变量在内存中，因此会使得**内存占用过多**，不能滥用。在退出函数前，将不使用的局部变量全部删除。
+2. 闭包会在函数外部，改变父函数内部变量的值，**注意不要随便改变**。
 
 思考题:
 
@@ -2791,11 +2785,9 @@ ES5 callback
 | rejected       | 已失败                                                       |
 | 备注: resolved | 表示已定型(`pending->fulfilled` 或者 `pending->rejected`)，常指 `fulfilled`. |
 
-
-
 ### 用法
 
-`Promise`是一个构造函数，用来生成`Promise`对象实例.
+`Promise ` 是一个构造函数，用来生成 `Promise` 对象实例.
 
 ```javascript
 const promise = new Promise(function(resolve，reject) {
@@ -2845,9 +2837,9 @@ p.then((value) => {
 })
 ```
 
-如上所示，首先建立一个`Promise`对象，将`setTimeout`这个异步操作放在里面，`Promise`提供了这个异步操作成功或者失败的解决方法. 异步操作执行成功了，就调用`resolve`函数抛出结果，失败就调用`reject`函数抛出结果，总之就是会抛出异步操作的运行结果. 
+如上所示，首先建立一个`Promise`对象，将`setTimeout`这个异步操作放在里面，`Promise`提供了这个异步操作成功或者失败的解决方法。异步操作执行成功了，就调用`resolve`函数抛出结果，失败就调用`reject`函数抛出结果，总之就是会抛出异步操作的运行结果。
 
-在异步操作结束以后，会触发对象p对执行对象的处理，即会触发调用对象p的`then`方法. 处理成功情况，传参是正常的值或者是`Promise`实例，实现`then`第一个参数即成功回调函数，处理失败情况，传参是`Error`，实现`then`第二个参数即失败回调函数.
+在异步操作结束以后，会触发对象p对执行对象的处理，即会触发调用对象p的`then`方法。处理成功情况，传参是正常的值或者是`Promise`实例，实现`then`第一个参数即成功回调函数，处理失败情况，传参是`Error`，实现`then`第二个参数即失败回调函数。
 
 
 
@@ -3077,18 +3069,222 @@ hhh
 
 #### Promise.prototype.finally()
 
-`finally`方法用于指定不管`Promise`对象最后状态如何，都会执行的操作. ES2018. finally的回调函数不接受入参.
+`finally`方法用于指定不管 `Promise ` 对象最后状态如何，都会执行的操作，ES2018引入。在执行完`then`或者`catch`方法后，都会执行`finally`方法。
+
+`finally` 的**回调函数不接受入参**，与 `Promise` 状态无关. 返回值是一个指定了 finally 回调函数的 Promise 对象。
 
 ```javascript
 promise
 .then(result => {···})
 .catch(error => {···})
-.finally(() => {···});
+.finally(() => {···}); // 注意回调函数没有参数
 ```
 
-在执行完`then`或者`catch`方法后，都会执行`finally`方法.
+`finally` 函数内部实现：
+
+> 可知 `finally` 函数总是返回原有的值，`Promise` 成功则返回成功的值，失败则抛出 `error`。
+
+```javascript
+Promise.prototype.finally = function (callback) {
+  let P = this.constructor;
+  return this.then(
+    val => P.resolve(callback()).then(() => val),
+    error => P.resolve(callback()).then(() => { throw error })
+  );
+};
+```
+
+注意：`finally(()=>{})` 与 `then(()=>{},()=>{})` 两者返回值的差别，`finally` 函数总是返回原来的值。
+
+```javascript
+let a = await Promise.resolve(2).then(() => { }, () => { });
+let b = await Promise.resolve(2).finally(() => { });
+
+console.log(a, b); // undefined 2
+
+let c = await Promise.reject(3).then(() => { }, () => { });
+console.log(c); // undefined
+
+let d = await Promise.reject(3).finally(() => { });
+console.log(d); // 3
+/*
+internal/process/esm_loader.js:74
+    internalBinding('errors').triggerUncaughtException(
+                              ^
+3
+Thrown at:
+    at loadESM (internal/process/esm_loader.js:74:31)
+*/
+```
+
+#### Promise.all()
+
+将多个 Promise 实例包装成一个 Promise 新实例，假设为 P。多个 Promise 实例使用数组传入或者其他具有 Iterator 接口的数据结构。假设以数组形式传入参数，则如果有参数不是 Promise 实例，则会通过 Promise.resolve 将其转换。只有当所有实例均有返回值时，才会触发 P 的回调函数。
+
+有一个实例执行失败，则执行 `P.catch()`（如果失败的实例没有自己定义 `catch` 函数的话，自己定义则触发自己的，不会触发 P 的）并且接收到第一个执行失败的 Promise 实例的返回值。
+
+```javascript
+let p1 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve("p1");
+  }, 300)
+})
+
+let p2 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve("p2");
+  }, 500)
+})
+
+let p3 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    reject("p3 error");
+  }, 700)
+})
+
+let p = Promise.all([p1, p2, p3]);
+p.then(val => {
+  console.log("全部执行成功：", val);
+}).catch(error => {
+  console.log("某个实例出现错误：", error);
+})
+// 某个实例出现错误： p3 error
+```
+
+将 p3 中的 `reject` 换成 `resolve`，其余代码不变。
+
+当所有实例状态均为 `fulfilled` 时，P 的状态才是 `fulfilled`， 才执行 P.then() 并且其接收到一个值是所有 Promise 实例的返回值组成的数组。
+
+```javascript
+...
+
+let p3 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve("p3");
+  }, 700)
+})
+
+...
+
+// 全部执行成功： [ 'p1', 'p2', 'p3' ]
+```
+
+#### Promise.race()
+
+形式与上面相同，只是含义不同。race 是哪个实例状态改变最快，就 follow 它的状态，并且将最快改变状态的实例的返回值传入响应回调函数并执行。
+
+```javascript
+let p1 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve("p1");
+  }, 300)
+})
+
+let p2 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    reject("p2");
+  }, 500)
+})
+
+let p3 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve("p3");
+  }, 700)
+})
+
+let p = Promise.race([p1, p2, p3]);
+p.then(val => {
+  console.log("最快状态改变：", val);
+}).catch(error => {
+  console.log("某个实例出现错误：", error);
+})
+
+// 最快状态改变： p1
+```
 
 
+
+#### Promise.try()
+
+需求：需要同步函数同步执行，异步函数异步执行。
+
+3 种实现方法：
+
+1. 使用 `async`
+
+   ```javascript
+   /* f 同步函数 */
+   const f = () => console.log('func');
+   (async () => f())();
+   console.log('over');
+   // func
+   // over
+   
+   /* f 异步函数 */
+   const f = () => {
+     setTimeout(() => {
+       return 1000;
+     }, 0)
+   };
+   (async () => f())() // async 会吃掉错误，需要 catch
+     .then(val => { console.log('val:', val); })
+     .catch(error => { console.log('error:', error); });
+   console.log('over'); // 先执行同步函数
+   // over
+   // val: undefined
+   ```
+
+   
+
+2. 使用 new Promise
+
+   ```javascript
+   /* f 同步函数 */
+   const f = () => console.log('func');
+   (() => new Promise(
+     resolve => resolve(f()) // resolve(f()) 这一步是立即执行的 也就是 f() 立即会被抛出并返回
+   ))();
+   console.log('over');
+   // func
+   // over
+   
+   /* f 异步函数 */
+   const f = () => {
+     setTimeout(() => {
+       console.log('func');
+       return 1000;
+     }, 0)
+   };
+   (() => new Promise(resolve => {
+     resolve(f())
+   }))()
+     .then(val => { console.log('val:', val); })
+     .catch(error => { console.log('error:', error); });
+   console.log('over');
+   // over
+   // val: undefined
+   // func
+   ```
+
+   
+
+3. Promise.try
+
+   ```javascript
+   const f = () => {
+     setTimeout(() => {
+       console.log('func');
+       return 1000;
+     }, 0)
+   };
+   // 能同时捕捉同步函数以及异步函数的报错
+   Promise.try(f)
+     .then(val => console.log('val:', val))
+     .catch(error => console.log('error:', error));
+   // node 环境执行会出现 TypeError: Promise.try is not a function 报错
+   ```
+
+   
 
 ## ES6 Generator 函数
 
@@ -3335,7 +3531,7 @@ f2 over
 
 ## JS 是单线程
 
-由于它是浏览器脚本语言，主要是与用户互动以及操作DOM，否则同步问题很复杂. 即使 js 可以创建多线程，但是子线程完全受控于主线程， 且不得操作 DOM，未改变单线程的本质.
+由于它是浏览器脚本语言，主要是与用户互动以及操作 DOM，否则同步问题很复杂. 即使 js 可以创建多线程，但是子线程完全受控于主线程， 且不得操作 DOM，未改变单线程的本质.
 
 ## 任务队列
 
@@ -4162,6 +4358,83 @@ export default 9;
 // error 没有指定对外接口
 export 5;
 ```
+
+# 垃圾回收 Garbage Collection
+
+一种自动的内存管理机制，释放不再需要的动态内存。
+
+## 概念
+
+### 可达性
+
+如果有数据块变得不可达即不可访问，则垃圾回收机制会将其删除。具有可达性的值是可访问的值，被存储在内存中。
+
+1. 根/固有可达值，无法被删除：
+   - 本地函数的变量与参数
+   - 当前嵌套调用链上的其他函数的变量与参数
+   - 全局变量
+   - 其他
+
+2. 从根开始沿着引用或者引用链能访问的值，也具有可达性。
+
+```javascript
+let a = { name: "Bob"};
+a = null;
+// { name: "Bob"} 对象丢失引用，变得不可达/无法访问，会被删除
+```
+
+JS 引擎中有一个后台进程称之为垃圾回收器，监视所有对象，并删除不可访问对象。
+
+### 垃圾
+
+无法从根开始被访问到的对象就是垃圾，要被清除。
+
+## 找到并清除垃圾
+
+### 算法-“标记-清除”
+
+垃圾搜集的工作原理：
+
+- 垃圾回收器获取根并“标记”它们
+- 获取所有来自根的引用并标记
+- 继续访问标记的对象，访问它们的引用并标记
+- 以此类推，直至所有引用（从根开始）都被访问
+- 除标记的对象外，所有对象都被删除
+
+遍历以根为根节点的树，访问所有引用，类似于广度优先遍历。
+
+JS 引擎做了下述优化：
+
+- 分代回收。对象分为新对象与旧对象，存在时间长的旧对象，很少被检查。
+- 增量回收。将垃圾回收分为几个部分，不是一次遍历并标记整个对象集，减少延迟。
+- 空闲时间回收。垃圾回收器利用CPU空闲时间进行垃圾回收。
+
+优点：
+
+- 实现简单，容易与其他算法结合。
+
+缺点：
+
+- 碎片化，导致很多系小分块散落在堆的各处
+- 分配速度不理想。每次分配内存都要遍历空闲链表，找到足够大的分块
+- 与写时复制技术不兼容，因为每次都会在活动对象上打上标记
+
+### 算法-“引用计数”
+
+记录每个对象被引用的次数，每次新建对象、赋值引用、删除引用的同时更新计数器，如果计数器为 0 则直接回收内存。
+
+优点：
+
+- 暂停时间短
+- 即刻回收垃圾
+- 不用沿着根遍历所有对象
+
+缺点：
+
+- 计数器任务繁重
+- 计数器占用很多位
+- 实现繁琐，每个赋值操作都得更换成引用更新操作
+- 循环引用无法回收
 
 
 
