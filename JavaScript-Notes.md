@@ -4391,7 +4391,7 @@ JS 引擎中有一个后台进程称之为垃圾回收器，监视所有对象�
 
 ## 找到并清除垃圾
 
-### 算法-“标记-清除”
+### 算法-“标记清除”
 
 垃圾搜集的工作原理：
 
@@ -4569,6 +4569,56 @@ test(''); // is kong
 
 # Node
 
+## 支持高并发
+
+### 单线程
+
+好处：
+
+- 没有多线程之间的状态同步问题
+- 没有线程切换的开销
+- 没有死锁
+
+坏处：
+
+- 无法充分利用多核 CPU
+- 大量计算占用CPU会导致应用阻塞（不适用CPU密集型）
+- 错误会引起整个应用退出
+
+针对性解决方案：
+
+1. 创建多进程、细分实例
+
+   创建多进程：一台多核服务器创建多个进程，处理好进程间通信
+
+   细分实例：将物理机划分为多个单核虚拟机，通过 pm2 等工具，管理多台虚拟机形成集群架构，处理好机器间通信。
+
+2. 时间片轮转
+
+   在单线程模拟多线程，适当减少阻塞感
+
+3. 负载均衡、坏点监控/隔离
+
+   错误无法通过try/catch捕捉，出错会导致应用退出。
+
+   可以通过 pm2 或者 nginx 工具，动态判断服务状态。服务出错时隔离坏点服务器，将请求转发到正常服务器上，并重启坏点服务器来继续提供服务。（Node 分布式架构）
+
+### 异步I/O
+
+需要等待的操作先跳过，在耗时操作返回回调时再处理，省去等待时间。
+
+### 事件驱动编程
+
+主线程通过 event loop 事件循环触发运行程序。
+
+### Node 分布式架构
+
+![img](https://pic2.zhimg.com/80/v2-7801db51fdf8a3a4f4a11cb76308b1fd_1440w.jpg)
+
+
+
+
+
 ## npm 模块安装机制
 
 之前提到 js 的模块化，在 node 中，npm 提供了别人写好的各种功能的模块的下载，使得开发者不用重复造轮子，造的轮子也能上传被大家使用。
@@ -4625,12 +4675,18 @@ npm install 或者 npm update 下载的模块压缩包，都存在本地缓存�
 
 ### 模块安装过程
 
-1. npm install
+1. npm install <packageName>
 2. npm 向 registry 查询模块压缩包的网址
 3. 下载压缩包到本地缓存目录 `~/.npm`
 4. 将压缩包解压至项目的 `node_modules` 目录
 
 同一个模块有两份代码，一个是缓存目录的压缩包，一个是 `node_modules` 解压后代码，npm install 时只会检查 `node_modules` 。
+
+实操命令：npm install fs
+
+执行中显示：
+
+`reify:fs: http fetch GET 200 https://registry.npmjs.org/fs/-/fs-0.0.1-security.tgz 1728ms`
 
 ### --cache-min 参数
 
@@ -4638,7 +4694,43 @@ npm install 或者 npm update 下载的模块压缩包，都存在本地缓存�
 
 一直从缓存目录下载：`npm install --cache-min 9999999/Infinity <package-name>`，但是仍然需要网络连接。
 
+## Node 常用模块
 
+### fs
+
+模块中的方法都有同步与异步两个版本，异步方法参数最后一个是回调函数，回调函数的第一个参数包含了错误信息（error）。
+
+建议异步方法，性能更高没有阻塞。
+
+读取文件：
+
+```javascript
+import { readFile, readFileSync } from "fs";
+
+readFile("input.txt", (err, data) => {
+    if (err) console.log(err);
+    // data 是 buffer
+    console.log("异步读取：", data.toString());
+})
+
+let data = readFileSync("input.txt");
+console.log("同步读取：", data.toString());
+
+console.log("文件读取完毕");
+
+// output
+// 同步读取： 家人朋友
+// 文件读取完毕
+// 异步读取： 家人朋友
+```
+
+
+
+### children_process
+
+### cluster
+
+### http
 
 
 
