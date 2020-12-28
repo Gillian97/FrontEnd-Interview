@@ -1676,7 +1676,7 @@ console.log(a); // { '0': 1 }
 
 ## Function.prototype.call()/apply()/bind()
 
-这里使用node与浏览器的运行结果不同(原因待深究)，下面为在浏览器中的运行结果.
+这里使用 Node 与浏览器的运行结果不同(原因待深究)，下面为在浏览器中的运行结果.
 
 ```javascript
 var name = "Mary"，age = 18;
@@ -1693,7 +1693,7 @@ console.log(obj.objAge); // 18
 obj.speak(); // XiaoMing is 18*undefined
 ```
 
-this 指上一层，这里指向 window.
+`this` 指上一层，这里指向 `window`.
 
 ```javascript
 var name = 'Bob';
@@ -1705,7 +1705,7 @@ speak(); // Bob
 
 **用法: call apply bind 都是用来改变 this.**
 
-在调用 obj.speak 函数时,函数中含有 this，call/apply/bind 都是用来指定函数中的 this 指谁的，这里传参是 newObj，则指的是 newObj 这个对象.
+在调用 obj.speak 函数时，函数中含有 this，call/apply/bind 都是用来指定函数中的 this 指谁的，这里传参是 newObj，则指的是 newObj 这个对象。
 
 ```javascript
 var name = "Mary"，age = 18;
