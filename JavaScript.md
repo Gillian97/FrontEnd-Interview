@@ -25,7 +25,7 @@ date: 2020-09-01 09:17:06
 
 浏览器从服务器取到HTML页面之后，会展示页面出来，但是浏览器内部将HTML组织成一个树给JS，这个树称为 DOM.
 
-![htmltree](JavaScript-Notes/htmltree.jpg)
+![htmltree](images/htmltree.jpg)
 
 JS可以定位并操作DOM中的任意一个节点，且不用刷新页面，操作就可以立刻显示出效果. 而且操作是内部进行，并没有改变 html的源码.
 
@@ -1459,7 +1459,7 @@ fn = function(y) {
 bar(10); // 2、进入bar函数上下文环境
 ```
 
-![img](JavaScript-Notes/执行上下文.png)
+![img](images/执行上下文.png)
 
 **函数调用栈**: 栈底永远是全局上下文，栈顶是当前正在执行的上下文(活动对象)，白色是被挂起的变量对象(执行上下文)
 
@@ -3563,7 +3563,7 @@ f2 over
 
 执行栈中的代码(同步任务)，总是在读取"任务队列"之前.
 
-![Event Loop](JavaScript-Notes/EventLoop.png)
+![Event Loop](images/EventLoop.png)
 
 ## 定时器
 
