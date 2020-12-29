@@ -718,11 +718,11 @@ React Fiber 出现就是解决这个问题：React 组件同步渲染造成的�
 
 ## Fiber
 
-旧算法中，React 创建一个包含所有元素的树，需要递归遍历这棵树，为了遍历需要维持一个执行栈。执行栈的问题是，整个子树会很快渲染，反过来降低用户体验。
+旧算法中，React 创建一个包含所有元素的树，需要递归遍历这棵树，为了遍历需要维持一个执行栈。执行栈的问题是，整个子树会重新渲染，反过来降低用户体验。
 
 为了解决执行栈的问题，Facebook 重实现了 Reconciliation 算法。
 
-Fiber 是一个新的数据结构， 表示需要完成的工作。
+**Fiber 是一个新的数据结构， 用来表示需要完成的工作。**
 
 React 中，每个元素都有对应的 fiber node，Fiber 的主要优势是在每一次渲染中，fiber node 不用重新生成。
 
@@ -746,42 +746,42 @@ FiberNode = {
 
 ![img](https://blog.kiprosh.com/content/images/2020/06/react-life-cycle.PNG)
 
-## 解决方案
+由上图可知，React 工作分两个阶段：Render 和 commit。
 
-分片，将耗时长的任务分解成很多片，每一片的运行时间很短，虽然总时间依然很长，但是在每个小片执行完之后，都给其他任务一个执行的机会，这样唯一的线程就不会被独占，其他任务依然有运行的机会。
+### 第一阶段
 
-React Fiber 把更新过程碎片化，执行过程如下面的图所示，每执行完一段更新过程，就把控制权交还给React负责任务协调的模块，看看有没有其他紧急任务要做，如果没有就继续去更新，如果有紧急任务，那就去做紧急任务。
+第一次更新，React 计算出哪些需要更新并应用更新。如果是第一次 render，React 会为每个元素创建 Fiber node。在随后的更新中，React 会使用这些 Fiber nodes。总结就是，第一个阶段之后，生成需要进行更新操作的 Fiber Tree（更新操作在第二个阶段进行）。
 
-因此，同步任务可以被拆解、异步化，浏览器主线程得以调控：
+### 第二阶段
 
-- 暂停运行任务
-- 恢复并继续执行任务
-- 给不同的任务分配不同的优先级
+第二个阶段会获取前一个阶段的更新，将更新应用在 DOM 中。当更新对用户可见时，这个阶段才能结束，因此这个阶段结束时需要写在一个用户可见触发的回调中。
 
-![img](https://pic1.zhimg.com/80/v2-78011f3365ab4e0b6184e1e9201136d0_1440w.png)
+整个实现中，React 创建一个由 Fiber Nodes 组成的可以转变的 Tree，就不用在每次更新的时候再创建 Fiber Nodes，只需要让对应的节点更新即可。
 
-维护每一个分片的数据结构，就是 **Fiber**——比线程(Thread)控制得更精密的并发处理机制。
+每次可用时，React 会处理 Fiber Nodes 但也同时会应对突发的事件，当事件发生时，会保留这些更新，以至于处理完突发事件后可以恢复工作。
 
-```javascript
-const fiber = {
-  stateNode, // 节点实例
-  child, // 子节点
-  sibling, // 兄弟节点
-  return, // 父节点
-}
-```
+调用生命周期方法也是 React 执行工作的一部分。
 
-## 实现原理
+Lifecycle methods called during **render** phase:
 
-React Fiber 的做法是不使用 Javascript 的栈，而是将需要执行的操作放在自己实现的栈对象上。这样就能在内存中保留栈帧，以便更加灵活的控制调度过程，例如我们可以手动操纵栈帧的调用。
+- [getDerivedStateFromProps](https://reactjs.org/docs/react-component.html#static-getderivedstatefromprops)
+- [shouldComponentUpdate](https://reactjs.org/docs/react-component.html#shouldcomponentupdate)
+- [render](https://reactjs.org/docs/react-component.html#render)
 
-大致上 Fiber 在调度的时候会执行如下流程：
+Lifecycle methods called during the **commit** phase :
 
-1. 将一个`state`更新需要执行的同步任务拆分成一个 Fiber 任务队列
-2. 在任务队列中选出优先级高的Fiber执行，如果执行时间超过了`deathLine`，则设置为`pending`状态挂起状态
-3. 一个 Fiber 执行结束或挂起，会调用基于`requestIdleCallback`/`requestAnimationFrame`实现的调度器，返回一个新的Fiber任务队列继续进行上述过程
+- [getSnapshotBeforeUpdate](https://reactjs.org/docs/react-component.html#getsnapshotbeforeupdate)
+- [componentDidMount](https://reactjs.org/docs/react-component.html#componentdidmount)
+- [componentDidUpdate](https://reactjs.org/docs/react-component.html#componentdidupdate)
+- [componentWillUnmount](https://reactjs.org/docs/react-component.html#componentwillunmount)
 
-> `requestIdleCallback` 会让一个低优先级的任务在空闲期被调用，而 `requestAnimationFrame`会让一个高优先级的任务在下一个栈帧被调用，从而保证了主线程按照优先级执行 Fiber 单元。
+> 第一个阶段是可以被打断以及恢复的，即异步的，第二个阶段必须在一个流中完成，是同步的。
+
+### 任务优先级
+
+React 如何决定暂停恢复哪些任务，由任务优先级决定，是 React Fiber 的重要特性。
+
+Fiber Reconciler 赋予任务优先级，基于优先级去更新。
 
 Fiber 任务优先级
 
@@ -801,20 +801,7 @@ module.exports = {
 
 文本框输入 > 本次调度结束需完成的任务 > 动画过渡 > 交互反馈 > 数据更新 > 不会显示但以防将来会显示的任务
 
-### React Fiber 更新过程的两个阶段
 
-一个更新过程可能被优先级更高的更新过程打断，所以 React Fiber 一个更新过程被分为两个阶段(Phase)：第一个阶段Reconciliation Phase 和第二阶段 Commit Phase。
-
-- 第一阶段：React Fiber 会找出需要更新哪些DOM，可以被打断，但打断后再执行需要从头开始；
-- 第二阶段：一鼓作气把 DOM 更新完，绝不会被打断。
-
-以 `render()` 函数为界，两个阶段可能会调用的生命周期函数如下。在 React Fiber 中，第一阶段中的生命周期函数在一次加载和更新中可能会被调用多次，因此需要注意生命周期函数的写法，需要适配多次调用的情况，其中 `componentWillMount` 和 `componentWillUpdate` 需要重点关注，可能会引起副作用。
-
-![img](https://pic2.zhimg.com/80/v2-d2c7de3c408badd0abeef40367d3fb19_1440w.png)
-
-
-
-实现方式是使用了浏览器的 requestIdleCallback API。
 
 
 
