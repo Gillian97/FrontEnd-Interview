@@ -728,8 +728,6 @@ React 中，每个元素都有对应的 fiber node，Fiber 的主要优势是在
 
 Fiber 的架构提供了**调度**、**暂停**和**中断**工作的方法。
 
-## 结构
-
 Fiber 是一个包含组件信息的 JS 对象。
 
 ```javascript
@@ -746,7 +744,7 @@ FiberNode = {
 
 ![img](https://blog.kiprosh.com/content/images/2020/06/react-life-cycle.PNG)
 
-由上图可知，React 工作分两个阶段：Render 和 commit。
+由上图可知，React 工作分两个阶段：Render 和 Commit。
 
 ### 第一阶段
 
@@ -801,9 +799,80 @@ module.exports = {
 
 文本框输入 > 本次调度结束需完成的任务 > 动画过渡 > 交互反馈 > 数据更新 > 不会显示但以防将来会显示的任务
 
+# React.lazy
 
+## 代码分割
 
+原因：前端项目代码打包后，bundle.js 过大，使用技术手段对代码包进行分割，能够创建多个包并在运行时动态地加载。现在像 Webpack、 Browserify等打包器都支持代码分割技术。
 
+使用场景：不是首页的页面使用较大的资源，可以考虑代码分割。
 
+懒加载示例代码：
 
+通过 `import()`、`React.lazy` 和 `Suspense` 共同一起实现了 React 的懒加载，即运行时动态加载。
+
+OtherComponent 组件文件被拆分打包为一个新的包（bundle）文件，并且只会在 OtherComponent 组件渲染时，才会被下载到本地。
+
+```react
+import React, { Suspense } from 'react';
+
+const OtherComponent = React.lazy(() => import('./OtherComponent'));
+
+function MyComponent() {
+  return (
+    <div>
+      <Suspense fallback={<div>Loading...</div>}>
+        <OtherComponent />
+      </Suspense>
+    </div>
+  );
+}
+```
+
+[import()](https://github.com/tc39/proposal-dynamic-import) 函数是由TS39提出的一种动态加载模块的规范实现，其返回是一个 promise。当 Webpack 解析到该 `import()` 语法时，会自动进行代码分割。
+
+在浏览器宿主环境中一个`import()`的参考实现如下：
+
+```javascript
+function import(url) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    const tempGlobal = "__tempModuleLoadingVariable" + Math.random().toString(32).substring(2);
+    script.type = "module";
+    script.textContent = `import * as m from "${url}"; window.${tempGlobal} = m;`;
+
+    script.onload = () => {
+      resolve(window[tempGlobal]);
+      delete window[tempGlobal];
+      script.remove();
+    };
+
+    script.onerror = () => {
+      reject(new Error("Failed to load module script with URL " + url));
+      delete window[tempGlobal];
+      script.remove();
+    };
+
+    document.documentElement.appendChild(script);
+  });
+}
+```
+
+## React.lazy 原理
+
+React.lazy 的源码(16.8.0)实现如下，返回了一个 `LazyComponent` 对象。
+
+```javascript
+export function lazy<T, R> (ctor: () => Thenable<T, R>): LazyComponent<T> {
+  let lazyType = {
+    $$typeof: REACT_LAZY_TYPE,
+    _ctor: ctor,
+    // React uses these fields to store the result.
+    _status: -1,
+    _result: null,
+  };
+
+  return lazyType;
+}
+```
 
