@@ -185,11 +185,12 @@ ReactDOM.render(
 
 - React 组件的核心，是数据的来源，必须尽可能简单。
 - 基本上状态是确定组件呈现和行为的对象。
-- 与props 不同，它们是可变的，并创建动态和交互式组件。可以通过 `this.state()` 访问它们。
+- 与 props 不同，它们是可变的，并创建动态和交互式组件。可以通过 `this.state()` 访问它们。
+- 只能在组件的构造函数处分配，视作组件的私有属性，由组件完全控制。
 
 ### 更新组件状态
 
-使用 `this.setState()`。
+使用 `this.setState()` 而不是直接修改，直接修改是不会重新渲染组件的（比如：this.state.value = 4）。
 
 ```react
 class MyComponent extends React.Component {
@@ -216,7 +217,85 @@ ReactDOM.render(
 );
 ```
 
-### **Props 与 状态的区别**
+### setState()
+
+**作用**：接受组件状态更新，告诉 React 该组件及其子组件需要被重新渲染。
+
+将 setState() 视作请求而不是更新组件而立即执行的命令，React 为了性能，在一次遍历中只会更新部分组件，并不会立刻将所有状态改变立即渲染。
+
+**特点**：
+
+- setState() 不会总是立刻更新组件（异步）。因此如果要读取更新后的状态，可以使用 setState() 的回调函数或者 componentDidUpdate() 。 
+- setState() 总是会导致重新渲染，除非 shouldComponentUpdate() 返回 false。
+
+**语法**：
+
+```
+setState(updater, [callback])
+```
+
+> 第一个参数 updater function
+
+```
+(state, props) => stateChange
+```
+
+state 是一个应用改变之后的状态，应该是一个基于传入的 state 和 props 的新对象。
+
+```javascript
+this.setState((state, props) => {
+  return { counter: state.counter + props.step };
+});
+// 函数返回值是后面会浅合并进 state 的对象
+```
+
+也可以直接传对象而不是一个函数，这个对象后面会**浅合并**至当前 state 形成新的 state，当 state 是一个多键值的结构时，可以单独更新某些键值，此时 React 会进行“差分”更新，不会影响其他的属性值。
+
+```javascript
+setState(stateChange[, callback])
+
+// 示例
+this.setState({quantity: 2})
+```
+
+> 第二个参数 回调函数
+
+`setState` 完成并且组件重新渲染之后才会调用的，建议使用 `componentDidUpdate()` 处理类似逻辑。
+
+
+
+**注意**：
+
+**事件合并**
+
+为了性能，React 可能会将多次 setState 调用合并为一次更新。multiple calls during the same cycle may be batched together。类似于下面：
+
+```javascript
+Object.assign(
+  previousState,
+  {quantity: state.quantity + 1},
+  {quantity: state.quantity + 1},
+  ...
+)
+```
+
+后面的调用覆盖前面的调用，因此如果更新的 state 与当前的 state 有关，建议传参采用 `updater` function 形式。
+
+> Subsequent calls will override values from previous calls in the same cycle, so the quantity will only be incremented once. If the next state depends on the current state, we recommend using the updater function form
+
+```javascript
+this.setState((state) => {
+  return {quantity: state.quantity + 1};
+});
+```
+
+**异步**
+
+由 React 控制的事件处理过程 setState 不会同步更新 this.state，也就是说，在 React 控制之外的情况， setState 会同步更新 this.state。
+
+
+
+## **Props 与 状态的区别**
 
 | **条件**                | **State**     | **Props**     |
 | ----------------------- | ------------- | ------------- |
@@ -227,7 +306,7 @@ ReactDOM.render(
 | 5. 设置子组件的初始值   | Yes           | Yes           |
 | 6. 在子组件的内部更改   | **<u>No</u>** | Yes           |
 
-### 有状态组件（有 State）与无状态组件（无 State）
+## 有状态组件（有 State）与无状态组件（无 State）
 
 | **有状态组件**                                               | **无状态组件**                                  |
 | ------------------------------------------------------------ | ----------------------------------------------- |
@@ -236,11 +315,11 @@ ReactDOM.render(
 | 3. 包含过去、现在和未来可能的状态变化情况                    | 3. 不包含过去，现在和未来可能发生的状态变化情况 |
 | 4. 接受无状态组件状态变化要求的通知，然后将 props 发送给他们。 | 4.从有状态组件接收 props 并将其视为回调函数。   |
 
-#### 类组件
+## 类组件
 
 可以使用其他特性，如状态 state 和生命周期钩子。
 
-#### 函数组件
+## 函数组件
 
 当组件只是接收 props 渲染到页面时，就是无状态组件，就属于函数组件，也被称为哑组件或展示组件。
 
@@ -466,7 +545,7 @@ React 的 `StrictMode` 是一种辅助组件，帮助编写更好的 react 组�
 
 `React.memo()`: 防止不必要重新渲染**函数组件**
 
-`PureComponent()`: 防止不必要重新渲染类组件
+`PureComponent()`: 防止不必要重新渲染**类组件**
 
 两种方法都非常依赖于传递给组件的 `props` 的浅比较，如果 `props` 没有改变，那么组件将不会重新渲染。
 
@@ -876,3 +955,115 @@ export function lazy<T, R> (ctor: () => Thenable<T, R>): LazyComponent<T> {
 }
 ```
 
+# 性能优化
+
+## React.memo()
+
+与纯组件相似，帮助控制<u>**函数组件**</u>的再渲染。注意，不要使用其避免渲染，可能会有 bug。
+
+> 组件只有其 props 改变时才会重新渲染。通常情况下，一旦有改变，所有的组件都会重新渲染一遍。但是有 PureComponent 和 React.memo() 之后，就可以只渲染一部分组件。
+>
+> 在计算机科学中，memoization 是一个主要使用的优化技术，通过存储函数运行的结果和返回相同输入对应的缓存结果，来加速计算机程序。这也是 React.memo() 命名由来，将即将到来的渲染与现有渲染进行比较，不同才渲染，相同则不渲染。
+
+#### 用法
+
+`React.memo()` 是级别更高的组件，可以将函数组件包含在其中，这样该函数组件仅有 `props` 改变时才会重新渲染。
+
+```react
+import React from 'react';
+
+const MyScotchyComponent = React.memo(function MyComponent(props) {
+  // only renders if props have changed!
+});
+
+// can also be an es6 arrow function
+const OtherScotchy = React.memo(props => {
+  return <div>my memoized component</div>;
+});
+
+// and even shorter with implicit return
+const ImplicitScotchy = React.memo(props => (
+  <div>implicit memoized component</div>
+));
+
+const RocketComponent = props => <div>my rocket component. {props.fuel}!</div>;
+
+// create a version that only renders on prop changes
+const MemoizedRocketComponent = React.memo(RocketComponent);
+```
+
+#### 特点
+
+1. React.memo() 仅仅会比较 props 的改变，如果组件中还有 useState 和 useContext，那么当 state 和 context 改变时，组件还是会重新渲染的。因此 React.memo() 适用于相同 props 渲染相同结果的组件。
+
+2. React.memo() 仅仅会对组件的前后 props 进行浅比较，可以通过向第二个参数传递自定义比较函数来控制 props 的比较。
+
+   ```react
+   function MyComponent(props) {
+     /* render using props */
+   }
+   function areEqual(prevProps, nextProps) {
+     /*
+     return true if passing nextProps to render would return
+     the same result as passing prevProps to render,
+     otherwise return false
+     */
+   }
+   export default React.memo(MyComponent, areEqual);
+   ```
+
+## pureComponent
+
+[React.Component](https://reactjs.org/docs/react-component.html) 是创建 React 组件的基础类，使用 ES6 语法。
+
+```react
+class Greeting extends React.Component {
+  render() {
+    return <h1>Hello, {this.props.name}</h1>;
+  }
+}
+```
+
+React.PureComponent 与 React.Component 类似，不同的是 React.Component 没有实现  [`shouldComponentUpdate()`](https://reactjs.org/docs/react-component.html#shouldcomponentupdate)，但是 React.PureComponent 实现了这个函数。
+
+如果组件对于同样的 props 和 state 总是有同样的渲染结果，就可以使用 React.PureComponent 进行优化，它会跳过不必要的渲染。
+
+> 上述函数实现跳过了整个组件树的 props 的更新，使用时需要确保子组件也是纯组件。
+
+#### shouldComponentUpdate()
+
+实现了 `props` 和 `state` 的**浅比较**，即将 `this.props` 和 `nextProps` 比较、`this.state` 和 `nextState` 比较，当不需要渲染时返回 `false`（并不会阻止子组件渲染，如果子组件的 `state` 改变，也会渲染不会跳过）。当返回值为 `false` 时，`UNSAFE_componentWillUpdate()`、`render()`、`componentDidUpdate()` 均不会被唤起。
+
+> 如果对象的数据结构比较复杂，`React.PureComponent` 的 `shouldComponentUpdate()` 可能有问题，复杂结构数据修改时可以使用  `forceUpdate()` ，或者使用不可变的对象加速复杂结构的比较。
+>
+> 这里并不建议进行深比较或者在 `shouldComponentUpdate()` 函数中使用 `JSON.stringify()`，效率低效。
+>
+> 尽管函数返回 false，仍然有可能导致组件的重渲染。
+
+## Hooks
+
+### 基础钩子
+
+[`useState`](https://reactjs.org/docs/hooks-reference.html#usestate)
+
+[`useEffect`](https://reactjs.org/docs/hooks-reference.html#useeffect)
+
+[`useContext`](https://reactjs.org/docs/hooks-reference.html#usecontext)
+
+### 新增钩子（React 16.8）
+
+[`useReducer`](https://reactjs.org/docs/hooks-reference.html#usereducer)
+
+[`useCallback`](https://reactjs.org/docs/hooks-reference.html#usecallback)
+
+[`useMemo`](https://reactjs.org/docs/hooks-reference.html#usememo)
+
+[`useRef`](https://reactjs.org/docs/hooks-reference.html#useref)
+
+[`useImperativeHandle`](https://reactjs.org/docs/hooks-reference.html#useimperativehandle)
+
+[`useLayoutEffect`](https://reactjs.org/docs/hooks-reference.html#uselayouteffect)
+
+[`useDebugValue`](https://reactjs.org/docs/hooks-reference.html#usedebugvalue)
+
+## shouldComponent
