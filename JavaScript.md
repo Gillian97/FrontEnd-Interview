@@ -1,5 +1,5 @@
 ---
-title: JavaScript Notes
+title: JavaScript
 tags: '-JavaScript'
 abbrlink: 11485
 date: 2020-09-01 09:17:06
@@ -21,29 +21,29 @@ date: 2020-09-01 09:17:06
 
 ## 功能
 
-### 操作HTML的DOM
+### 操作 HTML 的 DOM
 
-浏览器从服务器取到HTML页面之后，会展示页面出来，但是浏览器内部将HTML组织成一个树给JS，这个树称为 DOM.
+浏览器从服务器取到 HTML 页面之后，会展示页面出来，但是浏览器内部将 HTML 组织成一个树给 JS，这个树称为 DOM。
 
 ![htmltree](images/htmltree.jpg)
 
-JS可以定位并操作DOM中的任意一个节点，且不用刷新页面，操作就可以立刻显示出效果. 而且操作是内部进行，并没有改变 html的源码.
+JS 可以定位并操作 DOM 中的任意一个节点，且不用刷新页面，操作就可以立刻显示出效果. 而且操作是内部进行，并没有改变 html 的源码.
 
 ### 控制浏览器
 
-打开窗口/在一个窗口内前进后退/获得浏览器名称+版本(判断是什么浏览器，才能做这个浏览器支持的特殊操作)...
+打开窗口/在一个窗口内前进后退/获得浏览器名称 + 版本(判断是什么浏览器，才能做这个浏览器支持的特殊操作)...
 
 ### 异步调用
 
 不能像`java`一样访问网络，就不能调用服务器的接口去获取数据. 用户只能`get`或者`post`向服务器发送请求，服务器返回整个页面，而不是一个片段，整个页面得重新刷新.
 
-`XMLHttpRequest` 使得 `JS` 可以直接向服务器发起接口调用，等获得服务器返回的数据(此时为`XML`)后执行浏览器提供的回调函数. Called 异步调用. 回调函数基本就是更新`DOM`树的某个节点，实现网页的局部刷新. 后来上述的异步调用被称为 `AJAX` (Asynchronous JavaScript And XML).
+`XMLHttpRequest` 使得 `JS` 可以直接向服务器发起接口调用，等获得服务器返回的数据(此时为`XML`)后执行浏览器提供的回调函数，Called 异步调用。回调函数基本就是更新 `DOM` 树的某个节点，实现网页的局部刷新。后来上述的异步调用被称为 `AJAX` (Asynchronous JavaScript And XML)。
 
-由于`XML`的标签太多，真正数据很少，而且需要XML解析器进行解析，后来 `JS` 和服务器之间的数据传输使用 `JSON` 这种更简洁的格式.
+由于 `XML` 的标签太多，真正数据很少，而且需要 XML 解析器进行解析，后来 `JS` 和服务器之间的数据传输使用 `JSON` 这种更简洁的格式。
 
-HTML 结构，CSS 展示，JS(AJAX JSON) 逻辑 = 前端. 可以在浏览器实现 `MVC`.
+HTML 结构，CSS 展示，JS(AJAX JSON) 逻辑 = 前端，可以在浏览器实现 `MVC`.
 
- 后来出现了多种框架，ExtJS/prototype/JQuery/AngularJS将前端推向另一个高峰. 
+ 后来出现了多种框架，ExtJS/prototype/JQuery/AngularJS 将前端推向另一个高峰. 
 
 
 
@@ -71,13 +71,13 @@ HTML 结构，CSS 展示，JS(AJAX JSON) 逻辑 = 前端. 可以在浏览器实�
 
 ## 值类型
 
-### * 布尔值 Boolean
+### 布尔值 Boolean
 
 true/false
 
 
 
-### * 字符串 String
+### 字符串 String
 
 #### 创建
 
@@ -248,7 +248,7 @@ console.log(s.substr(1，4)，s); // ello helloWorld
 
 
 
-### * 数字 Number
+### 数字 Number
 
 数字可以是数字或者对象，Number 对象是原始数值的包装对象. JS只有一种数字类型.
 
@@ -349,7 +349,7 @@ console.log(isNaN(a)，isNaN(8)，isNaN("11")); // true false false
 
 
 
-### * Symbol (ES6)
+### Symbol (ES6)
 
 基本数据类型，ES6新增，表示独一无二的值. 由于 ES5 对象的属性名只能是字符串，容易造成属性名的冲突，需要独一无二的值.
 
@@ -457,7 +457,9 @@ let obj = {
 
 
 
-### * null
+### null 与 undefined
+
+#### null
 
 `null` : 表示主动释放指向对象的引用.
 
@@ -490,7 +492,7 @@ console.log(Object.getPrototypeOf(Object.prototype)); // null
 
 
 
-### * undefined
+#### undefined
 
 Brendan Eich 觉得，表示'无'的值，最好不是对象. 其次，由于js初版本没有错误处理机制，null 自动转为 0 不容易发现错误. 于是 Brendan Eich又设计了一个`undefined`.
 
@@ -545,7 +547,13 @@ if (!null) console.log('null if false'); // null if false
 
 ## 引用类型
 
-### * 数组 Array
+其实只有一种——Object 对象，但是下面是又细分的几种常见的数据类型，便于日常使用。
+
+### 对象 Object
+
+见下文
+
+### 数组 Array
 
 #### 创建
 
@@ -556,39 +564,22 @@ let arr2 = new Array(5); // 固定长度
 let arr3 = new Array(1,2,3,5);
 
 console.log(arr0，arr1，arr2，arr3); // [] [] [ <5 empty items> ] [ 1，2，3，5 ]
-```
 
-##### 使用 Array.from 创建
+// 使用 Array.from 创建
+// 语法：Array.from(arrayLike[，mapFunc[，thisArg]])
 
-语法:
-
-```javascript
-Array.from(arrayLike[，mapFunc[，thisArg]])
-```
-
-从 `String` 生成数组
-
-```javascript
+// 从 String 生成数组
 Array.from('foo'); // [ 'f'，'o'，'o' ]
-```
 
-从 `Set` 生成数组
-
-```javascript
+// 从 Set 生成数组
 const set = new Set([3，4，5，5，6，7]);
 Array.from(set); // [ 3，4，5，6，7 ]
-```
 
-从 `Map` 生成数组
-
-```javascript
+// 从 Map 生成数组
 const map = new Map([[1，2]，[2，4]，[4，8]]);
 Array.from(map); // [ [ 1，2 ]，[ 2，4 ]，[ 4，8 ] ]
-```
 
-在 `Array.from` 中使用箭头函数
-
-```javascript
+// 使用箭头函数
 Array.from([1，2，3]，x => x *= 4); // [ 4，8，12 ]
 
 // 初始 value 为 undefined
@@ -621,8 +612,8 @@ console.log(arr0.length); // 4
 >
 
 ```javascript
-var test=new Array();
-if (test.constructor==Array){
+var test = new Array();
+if (test.constructor == Array){
 	document.write(test.constructor);
 }
 // output: function Array() { [native code] }
@@ -710,7 +701,7 @@ console.log(arr1.shift()，arr1);
 
 **Array.unshift()**
 
-> 向数组的开头添加元素并返回现有长度
+> 向数组的开头添加元素并**返回现有长度**
 >
 
 ```javascript
@@ -721,7 +712,7 @@ console.log(arr1.unshift(9)，arr1);
 
 **Array.push()**
 
-> 向数组末尾添加元素并返回数组现有长度
+> 向数组末尾添加元素并**返回数组现有长度**
 >
 
 ```javascript
@@ -741,11 +732,11 @@ console.log(arr1.reverse()，arr1);
 // output: [ 3，2，1 ] [ 3，2，1 ]
 ```
 
-**Array.splice()** 
+**Array.splice(start, number, value...)** 
 
 > 推荐使用该方法删除数组元素
 >
-> 注意: 删除的元素以数组形式返回.
+> 注意: 删除的元素以数组形式返回。
 >
 
 ```javascript
@@ -817,7 +808,7 @@ console.log(arr1.slice(3)，arr1.slice(2,4)，arr1);
 
 **Array.concat()**
 
-> 拼接数组成一个新数组
+> 拼接数组成一个新数组，**浅拷贝**
 >
 
 ```javascript
@@ -832,6 +823,19 @@ console.log(arr0.concat(arr1)，arr0，arr1);
 > 按照指定的深度递归遍历数组，将所有元素与遍历到的子数组中的元素合并为一个**新数组**返回.
 >
 > 将数组扁平化 
+
+flat 函数实现
+
+```javascript
+Array.prototype.flat = function() {
+    return this.toString().split(',').map(item => +item )
+}
+// 不论数组多少层，使用 toString() 都能得到所有元素组成的字符串
+[1,[2,[4]]].toString()
+// '1,2,4'
+```
+
+使用示例
 
 ```javascript
 /* 默认递归深度为1 */
@@ -907,6 +911,8 @@ console.log(arr2，arr);
 **Array.forEach()**
 
 > 对数组的每个元素均执行一次函数(回调函数)
+
+无法 `break`，可以用 `try/catch` 中 `throw new Error` 来停止。
 
 ```javascript
 let arr = [1，2，'ok'，'fine'，'you'，'bye']
@@ -1133,11 +1139,22 @@ console.log('res:'，res);
 // res: [ 1，2，3，null，undefined ]
 ```
 
+##### 乱序
+
+```javascript
+var arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+arr.sort(function () {
+    return Math.random() - 0.5; // Math.random() in [0, 1)
+});
+```
+
+
+
 #### 伪数组
 
 对象冒充数组，有数组的形态其实就是有 length 的概念，但是并不能真正使用数组的方法.
 
-### * Map (ES6)
+### Map (ES6)
 
 解决js对象的键只能是字符串的问题，**ES6标准新增**的数据类型.
 
@@ -1169,7 +1186,7 @@ console.log(map.get('Bob')); // 100
 
 
 
-### * Set (ES6)
+### 集合 Set (ES6)
 
 一组不重复key的集合.ES6标准新增的数据类型.
 
@@ -1197,7 +1214,7 @@ console.log(set.has('4')，set.has(4)); // false true
 
 
 
-### * 函数
+### 函数 Function
 
 函数定义是一个常规的绑定， 其中绑定的值是函数. 
 
@@ -1385,7 +1402,83 @@ console.log(square1(2，7)，square1(2));
 // 14 6
 ```
 
-#### 作用域链
+
+
+#### 执行上下文
+
+函数在调用时在执行栈中产生的变量对象，该对象不能直接访问，但是可以访问其中的变量/this 对象等.
+
+作用域是在函数声明时就确定的变量访问的规则，执行上下文是函数执行时才产生的变量的环境，**执行上下文基于作用域**进行变量的访问/函数引用等操作.
+
+```javascript
+let fn，bar; // 1、进入全局上下文环境
+bar = function(x) {
+  let b = 5;
+  fn(x + b); // 3、进入fn函数上下文环境
+};
+fn = function(y) {
+  let c = 5;
+  console.log(y + c); //4、fn出栈，bar出栈
+};
+bar(10); // 2、进入bar函数上下文环境
+```
+
+![img](images/执行上下文.png)
+
+**函数调用栈**: 栈底永远是全局上下文，栈顶是当前正在执行的上下文(活动对象)，白色是被挂起的变量对象(执行上下文)
+
+执行上下文可以简单理解为一个对象:
+
+- 它包含三个部分:
+  - 变量对象(VO)
+  - 作用域链(词法作用域)
+  - `this`指向
+- 它的类型:
+  - 全局执行上下文
+  - 函数执行上下文
+  - `eval`执行上下文
+- 代码执行过程:
+  - 创建 **全局上下文** (global EC)
+  - 全局执行上下文 (caller) 逐行 **自上而下** 执行。遇到函数时，**函数执行上下文** (callee) 被`push`到执行栈顶层
+  - 函数执行上下文被激活，成为 active EC, 开始执行函数中的代码，caller 被挂起
+  - 函数执行完后，callee 被`pop`移除出执行栈，控制权交还全局上下文 (caller)，继续执行
+
+##### 变量对象
+
+存储所在执行上下文中所有的变量与函数声明（不包含函数表达式）
+
+> 活动对象 (AO): 当变量对象所处的上下文为 active EC 时，称为活动对象。
+
+##### 作用域
+
+该上下文中声明的**变量与声明的作用范围**，分为**块级作用域**与**函数作用域**。
+
+特性:
+
+- **声明提前**: 一个声明在函数体内都是可见的，函数优先于变量
+- 非匿名自执行函数，函数变量为 **只读** 状态，无法修改
+
+```javascript
+let foo = function() { console.log(1) };
+(function foo() {
+    foo = 10  // 由于foo在函数中只为可读，因此赋值无效
+    console.log(foo)
+}()) 
+
+// 结果打印：  ƒ foo() { foo = 10 ; console.log(foo) }
+```
+
+##### 作用域链
+
+在执行上下文中访问到父级甚至全局的变量，这便是作用域链的功劳。作用域链可以理解为一组对象列表，包含 **父级和自身的变量对象**，因此我们便能通过作用域链访问到父级里声明的变量或者函数。
+
+- 由两部分组成:
+  - `[[scope]]`属性: 指向父级变量对象和作用域链，也就是包含了父级的`[[scope]]`和`AO`
+  - AO: 自身活动对象
+
+如此 `[[scope]]`包含`[[scope]]`，便自上而下形成一条 **链式作用域**。
+
+
 
 定义了一个函数激活执行的时候，去哪里找变量的值.
 
@@ -1414,11 +1507,13 @@ A = createFunc作用域[desc: ' is eating'，eat: <func 定义>，parent作用�
 B = Global作用域[desc: '吃东西'，createFunc: <func 定义>，parent作用域-null]
 ```
 
-eat 函数中没有定义 `desc` 这个变量值，就沿着作用域链去找，在 `createFunc` 作用域中找到了 `desc` 变量的值，于是就使用了.如果还没有找到，就接着往上找.
+`eat` 函数中没有定义 `desc` 这个变量值，就沿着作用域链去找，在 `createFunc` 作用域中找到了 `desc` 变量的值，于是就使用了。如果还没有找到，就接着往上找。
 
-当执行 `createFunc` 的时候，`eat` 函数被创建，此时 eat 函数会把外部函数的作用域链记录下来，留到执行时使用. 
+当执行 `createFunc` 的时候，`eat` 函数被创建，此时 `eat` 函数会把外部函数的作用域链记录下来，留到执行时使用。
 
-注意: 作用域链是**函数创建时刻**发生关联的，不是运行时刻. Called **静态作用域/词法作用域**. 函数被创建即函数被定义.
+> 注意
+>
+> 作用域链是***函数创建时刻***发生关联的，不是运行时刻，Called **静态作用域/词法作用域**，函数被创建即函数被定义。
 
 ```javascript
 var x = 1;
@@ -1438,36 +1533,9 @@ bar(foo); // 1
 
 静态作用域是实现闭包的必需条件.
 
-
-
-#### 执行上下文
-
-函数在调用时在执行栈中产生的变量对象，该对象不能直接访问，但是可以访问其中的变量/this 对象等.
-
-作用域是在函数声明时就确定的变量访问的规则，执行上下文是函数执行时才产生的变量的环境，执行上下文基于作用域进行变量的访问/函数引用等操作.
-
-```javascript
-let fn，bar; // 1、进入全局上下文环境
-bar = function(x) {
-  let b = 5;
-  fn(x + b); // 3、进入fn函数上下文环境
-};
-fn = function(y) {
-  let c = 5;
-  console.log(y + c); //4、fn出栈，bar出栈
-};
-bar(10); // 2、进入bar函数上下文环境
-```
-
-![img](images/执行上下文.png)
-
-**函数调用栈**: 栈底永远是全局上下文，栈顶是当前正在执行的上下文(活动对象)，白色是被挂起的变量对象(执行上下文)
-
-
-
 #### 闭包
 
-闭包在 JS 中就是一个以函数和以静态方式存储的父作用域的一个集合体.
+闭包在 JS 中就是一个以函数和以静态方式存储的父作用域的一个集合体。
 
 能够**读取函数局部变量的函数**就是闭包. 下面例子中，`func2`函数就是闭包.
 
@@ -1629,11 +1697,13 @@ console.log(eval(67)); // 67
 console.log(eval(new String(777))); // [String: '777']
 ```
 
+## 类型判断
 
+判断变量数据类型
 
-## 操作符 typeof
+### 大致判断 
 
-### 判断变量数据类型
+使用 `typeof` 操作符
 
 ```javascript
 console.log(
@@ -1656,6 +1726,40 @@ console.log(undefined===null，undefined==null); // false true
 console.log(Array.isArray([1,2,3])) // true
 console.log(Array.isArray({k1:'v1'，k2:'v2'})) // false
 ```
+
+### 细分判断
+
+- 基本类型(`null`): 使用 `String(XXX)` 是否为 `null`，因为 `String(null)=== 'null'`
+- 基本类型(`string / number / boolean / undefined`) + `function`: 直接使用 `typeof` 即可
+- 其余引用类型(`Array / Date / RegExp / Error`): 调用`toString`后根据`[object XXX]`进行判断
+
+类型判断封装代码：
+
+```javascript
+let class2type = {}
+'Array Date RegExp Object Error'.split(' ').forEach(e => class2type[ '[object ' + e + ']' ] = e.toLowerCase()) 
+
+function type(obj) {
+    if (obj == null) return String(obj)
+    return typeof obj === 'object' ? class2type[ Object.prototype.toString.call(obj) ] || 'object' : typeof obj
+}
+```
+
+
+
+## 类型转换
+
+ JS 中在使用**运算符**或者**对比符**时，会自带**隐式转换**，规则如下:
+
+- -、*、/、% ：一律转换成数值后计算
+- +：
+  - 数字 + 字符串 = 字符串， 运算顺序是从左到右
+  - 数字 + 对象， 优先调用对象的`valueOf` -> `toString`
+  - 数字 + `boolean/null` -> 数字
+  - 数字 + `undefined` -> `NaN`
+- `[1].toString() === '1'`
+- `{}.toString() === '[object object]'`
+- `NaN` !== `NaN` 、`+undefined 为 NaN`
 
 
 
@@ -1756,9 +1860,9 @@ obj.speak.bind(newObj，['合肥'，'上海'])(); // Cookie is 40 合肥,上海*
 
 # 对象 Object
 
-使用 `{}` 表示，键必须是字符串或者 Symbol 类型. 不是字符串的话会转换成字符串，对象的话默认调用 toString 方法.
+使用 `{}` 表示，键必须是字符串或者 `Symbol` 类型。不是字符串的话会转换成字符串，对象的话默认调用 toString 方法。
 
-下面的例子中，对象转换为字符串后，键值都是 [object Object] ，因此这里值可以被更改.
+下面的例子中，对象转换为字符串后，键值都是 [object Object] ，因此这里值可以被更改。
 
 ```javascript
 var a = {}，b = { key: '123' }，c = { key: '456' };
@@ -1821,7 +1925,9 @@ animal.color = 'red';
 console.log(animal.color); // red
 ```
 
-显式修改 方法的调用对象. 使用函数的 `call` 方法，该方法将 `this` 值作为第一个参数，其他参数为普通参数. 则此时 `obj` 是 `eat` 方法的调用者，通过 `call` 进行了显式的调用对象的修改.
+显式修改方法的调用对象。
+
+使用函数的 `call` 方法，该方法将 `this` 值作为第一个参数，其他参数为普通参数. 则此时 `obj` 是 `eat` 方法的调用者，通过 `call` 进行了显式的调用对象的修改.
 
 ```javascript
 let animal = {
@@ -1838,11 +1944,17 @@ animal.eat.call(obj，'carrot'); // monkey eat carrot
 
 ## 原型
 
-对象有自己的默认属性集. `Object.getPrototypeOf` 方法返回一个对象的原型.
+一个简单的对向，用于实现对象的属性继承，可以简单理解为对象的爹。
 
-`Object.prototype` 提供在所有对象中显示的方法，是最根部的原型.
+对象有自己的默认属性集。
 
-函数派生自 `Function.prototype`，数组派生自 `Array.prototype`，他们具有不同的默认属性集.
+> 一个对象查看原型的方法
+>
+> 1. 任何对象都可以通过 `__proto__`属性查看自己的原型，即 `obj.__proto__`。
+>
+> 2.  `Object.getPrototypeOf` 方法返回一个对象的原型。`Object.prototype` 提供在所有对象中显示的方法，最根部原型。
+>
+>    函数派生自 `Function.prototype`，数组派生自 `Array.prototype`，他们具有不同的默认属性集。
 
 ```javascript
 let obj = {}
@@ -1876,9 +1988,9 @@ dog.name = 'doggi'; // dog 对象此时仅包含自身属性 name
 dog.speak('hello'); // doggi is speaking hello
 ```
 
-### __proto\_\_ 属性
+### `__proto__` 属性
 
-继承是让两个对象产生关联，使用 __proto\_\_，这个属性每个对象都有. 
+继承是让两个对象产生关联，使用 `__proto__`，这个属性每个对象都有. 
 
 ```javascript
 let animal = {
@@ -1932,13 +2044,15 @@ dog.eat(); // dog is eating
 cat.eat(); // cat is eating
 ```
 
-如下所示，对象 `dog` 和 `cat` 的原型均是 `animal`，但是均没有定义 `eat` 方法. 在执行 `eat` 方法时，会到其原型中去寻找，如果找到则执行，没有则继续去原型的原型中去寻找，直至找到或者为`null`. 不断寻找原型的过程依赖于__proto\_\_建立的原型链.
+如下所示，对象 `dog` 和 `cat` 的原型均是 `animal`，但是均没有定义 `eat` 方法。在执行 `eat` 方法时，会到其原型中去寻找，如果找到则执行，没有则继续去原型的原型中去寻找，直至找到或者为`null`。不断寻找原型的过程依赖于`__proto__`建立的**原型链**。
 
-可以看出，尽管执行的是原型中的方法，但是方法中的`this`仍然指的是调用该方法的上级对象，由于是`dog`和`cat`这两个对象进行调用的，所以 this 指向的就是这两个对象而不是 animal.
+可以看出，尽管执行的是原型中的方法，但是方法中的`this`仍然指的是调用该方法的上级对象，由于是 `dog ` 和 `cat `这两个对象进行调用的，所以 this 指向的就是这两个对象而不是 `animal`。
 
 ### 构造函数
 
-但是 JS 也可以通过 `new` 关键字来创建对象，是给不理解原型链又需要创建对象的程序员使用的.
+但是 JS 也可以通过 `new` 关键字来创建对象，是给不理解原型链又需要创建对象的程序员使用的。
+
+定义：可以通过 new 关键字**新建对象**的函数。
 
 ```javascript
 // 模仿 java 中的 Class 而提供的构造函数
@@ -1959,9 +2073,33 @@ mary.sayHello(); // hello mary
 
 这样有个问题就是，每个对象都会有一个 `sayHello` 函数，太重复，而 java 中函数是定义在 `class` 中的.
 
+### 实例
+
+通过构造函数和 `new` 创建出来的对象即是实例，实例通过 `__proto__`指向原型，通过 `constructor` 指向构造函数。
+
+```javascript
+实例.__proto__ === 原型
+
+原型.constructor === 构造函数
+
+构造函数.prototype === 原型
+
+// 这条线其实是是基于原型进行获取的，可以理解成一条基于原型的映射线
+// 例如: 
+// const o = new Object()
+// o.constructor === Object   --> true
+// o.__proto__ = null;
+// o.constructor === Object   --> false
+// 注意: 实例上并不是真正有 constructor 这个指针，它其实是从原型链上获取的
+// instance.hasOwnProperty('constructor') === false
+实例.constructor === 构造函数
+```
+
+![img](https://user-gold-cdn.xitu.io/2019/2/14/168e9d9b940c4c6f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
 ### prototype
 
-JS  使用更加高效的方式，创建一个原型对象 A，将方法都放在这个原型对象 A 中，而通过同一个构造函数创建的对象的原型，都是这个原型对象 A，这样对象找不到方法时，就会去其原型即 A 中寻找.
+JS  使用更加高效的方式，创建一个原型对象 A，将方法都放在这个原型对象 A 中，而通过同一个构造函数创建的对象的原型，都是这个原型对象 A，这样对象找不到方法时，就会去其原型即 A 中寻找。
 
 达到这样的效果， 则需要将构造函数与原型对象 A 关联起来，将 A 赋值给构造函数的 `prototype` 属性，则 A 就会成为这个构造函数创建的对象的原型.
 
@@ -1986,9 +2124,9 @@ mary.sayHello(); // hello mary
 
 ### 语法糖 Class
 
-上述语法有点复杂，JS 推出语法糖，将构造函数与原型对象的函数写在一个 `class` 中.
+上述语法有点复杂，JS 推出语法糖，将构造函数与原型对象的函数写在一个 `class` 中。
 
-上述写法等同于下面这种.
+上述写法等同于下面这种。
 
 ```javascript
 class Student {
@@ -2009,13 +2147,19 @@ let mary = new Student('mary');
 mary.sayHello(); // hello mary
 ```
 
+### 原型链
 
+由原型对象组成，每个对象都有 `__proto__` 属性，指向创建该对象的构造函数的原型，`__proto__` 将对象连接起来组成了原型链，是一个用来实现继承与属性共享的有限的对象链。
+
+- **属性查找机制**: 当查找对象的属性时，如果实例对象自身不存在该属性，则沿着原型链往上一级查找，找到时则输出，不存在时，则继续沿着原型链往上一级查找，直至最顶级的原型对象`Object.prototype`，如还是没找到，则输出 `undefined`；
+
+- **属性修改机制**: 只会修改实例对象本身的属性，如果不存在，则进行添加该属性，如果需要修改原型的属性时，则可以用: `b.prototype.x = 2`；但是这样会造成所有继承于该对象的实例的属性发生改变。
 
 ## 类 Class
 
-一种语法糖，特殊的函数，由**类表达式**和**类声明**组成. 类定义了一种对象的形状，具有哪些属性与方法. 而这种对象称之为类的实例.
+一种语法糖，特殊的函数，由**类表达式**和**类声明**组成。类定义了一种对象的形状，具有哪些属性与方法，而这种对象称之为**类的实例**。
 
-JS 类就是带有 prototype 属性的构造函数. 类中的方法，都是构造函数原型对象中的方法. 类中的`constructor`方法是实际的构造函数，并被绑定名称 `Animal`.
+JS 类就是带有 `prototype` 属性的构造函数。类中的方法，都是构造函数原型对象中的方法。类中的`constructor`方法是实际的构造函数，并被绑定名称 `Animal`。
 
 ```javascript
 class Animal {
@@ -2029,8 +2173,6 @@ class Animal {
   }
 }
 ```
-
-
 
 ### 定义类
 
@@ -2100,7 +2242,14 @@ class Animal {
 
 构造函数，一种特殊方法，创建和初始化一个由 `class` 创建的对象. 
 
-构造函数可以使用`super`调用父类的构造函数.
+构造函数可以使用`super`调用父类的构造函数
+
+### new 运算符执行过程
+
+- 新生成对象
+- 连接到原型：`obj.__proto__ = Con.prototype`
+- 绑定 `this`：`apply`（参数以数组形式传递）
+- 返回新对象（如果构造函数自己有 `return` 时，返回该值）
 
 ### 覆盖派生属性
 
@@ -2218,7 +2367,25 @@ console.log('name' in dog，'speak' in dog); // true true
 
 ### 继承
 
-继承允许我们构造与已有数据类型相似的数据类型.
+继承允许我们构造与已有数据类型相似的数据类型。在 js 中，继承通常指的是 **原型链继承**，也就是通过指定原型，并可以通过原型链继承原型上的属性或者方法。
+
+最优化：圣杯模式
+
+```javascript
+var inherit = (function (c, p) {
+    var F = function () { };
+    return function (c, p) {
+        F.prototype = p.prototype;
+        c.prototype = new F();
+        c.uber = p.prototype;
+        c.prototype.constructor = c;
+    }
+})();
+
+// 或者使用 ES6 的语法糖 class/extends
+```
+
+
 
 #### extends 创建子类
 
@@ -2248,7 +2415,16 @@ d.speak(); // cookie is girl and barks
 
 #### instanceof 运算符
 
-判断一个对象是否来自某一个类.
+判断一个对象是否来自某一个类，即是否能在实例的 **原型对象链** 中找到该构造函数的 `prototype` 属性所指向的**原型对象**，找得到就返回 `true`。
+
+```javascript
+// __proto__: 代表原型对象链
+instance.[__proto__...] === instance.constructor.prototype
+
+// return true
+```
+
+示例：
 
 ```javascript
 class Animal {
@@ -2268,6 +2444,8 @@ console.log(dog instanceof Animal，dog instanceof Object); // true true
 // TO DO 
 console.log(dog instanceof Object.prototype); // TypeError: Right-hand side of 'instanceof' is not callable
 ```
+
+
 
 ## 静态方法
 
@@ -2322,21 +2500,38 @@ console.log(obj.hasOwnProperty('key2')); // true
 - JSON.parse 序列化格式->数据
 - JSON.stringify 数据->序列化格式
 
+# 代码复用
 
+当代码开始写第二遍时，就可以开始考虑是否复用。
+
+以下几种方式：
+
+1. 函数封装
+2. 继承
+3. 复制 `extend`
+4. 混入 `mixin`
+5. 借用 `apply`/`call`
+
+# script 引入方式
+
+- html 静态`<script>`引入
+- js 动态插入`<script>`
+- `<script defer>`: 延迟加载，元素解析完成后执行
+- `<script async>`: 异步加载，但执行时会阻塞元素渲染
 
 # 函数式编程
 
-摩尔定律失效，多核时代来临，函数式编程能够很好地为并发编程服务，具有 没有 side effect/ 不共享变量/安全调度到任何一个CPU core 上运行/没有加锁问题...等诸多优点.
+摩尔定律失效，多核时代来临，函数式编程能够很好地为并发编程服务，具有 没有 side effect/ 不共享变量/安全调度到任何一个CPU core 上运行/没有加锁问题...等诸多优点。
 
 ## 纯函数
 
-1. 对于相同的输入，永远有相同的输出. 没有可观察的副作用，不依赖外部条件.
+1. 对于相同的输入，永远有相同的输出. 没有可观察的副作用，不依赖外部条件。
 2. 不能修改传递给函数的参数
 3. 不能修改全局变量
 
-比如数组操作中，对于给定的数组，slice就是纯的，splice就是不纯的.
+比如数组操作中，对于给定的数组，slice就是纯的，splice就是不纯的。
 
-纯函数可以有效降低系统复杂性，还有很多其他的优秀特性，例如可缓存性.
+纯函数可以有效降低系统复杂性，还有很多其他的优秀特性，例如可缓存性。
 
 ```javascript
 import _ from 'lodash';
@@ -2351,7 +2546,7 @@ var b = sin(1);
 
 ## 使用递归而非迭代
 
-使用尾递归，保证不溢出.
+使用尾递归，保证不溢出。
 
 ```javascript
 // 迭代不被允许
@@ -2375,23 +2570,39 @@ console.log(sum(arr，0)); // 10
 
 ## 高阶函数
 
-很多函数大体相同，重复代码很多，只有一些细节不一样，于是产生高阶函数.
+很多函数大体相同，重复代码很多，只有一些细节不一样，于是产生高阶函数。
 
-高阶函数: 让函数来产生函数，共用的部分抽取出来，不共用的部分与共用的部分能组合起来.
+高阶函数: 让函数来产生函数，共用的部分抽取出来，不共用的部分与共用的部分能组合起来。
 
-比如 JS 中的 `map/filter/forEach/...` 函数都是高阶函数，能快速操作集合数据.
+比如 JS 中的 `map/filter/forEach/...` 函数都是高阶函数，能快速操作集合数据。
 
 ### 函数的柯里化
 
-curry: 传递给函数一部分的参数来调用它，让他返回一个函数去处理剩下的参数.
+curry: 传递给函数一部分的参数来调用它，让他返回一个函数去处理剩下的参数。
 
-就是传递一部分的参数，形成固定模式的函数(部分参数数值已经固定)，得到已经记住参数的新函数. 这样对应固定的输入，就得到固定的输出.
+就是传递一部分的参数，形成固定模式的函数(部分参数数值已经固定)，得到已经记住参数的新函数。这样对应固定的输入，就得到固定的输出。
+
+在不侵入函数的前提下，为函数 **预置通用参数**，供多次重复调用。
 
 ```javascript
+// example 1
 var check = x => (y => y > x);
 let check7 = check(7);
 console.log(check7(10)); // true
+
+// example 2
+const add = function add(x) {
+	return function (y) {
+		return x + y
+	}
+}
+const add1 = add(1)
+
+add1(2) === 3
+add1(20) === 21
 ```
+
+
 
 ### 函数组合
 
@@ -3823,7 +4034,7 @@ console.log(Object.keys(obj)); // [ '2'，'7'，'100' ]
 
 ## Object.assign()
 
-将一个/多个源对象的自身所有可枚举属性拷贝给目标对象. 返回目标对象.
+将一个/多个源对象的**自身**所有可枚举属性拷贝给目标对象，返回目标对象。
 
 ```javascript
 let target = { a: 1，b: 2，c: 3 }
@@ -3868,16 +4079,20 @@ console.log(Object.assign({ a: 1 }，undefined)); // { a: 1 }
 
 ### 复制对象
 
-```javascript
-let obj = { a: 1，b: 2 }
-let newObj = Object.assign({}，obj)
-console.log(newObj); // { a: 1，b: 2 }
-console.log(newObj === obj); // false
-```
+#### 浅拷贝：仅仅拷贝对象的引用
 
-### 深拷贝问题
+- 使用 Object.assign()
 
-浅拷贝: 仅仅拷贝对象的引用，深拷贝: 完整拷贝对象，是另一个新对象.
+  ```javascript
+  let obj = { a: 1，b: 2 }
+  let newObj = Object.assign({}，obj)
+  console.log(newObj); // { a: 1，b: 2 }
+  console.log(newObj === obj); // false
+  ```
+
+- 使用展开运算符(...)
+
+#### 深拷贝: 完整拷贝对象，是另一个新对象.
 
 ```javascript
 const log = console.log;
@@ -3903,18 +4118,23 @@ log(newObj，obj);
 
 **对象的深拷贝实现**
 
-使用 `JSON.parse` 与 `JSON.stringify` .
+- 使用 `JSON.parse` 与 `JSON.stringify` ：性能最快
 
-```javascript
-const log = console.log;
-let obj = { a: 0，b: 1，c: { d: 2 } }
+  - 具有循环引用的对象时，报错
+  - 当值为函数、undefined 或 symbol 时，无法拷贝
 
-let obj1 = JSON.parse(JSON.stringify(obj));
-obj.a = 55;
-obj.c.d = 88;
-log(obj，obj1);
-// { a: 55，b: 1，c: { d: 88 } } { a: 0，b: 1，c: { d: 2 } }
-```
+  ```javascript
+  const log = console.log;
+  let obj = { a: 0，b: 1，c: { d: 2 } }
+  
+  let obj1 = JSON.parse(JSON.stringify(obj));
+  obj.a = 55;
+  obj.c.d = 88;
+  log(obj，obj1);
+  // { a: 55，b: 1，c: { d: 88 } } { a: 0，b: 1，c: { d: 2 } }
+  ```
+
+- 递归进行逐一赋值
 
 ## Object.defineProperty()
 
@@ -3989,13 +4209,27 @@ let obj = {
 
 ## 观察者模式
 
+
+
 # 模块化
+
+ES6 引入模块化后，通常**在浏览器中使用 ES6 的模块化支持，在 Node 中使用 CommonJS 的模块化支持。**
+
+- *分类*
+  - es6: `import / export`
+  - commonjs: `require / module.exports / exports`
+  - amd: `require / defined`
+
+- *`require` 与 `import `的区别*
+  - `require`支持 **动态导入**，`import`不支持，正在提案 (babel 下可支持)
+  - `require`是 **同步** 导入，`import`属于 **异步** 导入
+  - `require`是 **值拷贝**，导出值变化不会影响导入值；`import`指向 **内存地址**，导入值会随导出值而变化
 
 ## 概述
 
-ES6 之前，JS 没有模块体系，使用社区的模块加载方案，分别是 CommonJS (用于服务器)和 AMD(用于浏览器) 两种，都只能运行时确定模块的依赖关系.
+ES6 之前，JS 没有模块体系，使用社区的模块加载方案，分别是 CommonJS (用于服务器)和 AMD(用于浏览器) 两种，都只能运行时确定模块的依赖关系。
 
-### 运行时加载
+**运行时加载**
 
 ```javascript
 // CommonJS模块
@@ -4012,7 +4246,7 @@ let readfile = _fs.readfile;
 
 ES6 引入了模块化，在编译时就能确定模块的依赖关系 + 输入和输出的变量，成为浏览器和服务器通用的模块解决方案.
 
-### 编译时加载
+**编译时加载**
 
 ```javascript
 // ES6模块
@@ -4045,6 +4279,8 @@ module.exports = moduleA.someFunc;
 - 代码无法直接在浏览器中运行，必须通过工具转成标准的 ES5 。
 
 ### AMD
+
+require、defined
 
 ## 编译时加载
 
@@ -4386,6 +4622,60 @@ export default 9;
 export 5;
 ```
 
+# 防抖与节流
+
+防抖与节流函数是一种最常用的 **高频触发优化方式**，能对性能有较大的帮助。
+
+- **防抖 (debounce)**: 将多次高频操作优化为只在最后一次执行，通常使用的场景是：用户输入，只需在输入完成后做一次输入校验即可。
+
+  ```javascript
+  function debounce(fn, wait, immediate) {
+      let timer = null
+  
+      return function() {
+          let args = arguments
+          let context = this
+  
+          if (immediate && !timer) {
+              fn.apply(context, args)
+          }
+  
+          if (timer) clearTimeout(timer)
+          timer = setTimeout(() => {
+              fn.apply(context, args)
+          }, wait)
+      }
+  }
+  ```
+
+- **节流(throttle)**: 每隔一段时间后执行一次，也就是降低频率，将高频操作优化成低频操作，通常使用场景: 滚动条事件 或者 resize 事件，通常每隔 100~500 ms执行一次即可。
+
+  ```javascript
+  function throttle(fn, wait, immediate) {
+      let timer = null
+      let callNow = immediate
+      
+      return function() {
+          let context = this,
+              args = arguments
+  
+          if (callNow) {
+              fn.apply(context, args)
+              callNow = false
+          }
+  
+          if (!timer) {
+              timer = setTimeout(() => {
+                  fn.apply(context, args)
+                  timer = null
+              }, wait)
+          }
+      }
+  }
+  ```
+
+  
+
 # 垃圾回收 Garbage Collection
 
 一种自动的内存管理机制，释放不再需要的动态内存。
@@ -4593,6 +4883,80 @@ test(''); // is kong
 - 禁止使用右侧类似语句 with (Math){x = cos(2)};
 - 禁止在作用域eval创建的变量被使用
 - 禁止this指向全局对象
+
+# ES6/ES7
+
+由于 Babel 的强大和普及，现在 ES6/ES7 基本上已经是现代化开发的必备了。通过新的语法糖，能让代码整体更为简洁和易读。
+
+- 声明
+
+  - `let / const`: 块级作用域、不存在变量提升、暂时性死区、不允许重复声明
+  - `const`: 声明常量，无法修改
+
+- 解构赋值
+
+- `class / extend`: 类声明与继承
+
+- `Set / Map`: 新的数据结构
+
+- 异步解决方案:
+
+  - `Promise`的使用与实现
+  - `generator`:
+    - `yield`: 暂停代码
+    - `next()`: 继续执行代码
+
+  ```javascript
+  function* helloWorld() {
+    yield 'hello';
+    yield 'world';
+    return 'ending';
+  }
+  
+  const generator = helloWorld();
+  
+  generator.next()  // { value: 'hello', done: false }
+  
+  generator.next()  // { value: 'world', done: false }
+  
+  generator.next()  // { value: 'ending', done: true }
+  
+  generator.next()  // { value: undefined, done: true }
+  ```
+
+  - `await / async`: 是`generator`的语法糖， babel中是基于`promise`实现。
+
+  ```javascript
+  async function getUserByAsync(){
+     let user = await fetchUser();
+     return user;
+  }
+  
+  const user = await getUserByAsync()
+  console.log(user)
+  ```
+
+# AST
+
+**抽象语法树 (Abstract Syntax Tree)**，是将代码逐字母解析成 **树状对象** 的形式。这是语言之间的转换、代码语法检查，代码风格检查、代码格式化、代码高亮、代码错误提示、代码自动补全等等的基础。例如:
+
+```javascript
+function square(n){
+	return n * n
+}
+```
+
+通过解析转化成的`AST`如下图:
+
+
+
+![img](https://user-gold-cdn.xitu.io/2019/2/14/168e9d95910dd187?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+# babel 编译原理
+
+- babylon 将 ES6/ES7 代码解析成 AST
+- babel-traverse 对 AST 进行遍历转译，得到新的 AST
+- 新 AST 通过 babel-generator 转换成 ES5
 
 # Node
 
