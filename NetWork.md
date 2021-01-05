@@ -34,25 +34,111 @@ PKI = CA(认证中心)+RA(注册中心)+DS(目录服务)服务器
 
 
 
-## 输入 url 到展示
+## HTTP/HTTPS 协议
 
-## http/https 区别
+### HTTP
 
-## HTTP1 HTTP2 HTTP3
+#### 1.0 协议缺陷
 
-## get post
+- 无法复用链接，完成即断开，**重新慢启动和 TCP 3次握手**
+- head of line blocking: **线头阻塞**，导致请求之间互相影响
+
+#### 1.1 改进
+
+- **长连接**(默认 keep-alive)，复用
+- host 字段指定对应的虚拟站点
+- 新增功能:
+  - 断点续传
+  - 身份认证
+  - 状态管理
+  - cache 缓存
+    - Cache-Control
+    - Expires
+    - Last-Modified
+    - Etag
+
+#### 2.0
+
+- 多路复用
+- 二进制分帧层: 应用层和传输层之间
+- 首部压缩
+- 服务端推送
+
+### HTTPS
+
+较为安全的网络传输协议
+
+- 证书(公钥)
+- SSL 加密
+- 端口 443
+
+
+
+## get/post
+
+- get: 缓存、请求长度受限、会被历史保存记录
+  - 无副作用(不修改资源)，幂等(请求次数与资源无关)的场景
+- post: 安全、大数据、更多编码类型
+
+![img](https://user-gold-cdn.xitu.io/2019/2/14/168e9d9050b9d08a?imageslim)
 
 ## options 何时发出
 
 ## 常见状态码
 
+- 1xx: 接受，继续处理
+- 200: 成功，并返回数据
+- 201: 已创建
+- 202: 已接受
+- 203: 成为，但未授权
+- 204: 成功，无内容
+- 205: 成功，重置内容
+- 206: 成功，部分内容
+- 301: 永久移动，重定向
+- 302: 临时移动，可使用原有URI
+- 304: 资源未修改，可使用缓存
+- 305: 需代理访问
+- 400: 请求语法错误
+- 401: 要求身份认证
+- 403: 拒绝请求
+- 404: 资源不存在
+- 500: 服务器错误
 
+### 
 
-# TCP UDP
+# TCP/UDP
 
-## TCP 三次握手 四次挥手
+## TCP
+
+### 三次握手
+
+建立连接前，客户端和服务端需要通过握手来确认对方:
+
+- 客户端发送 syn(同步序列编号) 请求，进入 syn_send 状态，等待确认
+- 服务端接收并确认 syn 包后发送 syn+ack 包，进入 syn_recv 状态
+- 客户端接收 syn+ack 包后，发送 ack 包，双方进入 established 状态
+
+### 四次挥手
+
+- 客户端 -- FIN --> 服务端， FIN—WAIT
+- 服务端 -- ACK --> 客户端， CLOSE-WAIT
+- 服务端 -- ACK,FIN --> 客户端， LAST-ACK
+- 客户端 -- ACK --> 服务端，CLOSED
+
+### 滑动窗口: 流量控制
+
+### 拥塞处理
+
+- 慢开始
+- 拥塞避免
+- 快速重传
+- 快速恢复
 
 ## TCP UDP 区别
+
+
+
+
 
 # 跨域
 
@@ -78,7 +164,7 @@ PKI = CA(认证中心)+RA(注册中心)+DS(目录服务)服务器
 
 但是现实中部分场景需要规避同源政策带来的限制，实现某些数据的读取以及进行一些操作。
 
-### 一级域名相同的网页共享 Cookie
+**一级域名相同的网页共享 Cookie**
 
 两个网页一级域名相同，二级域名不同，设置相同的 document.domain，可实现 `Cookie`共享。
 
@@ -88,19 +174,36 @@ B 网页（http://test2.example.com/b.html）设置 `document.domain="example.co
 
 A 网页设置 `document.cookie = "hello"`，B 网页可进行读取 `let cookie = document.cookie`。
 
-## CORS（Cross-Origin resource sharing W3C标准）
+## CORS
 
-跨域资源共享。
+Cross-Origin resource sharing W3C标准，跨域资源共享。
 
-允许浏览器向跨源服务器发出 XMLHttpRequest 请求，克服AJAX只能同源使用的限制。
+允许浏览器向跨源服务器发出 XMLHttpRequest 请求，克服 AJAX 只能同源使用的限制。
 
-## JSONP(JSON with Padding)
+## JSONP
 
-JSON 的一种“使用模式”，可以让网页从别的域名/网站那里获取数据，即跨域读取数据。
+JSON with Padding，JSON 的一种“使用模式”，可以让网页从别的域名/网站那里获取数据，即跨域读取数据。
 
-## JWT (JSON Web Tokens)
+利用`<script>`标签不受跨域限制的特点，缺点是只能支持 get 请求。
 
-跨域认证解决方案。
+```javascript
+function jsonp(url, jsonpCallback, success) {
+  const script = document.createElement('script')
+  script.src = url
+  script.async = true
+  script.type = 'text/javascript'
+  window[jsonpCallback] = function(data) {
+    success && success(data)
+  }
+  document.body.appendChild(script)
+}
+```
+
+
+
+## JWT
+
+JSON Web Tokens，跨域认证解决方案。
 
 ### 用户认证
 
@@ -203,7 +306,7 @@ HMACSHA256(
 
 HTTP 连接是单向的，HTTP 协议是一个请求-响应协议，只能由客户端发起，如果需要感知服务器的变化就需要轮询，效率低且浪费资源。
 
-H5 新增协议，主要特点是：服务器与客户端均可以互相向对方发送消息，是完全的平等对话，全双工通信。
+H5 新增 **持久化协议**，主要特点是：服务器与客户端均可以互相向对方发送消息，是完全的平等对话，全双工通信。
 
 ![img](images/websocket.png)
 
@@ -216,6 +319,12 @@ H5 新增协议，主要特点是：服务器与客户端均可以互相向对�
 5. 可以发送文本或者二进制数据
 6. 没有同源限制，客户端可以与任意服务器通信
 7. 协议标识是 ws（加密 wss），服务器网址就是 URL
+
+### 兼容
+
+- FLASH Socket
+- 长轮询： 定时发送 ajax
+- long poll： 发送 --> 有消息时再 response
 
 ### 客户端 API
 
@@ -422,13 +531,18 @@ Cookie 窃取：JS 脚本收集用户环境的信息（Cookie），通过图片�
 <script>alert('xss')</script>
 ```
 
-## CSP
+防护：
 
-Content Security Policy，网页安全政策。应对 XSS。
+- cookie 设置 httpOnly
+- 转义页面上的输入内容和输出内容
+
+### CSP
+
+Content Security Policy，网页安全政策。**应对 XSS**。
 
 开发者给浏览器提供白名单，明确告诉客户端可以执行的脚本有哪些，实现与执行全部由浏览器完成，开发者提供配置。
 
-### 启用 CSP 方法
+#### 启用 CSP 方法
 
 1. HTTP 头信息设置 Content-Security-Policy 字段
 
@@ -453,7 +567,7 @@ Content Security Policy，网页安全政策。应对 XSS。
 
 启用后，不符合 CSP 的外部资源就会被阻止加载。
 
-### 限制选项
+#### 限制选项
 
 CSP 提供很多限制选项，涉及安全的各个方面。
 
@@ -482,7 +596,7 @@ manifest-src：manifest 文件
 关键字'none'：禁止加载任何外部资源，需要加引号
 ```
 
-### default-src
+#### default-src
 
 设置各个选项的默认值
 
@@ -496,7 +610,7 @@ Content-Security-Policy: default-src 'self' ; style-src cdn.example.org third-pa
 
 如果没有设置该值，则 `script-src`和 `object-src`是必设的。一旦注入脚本，其他都能规避，`object-src` 必须设置是因为 Flash 内部可以执行外部脚本。
 
-### URL 限制
+#### URL 限制
 
 限制网页与其他的 URL 发生联系。
 
@@ -506,7 +620,7 @@ base-uri：限制<base#href>
 form-action：限制<form#action>
 ```
 
-### 其他限制
+#### 其他限制
 
 ```
 block-all-mixed-content：HTTPS 网页不得加载 HTTP 资源（浏览器已经默认开启）
@@ -515,7 +629,7 @@ plugin-types：限制可以使用的插件格式
 sandbox：浏览器行为的限制，比如不能有弹出窗口等。
 ```
 
-### 报告脚本注入行为
+#### 报告脚本注入行为
 
 ```
 Content-Security-Policy: default-src 'self'; ...; report-uri /my_amazing_csp_report_parser;
@@ -525,7 +639,7 @@ Content-Security-Policy-Report-Only: default-src 'self'; ...; report-uri /my_ama
 // 不执行限制选项，只记录注入行为
 ```
 
-### script-src 的特殊值
+#### script-src 的特殊值
 
 都必须放在单引号中。
 

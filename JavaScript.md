@@ -3816,6 +3816,32 @@ dog
 */
 ```
 
+## Node 中的 Event Loop
+
+1. timer 阶段: 执行到期的`setTimeout / setInterval`队列回调
+
+2. I/O 阶段: 执行上轮循环残流的`callback`
+
+3. idle, prepare
+
+4. poll: 等待回调
+
+   - 执行回调
+
+   - 执行定时器
+     - 如有到期的`setTimeout / setInterval`， 则返回 timer 阶段
+     - 如有`setImmediate`，则前往 check 阶段
+
+5. check
+
+   - 执行`setImmediate`
+
+6. close callbacks
+
+## 浏览器中的 Event Loop
+
+
+
 # Proxy
 
 ## 定义

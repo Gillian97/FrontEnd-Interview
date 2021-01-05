@@ -771,7 +771,7 @@ function addTodo(text) {
 
 > E.g. whenever the component's props or state gets updated, whether to make an actual DOM update or not, React will decide by comparing the newly returned element with previously rendered one.
 
-如果两个组件确实不同，则 React 会更新 DOM ，这个过程叫做 **Reconciliation**。
+如果两个组件确实不同，则 React 会更新 DOM ，这个过程叫做 **Reconciliation**，调度算法。
 
 ### DOM 中渲染组件方法
 
@@ -799,7 +799,14 @@ React Fiber 出现就是解决这个问题：React 组件同步渲染造成的�
 
 旧算法中，React 创建一个包含所有元素的树，需要递归遍历这棵树，为了遍历需要维持一个执行栈。执行栈的问题是，整个子树会重新渲染，反过来降低用户体验。
 
-为了解决执行栈的问题，Facebook 重实现了 Reconciliation 算法。
+为了解决执行栈的问题，可以使用**异步**与**任务分割**，Facebook 重实现了 Reconciliation 算法，其中 React Fiber 实现了任务分割。
+
+### 简述
+
+- 在 React V16 将调度算法进行了重构， 将之前的 stack reconciler 重构成新版的 fiber reconciler，变成了具有链表和指针的 **单链表树遍历算法**。通过指针映射，每个单元都记录着遍历当下的上一步与下一步，从而使遍历变得可以被暂停和重启。
+- 理解为是一种 **任务分割调度算法**，主要是 将原先同步更新渲染的任务分割成一个个独立的 **小任务单位**，根据不同的优先级，将小任务分散到浏览器的空闲时间执行，充分利用主进程的事件循环机制。
+
+### 核心
 
 **Fiber 是一个新的数据结构， 用来表示需要完成的工作。**
 
@@ -810,12 +817,16 @@ Fiber 的架构提供了**调度**、**暂停**和**中断**工作的方法。
 Fiber 是一个包含组件信息的 JS 对象。
 
 ```javascript
-FiberNode = {
-  return,
-  type,
-  key,
-  props,
-  ...
+class Fiber {
+	constructor(instance) {
+		this.instance = instance
+		// 指向第一个 child 节点
+		this.child = child
+		// 指向父节点
+		this.return = parent
+		// 指向第一个兄弟节点
+		this.sibling = previous
+	}	
 }
 ```
 
@@ -825,19 +836,67 @@ FiberNode = {
 
 由上图可知，React 工作分两个阶段：Render 和 Commit。
 
-### 第一阶段
+### 第一阶段—Render
 
-第一次更新，React 计算出哪些需要更新并应用更新。如果是第一次 render，React 会为每个元素创建 Fiber node。在随后的更新中，React 会使用这些 Fiber nodes。总结就是，第一个阶段之后，生成需要进行更新操作的 Fiber Tree（更新操作在第二个阶段进行）。
+第一次更新，React 计算出哪些需要更新并应用更新（VDOM 的比较），**适合拆分**，比如对比一部分树后，先暂停执行个动画调用，待完成后再回来继续比对。
 
-### 第二阶段
+如果是第一次 render，React 会为每个元素创建 Fiber Node。在随后的更新中，React 会使用这些 Fiber Nodes。总结就是，第一个阶段之后，生成需要进行更新操作的 Fiber Tree（更新操作在第二个阶段进行）。
 
-第二个阶段会获取前一个阶段的更新，将更新应用在 DOM 中。当更新对用户可见时，这个阶段才能结束，因此这个阶段结束时需要写在一个用户可见触发的回调中。
+#### 具体过程
+
+- 更新 state 与 props；
+- 调用生命周期钩子；
+- 生成 virtual dom；
+  - 这里应该称为 Fiber Tree 更为符合；
+- 通过新旧 vdom 进行 diff 算法，获取 vdom change；
+- 确定是否需要重新渲染
+
+#### 链表树遍历算法
+
+深度优先遍历，通过 **节点保存与映射**，便能够随时地进行 **停止和重启**，这样便能达到实现任务分割的基本前提；
+
+1. 首先通过不断遍历子节点，到树末尾；
+2. 开始通过 sibling 遍历兄弟节点；
+3. return 返回父节点，继续执行2；
+4. 直到 root 节点后，跳出遍历；
+
+
+
+### 第二阶段—Commit
+
+第二个阶段会获取前一个阶段的更新 change list，将更新应用在 DOM 中，**不适合拆分**，才能保持数据与 UI 一致，阻塞更新可能会出现数据与 UI 不一致的情况。
+
+当更新对用户可见时，这个阶段才能结束，因此这个阶段结束时需要写在一个用户可见触发的回调中。
 
 整个实现中，React 创建一个由 Fiber Nodes 组成的可以转变的 Tree，就不用在每次更新的时候再创建 Fiber Nodes，只需要让对应的节点更新即可。
 
-每次可用时，React 会处理 Fiber Nodes 但也同时会应对突发的事件，当事件发生时，会保留这些更新，以至于处理完突发事件后可以恢复工作。
 
-调用生命周期方法也是 React 执行工作的一部分。
+
+### 分散执行
+
+#### 思路
+
+Render 阶段，React 会处理 Fiber Nodes 但也同时会应对突发的事件，当事件发生时，会保留这些更新，以至于处理完突发事件后可以恢复工作。
+
+#### 具体实现
+
+任务分割后，就可以把小任务单元分散到浏览器的空闲期间去排队执行，而实现的关键是两个新API: `requestIdleCallback` 与 `requestAnimationFrame`。
+
+- 低优先级的任务交给`requestIdleCallback`处理，这是个浏览器提供的事件循环空闲期的回调函数，需要 pollyfill，而且拥有 deadline 参数，限制执行事件，以继续切分任务；
+- 高优先级的任务交给`requestAnimationFrame`处理；
+
+```javascript
+// 类似于这样的方式
+requestIdleCallback((deadline) => {
+    // 当有空闲时间时，我们执行一个组件渲染；
+    // 把任务塞到一个个碎片时间中去；
+    while ((deadline.timeRemaining() > 0 || deadline.didTimeout) && nextComponent) {
+        nextComponent = performWork(nextComponent);
+    }
+});
+```
+
+#### 调用生命周期方法
 
 Lifecycle methods called during **render** phase:
 
@@ -877,6 +936,12 @@ module.exports = {
 由此我们可以看出 `Fiber `任务的优先级顺序为：
 
 文本框输入 > 本次调度结束需完成的任务 > 动画过渡 > 交互反馈 > 数据更新 > 不会显示但以防将来会显示的任务
+
+> **Tips：**
+>
+> Fiber 其实可以算是一种编程思想，在其它语言中也有许多应用(Ruby Fiber)。核心思想是 任务拆分和协同，主动把执行权交给主线程，使主线程有时间空挡处理其他高优先级任务。
+>
+> 当遇到进程阻塞的问题时，**任务分割**、**异步调用** 和 **缓存策略** 是三个显著的解决思路。
 
 # React.lazy
 
@@ -965,7 +1030,7 @@ export function lazy<T, R> (ctor: () => Thenable<T, R>): LazyComponent<T> {
 >
 > 在计算机科学中，memoization 是一个主要使用的优化技术，通过存储函数运行的结果和返回相同输入对应的缓存结果，来加速计算机程序。这也是 React.memo() 命名由来，将即将到来的渲染与现有渲染进行比较，不同才渲染，相同则不渲染。
 
-#### 用法
+### 用法
 
 `React.memo()` 是级别更高的组件，可以将函数组件包含在其中，这样该函数组件仅有 `props` 改变时才会重新渲染。
 
@@ -992,7 +1057,7 @@ const RocketComponent = props => <div>my rocket component. {props.fuel}!</div>;
 const MemoizedRocketComponent = React.memo(RocketComponent);
 ```
 
-#### 特点
+### 特点
 
 1. React.memo() 仅仅会比较 props 的改变，如果组件中还有 useState 和 useContext，那么当 state 和 context 改变时，组件还是会重新渲染的。因此 React.memo() 适用于相同 props 渲染相同结果的组件。
 
@@ -1030,7 +1095,7 @@ React.PureComponent 与 React.Component 类似，不同的是 React.Component �
 
 > 上述函数实现跳过了整个组件树的 props 的更新，使用时需要确保子组件也是纯组件。
 
-#### shouldComponentUpdate()
+### shouldComponentUpdate()
 
 实现了 `props` 和 `state` 的**浅比较**，即将 `this.props` 和 `nextProps` 比较、`this.state` 和 `nextState` 比较，当不需要渲染时返回 `false`（并不会阻止子组件渲染，如果子组件的 `state` 改变，也会渲染不会跳过）。当返回值为 `false` 时，`UNSAFE_componentWillUpdate()`、`render()`、`componentDidUpdate()` 均不会被唤起。
 

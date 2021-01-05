@@ -188,7 +188,50 @@ name=Mary&message=Yes%3F
 
 # 浏览器
 
-## 多进程架构
+## 输入 URL 到展示的过程
+
+1. DNS 解析
+2. TCP 三次握手
+3. 发送请求，分析 url，设置请求报文(头，主体)
+4. 服务器返回请求的文件 (html)
+5. 浏览器渲染
+
+   - HTML parser --> DOM Tree
+
+     - 标记化算法，进行元素状态的标记
+     - dom 树构建
+   - CSS parser --> Style Tree
+
+     - 解析 css 代码，生成样式树
+   - attachment --> Render Tree
+
+     - 结合 dom树 与 style树，生成渲染树
+   - layout: 布局
+   - GPU painting: 像素绘制页面
+
+## 事件循环
+
+执行一个宏任务，然后执行清空微任务列表，循环再执行宏任务，再清微任务列表
+
+- 微任务 `microtask(jobs)`: `promise / ajax / Object.observe(该方法已废弃)`
+- 宏任务 `macrotask(task)`: `setTimout / script / IO / UI Rendering`
+
+
+
+## 架构
+
+- 用户界面
+- 主进程
+- 内核
+  - 渲染引擎
+  - JS 引擎
+    - 执行栈
+  - 事件触发线程
+    - 消息队列
+      - 微任务
+      - 宏任务
+  - 网络异步线程
+  - 定时器线程
 
 ### 单进程浏览器
 
@@ -239,15 +282,18 @@ name=Mary&message=Yes%3F
 
 1. 找到所有的 CSS 样式
 2. 将其标准化
-3. 给 DOM 树节点添加 CSS 样式，生成带样式的 DOM 树
+
+
+
+给 DOM 树节点添加 CSS 样式，生成带样式的 DOM 树
+
+![img](images/渲染树.png)
 
 ### 生成布局树
 
 给 DOM 树节点添加标识其几何位置的信息。
 
 以 flex 布局为例，模拟在 flex 布局中如何计算元素的具体位置。
-
-![img](images/渲染树.png)
 
 ### 分层 layer
 
@@ -278,7 +324,7 @@ name=Mary&message=Yes%3F
 
 每个渲染对象都代表一个矩形区域，通常对应相关节点的 CSS 框（宽度、高度、几何位置等）。`display` 样式属性影响渲染对象的类型（`RenderInline`、`RenderBlock`、`RenderListItem` 等对象）。
 
-WebKits RenderObject 是所有渲染对象的基类，定义如下：
+WebKits `RenderObject` 是所有渲染对象的基类，定义如下：
 
 ```c
 class RenderObject{
@@ -299,15 +345,30 @@ class RenderObject{
 
 #### 重排/回流
 
-定义
-
-在 Gecko 浏览器引擎中，视觉格式化组成的树称之为 “框架树”（`Frame Tree`），每个元素都是一个框架，更新元素的放置称之为“回流”（`reflow`）；
+**定义**：在 Gecko 浏览器引擎中，视觉格式化组成的树称之为 “框架树”（`Frame Tree`），每个元素都是一个框架，更新元素的放置称之为“回流”（`reflow`）；
 
 在 WebKit 浏览器引擎中，视觉格式化组成的树称之为 “渲染树”（`render Tree`），每个元素都是一个 `Render Object`，更新元素的放置称之为“重排”（`relayout`）；
 
-特点：更新元素几何属性，更新整个渲染流程，开销最大。
+**特点**：更新元素几何属性，更新整个渲染流程，开销最大。
 
-触发回流：改变渲染对象的位置信息。
+**触发回流**：改变渲染对象的位置信息。
+
+下述操作会触发回流：
+
+- 页面初次渲染
+- 浏览器窗口大小改变
+- 元素尺寸、位置、内容发生改变
+- 元素字体大小变化
+- 添加或者删除可见的 dom 元素
+- 激活 CSS 伪类（例如：:hover）
+- 查询某些属性或调用某些方法
+
+  - clientWidth、clientHeight、clientTop、clientLeft
+  - offsetWidth、offsetHeight、offsetTop、offsetLeft
+  - scrollWidth、scrollHeight、scrollTop、scrollLeft
+  - getComputedStyle()
+  - getBoundingClientRect()
+  - scrollTo()
 
 ![img](images/重排.image)
 
@@ -319,13 +380,27 @@ class RenderObject{
 
 #### 重绘
 
-重绘：填充像素的过程，涉及绘出文本、颜色、图像等元素的每个可视部分。重绘时系统会遍历渲染对象的 paint 方法，将渲染对象的内容显示在屏幕上。
+**定义**：填充像素的过程，涉及绘出文本、颜色、图像等元素的每个可视部分。重绘时系统会遍历渲染对象的 paint 方法，将渲染对象的内容显示在屏幕上。
 
-特点：更新元素的绘制属性，省去了布局与分层阶段，处理过程更少。
+**特点**：更新元素的绘制属性，省去了布局与分层阶段，处理过程更少，**损耗较少**。
 
-触发重绘：改变渲染对象的外观样式。
+**触发重绘**：改变渲染对象的外观样式。
 
 ![img](images/重绘.image)
+
+##### 重绘/回流最佳实践
+
+- css
+  - 避免使用`table`布局
+  - 将动画效果应用到`position`属性为`absolute`或`fixed`的元素上
+- javascript
+  - 避免频繁操作样式，可汇总后统一 **一次修改**
+  - 尽量使用`class`进行样式修改
+  - 减少`dom`的增删次数，可使用 **字符串** 或者 `documentFragment` 一次性插入
+  - 极限优化时，修改样式可将其`display: none`后修改
+  - 避免多次触发上面提到的那些会触发回流的方法，可以的话尽量用 **变量存住**
+
+
 
 #### 合成
 
@@ -348,7 +423,21 @@ class RenderObject{
 
 ## 浏览器存储
 
-### Cookie
+### 短暂性存储
+
+将数据存储在内存中，只在运行时可用
+
+### 持久性存储
+
+#### 服务器端
+
+##### 分布式缓存 redis
+
+##### 数据库
+
+#### 浏览器端
+
+##### Cookie
 
 定义：服务器发送到浏览器的一小段数据，会在浏览器下次向同一服务器发送请求时带上一起发送给服务器。
 
@@ -360,7 +449,7 @@ class RenderObject{
 
 后来由于前端交互的需要，`Cookie` 也存储一些客户端数据。
 
-#### 优缺点
+**优缺点**
 
 优点：
 
@@ -376,13 +465,13 @@ class RenderObject{
 2. 安全性问题。被盗的话，攻击者可以取得所有的 Session 信息，同时攻击者只要转发即可，不需要知道意义。
 3. 有些状态不能保存在客户端。比如防止重复提交表单，需要在服务端保存计时器。
 
-### webStorage
+##### webStorage
 
 `HTML5` 提供了两种在客户端存储数据的方法：`localStorage`、`sessionStorage`，挂载在 `window` 对象下。
 
 本地存储，不依赖于服务器，克服 `Cookie` 带来的一些限制。
 
-#### localStorage
+###### localStorage
 
 生命周期永久性。关闭浏览器，数据也不会消失，除非主动删除。
 
@@ -400,7 +489,7 @@ localStorage.removeItem('key');
 localStorage.clear();
 ```
 
-#### sessionStorage
+###### sessionStorage
 
 - 在浏览器关闭前有效
 - 刷新页面数据不会消失
@@ -420,7 +509,7 @@ sessionStorage.removeItem('key');
 sessionStorage.clear();
 ```
 
-### 三者比较
+##### 三者比较
 
 
 | 存储方式 | 作用与特性 | 存储数量及大小 |
@@ -431,12 +520,18 @@ sessionStorage.clear();
 
 ## 跨标签通信
 
-主要利用两种方式：
+本质是使用可以 **共享的中间介质**，主要利用两种方式：
 
 1. 浏览器存储：本地存储
 2. 服务器方式：主要使用 websocket 技术使**多页签都监听服务器推送事件**来获取其他页面发送的数据。
 
 ### 方式 1：浏览器存储
+
+#### open/postMessage
+
+通过父页面`window.open()`和子页面`postMessage`
+
+- 异步下，通过 `window.open('about: blank')` 和 `tab.location.href = '*'`
 
 #### localStorage
 
@@ -647,7 +742,7 @@ try {  
 
 #### 协商缓存
 
-强缓存失效后，浏览器携带缓存标识向服务器发送请求，由服务器根据缓存标识决定是否使用缓存的过程。
+**强缓存失效**后，浏览器携带缓存标识向服务器发送请求，由服务器根据缓存标识决定是否使用缓存的过程。
 
 情况1：协商缓存生效，返回 `304` 和 `Not Modified`
 
@@ -659,7 +754,7 @@ try {  
 
 通过设置两种 HTTP Header 实现：`Last-Modified` 和 `ETag`。
 
-##### Last-Modified
+##### Last-Modified(最后一次修改时间)
 
 第一次请求后缓存数据，后面再请求时，先发请求校验资源是否更新。服务器将请求 `header` 中的 `If-Modified-Since` 字段的时间与服务器中这个资源的最后修改时间对比，相同则未更新，返回 `304`，不同则已更新，返回 `200` 和新的资源文件。
 
@@ -670,7 +765,7 @@ try {  
 - 本地打开缓存文件会导致 Last-Modified 被修改，服务器比对时间不一致，不能命中缓存，会重新发送资源。
 - Last-Modified 以秒计时，服务器端资源在小于秒的时间范围内文件被修改，最后修改时间仍未改变，则仍会认为命中缓存，不能返回最新文件。
 
-##### ETag
+##### ETag(唯一标识方案，优先级高于前者)
 
 由于前者的一些缺陷，于是设计直接根据资源内容是否被修改来确定缓存策略。
 
@@ -717,6 +812,30 @@ Cache-Control: max-age=31536000
 参考：https://www.jianshu.com/p/54cc04190252
 
 ## Web Worker
+
+现代浏览器为`JavaScript`创造的 **多线程环境**。可以新建并将部分任务分配到`worker`线程并行运行，两个线程可 **独立运行，互不干扰**，可通过自带的 **消息机制** 相互通信。
+
+### 基本用法
+
+```javascript
+// 创建 worker
+const worker = new Worker('work.js');
+
+// 向 worker 线程推送消息
+worker.postMessage('Hello World');
+
+// 监听 worker 线程发送过来的消息
+worker.onmessage = function (event) {
+  console.log('Received message ' + event.data);
+}
+```
+
+### 限制
+
+- 同源限制
+- 无法使用 `document` / `window` / `alert` / `confirm`
+- 无法加载本地资源
+
 
 
 ## 浏览器事件
@@ -1058,8 +1177,6 @@ document.body.addEventListener("click", () => {
 2. 统计首屏内加载最慢的图片的时间
 3. 自定义首屏内容计算法
 
-
-
 ## 内存泄露
 
 - 意外的**全局变量**: 无法被回收
@@ -1069,8 +1186,6 @@ document.body.addEventListener("click", () => {
 - **dom 引用**: dom 元素被删除时，内存中的引用未被正确清空
 
 可用 chrome 中的 timeline 进行内存标记，可视化查看内存的变化情况，找出异常点。
-
-
 
 ## 垃圾回收
 
@@ -1095,27 +1210,10 @@ document.body.addEventListener("click", () => {
 
   - 经历过一次以上 Scavenge GC 的对象
   - 当 to space 体积超过25%
-
 - 标记清除算法
 
   : 标记存活的对象，未被标记的则被释放
 
   - 增量标记: 小模块标记，在代码执行间隙执，GC 会影响性能
   - 并发标记(最新技术): 不阻塞 js 执行
-
 - **压缩算法**: 将内存中清除后导致的碎片化对象往内存堆的一端移动，解决 **内存的碎片化**
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
