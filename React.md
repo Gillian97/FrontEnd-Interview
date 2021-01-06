@@ -369,17 +369,108 @@ render() {
 
    最后阶段，组件被销毁并从 DOM 中删除。
 
+
+
 ### 七个生命周期方法
 
-| 方法名称                    | 说明                                                         |
-| --------------------------- | ------------------------------------------------------------ |
-| componentWillMount()        | 在渲染之前执行，在**客户端和服务器端**都会执行。             |
-| componentDidMount()         | 仅在第一次渲染后在**客户端**执行。                           |
-| componentWillReceiveProps() | 当从父类接收到 props 并且在调用另一个渲染器之前调用。        |
-| shouldComponentUpdate()     | 根据特定条件返回 true 或者 false。如果更新组件则返回 true，否则返回 false（默认情况）。 |
-| componentWillUpdate()       | DOM 渲染之前调用                                             |
-| componentDidUpdate()        | DOM 渲染之后立即调用                                         |
-| componentWillUnmount()      | 从 DOM 卸载组件后调用，用于清理内存空间                      |
+原来 React 两个阶段对应的声明周期方法。
+
+| 方法名称                     | 说明                                                         |
+| ---------------------------- | ------------------------------------------------------------ |
+| <u>*reconciliation 阶段*</u> |                                                              |
+| componentWillMount()         | 在渲染之前执行，在**客户端和服务器端**都会执行。             |
+| componentWillReceiveProps()  | 当从父类接收到 props 并且在调用另一个渲染器之前调用。        |
+| shouldComponentUpdate()      | 根据特定条件返回 true 或者 false。如果更新组件则返回 true，否则返回 false（默认情况）。 |
+| componentWillUpdate()        | DOM 渲染之前调用                                             |
+| *<u>commit 阶段</u>*         |                                                              |
+| componentDidMount()          | 仅在第一次渲染后在**客户端**执行。                           |
+| componentDidUpdate()         | DOM 渲染之后立即调用                                         |
+| componentWillUnmount()       | 从 DOM 卸载组件后调用，用于清理内存空间                      |
+
+
+
+### 新版生命周期建议
+
+在新版本中，React 官方对生命周期有了新的 **变动建议**:
+
+- 使用`getDerivedStateFromProps` 替换 `componentWillMount` 与 `componentWillReceiveProps`；
+- 使用`getSnapshotBeforeUpdate`替换`componentWillUpdate`；
+- 避免使用`componentWillReceiveProps`；
+
+变动的原因是 React Fiber，Fiber 在 reconciliation 阶段进行了任务分割，涉及暂停和重启，可能导致 reconciliation 中的生命周期函数在一次更新渲染循环中被 **多次调用**，产生意外错误。
+
+*新生命周期建议：*
+
+```javascript
+class Component extends React.Component {
+  // 替换 `componentWillReceiveProps` ，
+  // 初始化和 update 时被调用
+  // 静态函数，无法使用 this
+  static getDerivedStateFromProps(nextProps, prevState) {}
+  
+  // 判断是否需要更新组件
+  // 可以用于组件性能优化
+  shouldComponentUpdate(nextProps, nextState) {}
+  
+  // 组件被挂载后触发
+  componentDidMount() {}
+  
+  // 替换 componentWillUpdate
+  // 可以在更新之前获取最新 dom 数据
+  getSnapshotBeforeUpdate() {}
+  
+  // 组件更新后调用
+  componentDidUpdate() {}
+  
+  // 组件即将销毁
+  componentWillUnmount() {}
+  
+  // 组件已销毁
+  componentDidUnmount() {}
+}
+```
+
+*使用建议*
+
+1. 在`constructor`初始化 state；
+
+2. 在`componentDidMount`中进行事件监听，并在`componentWillUnmount`中解绑事件；
+
+3. 在`componentDidMount`中进行数据的请求，而不是在`componentWillMount`；
+
+4. 需要根据 props 更新 state 时，使用`getDerivedStateFromProps(nextProps, prevState)`；
+
+   - 旧 props 需要自己存储，便于比较
+
+     ```react
+     public static getDerivedStateFromProps(nextProps, prevState) {
+     	// 当新 props 中的 data 发生变化时，同步更新到 state 上
+     	if (nextProps.data !== prevState.data) {
+     		return {
+     			data: nextProps.data
+     		}
+     	} else {
+     		return null
+     	}
+     }
+     ```
+
+5. 可以在`componentDidUpdate`监听 props 或者 state 的变化，例如:
+
+   ```react
+   componentDidUpdate(prevProps) {
+   	// 当 id 发生变化时，重新获取数据
+   	if (this.props.id !== prevProps.id) {
+   		this.fetchData(this.props.id);
+   	}
+   }
+   ```
+
+   - - 在`componentDidUpdate`使用`setState`时，必须加条件，否则将进入死循环；
+     - `getSnapshotBeforeUpdate(prevProps, prevState)`可以在更新之前获取最新的渲染数据，它的调用是在 render 之后， update 之前；
+     - `shouldComponentUpdate`: 默认每次调用`setState`，一定会最终走到 diff 阶段，但可以通过`shouldComponentUpdate`的生命钩子返回`false`来直接阻止后面的逻辑执行，通常是用于做条件渲染，优化渲染的性能。
+
+
 
 ## 事件
 
