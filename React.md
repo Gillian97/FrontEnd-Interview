@@ -188,9 +188,15 @@ ReactDOM.render(
 - 与 props 不同，它们是可变的，并创建动态和交互式组件。可以通过 `this.state()` 访问它们。
 - 只能在组件的构造函数处分配，视作组件的私有属性，由组件完全控制。
 
-### 更新组件状态
+### 事务（Transaction）
 
-使用 `this.setState()` 而不是直接修改，直接修改是不会重新渲染组件的（比如：this.state.value = 4）。
+React 中的一个调用结构，用于包装一个方法，结构为: **initialize - perform(method) - close**。通过事务，可以统一管理一个方法的开始与结束；处于事务流中，表示进程正在执行一些操作；
+
+![img](1)
+
+### setState()
+
+**示例：**使用 `this.setState()` 而不是直接修改，直接修改是不会重新渲染组件的（比如：this.state.value = 4）。
 
 ```react
 class MyComponent extends React.Component {
@@ -217,16 +223,14 @@ ReactDOM.render(
 );
 ```
 
-### setState()
-
 **作用**：接受组件状态更新，告诉 React 该组件及其子组件需要被重新渲染。
 
 将 setState() 视作请求而不是更新组件而立即执行的命令，React 为了性能，在一次遍历中只会更新部分组件，并不会立刻将所有状态改变立即渲染。
 
 **特点**：
 
-- setState() 不会总是立刻更新组件（异步）。因此如果要读取更新后的状态，可以使用 setState() 的回调函数或者 componentDidUpdate() 。 
-- setState() 总是会导致重新渲染，除非 shouldComponentUpdate() 返回 false。
+- `setState()` 不会总是立刻更新组件（异步）。因此如果要读取更新后的状态，可以使用 `setState()` 的回调函数或者 `componentDidUpdate()` 。 
+- `setState()` 总是会导致重新渲染，除非 `shouldComponentUpdate()` 返回 false。
 
 **语法**：
 
@@ -234,64 +238,87 @@ ReactDOM.render(
 setState(updater, [callback])
 ```
 
-> 第一个参数 updater function
+- 第一个参数 updater 是 function
 
-```
-(state, props) => stateChange
-```
+  ```
+  (state, props) => stateChange
+  ```
 
-state 是一个应用改变之后的状态，应该是一个基于传入的 state 和 props 的新对象。
+  state 是一个应用改变之后的状态，应该是一个基于传入的 state 和 props 的 **新对象**。
 
-```javascript
-this.setState((state, props) => {
-  return { counter: state.counter + props.step };
-});
-// 函数返回值是后面会浅合并进 state 的对象
-```
+  ```javascript
+  this.setState((state, props) => {
+    return { counter: state.counter + props.step };
+  });
+  // 函数返回值是后面会浅合并进 state 的对象
+  ```
 
-也可以直接传对象而不是一个函数，这个对象后面会**浅合并**至当前 state 形成新的 state，当 state 是一个多键值的结构时，可以单独更新某些键值，此时 React 会进行“差分”更新，不会影响其他的属性值。
+  也可以直接传对象而不是一个函数，这个对象后面会**浅合并**至当前 state 形成新的 state，当 state 是一个多键值的结构时，可以单独更新某些键值，此时 React 会进行“差分”更新，不会影响其他的属性值。
 
-```javascript
-setState(stateChange[, callback])
+  ```javascript
+  setState(stateChange[, callback])
+  
+  // 示例
+  this.setState({quantity: 2})
+  ```
 
-// 示例
-this.setState({quantity: 2})
-```
+- 第二个参数 回调函数
 
-> 第二个参数 回调函数
+  `setState` 完成并且组件重新渲染之后才会调用的，建议使用 `componentDidUpdate()` 处理类似逻辑。
 
-`setState` 完成并且组件重新渲染之后才会调用的，建议使用 `componentDidUpdate()` 处理类似逻辑。
+> 注意
+>
 
+1. **事件合并**
 
+   为了性能，React 可能会将多次 setState 调用合并为一次更新。
 
-**注意**：
+   > multiple calls during the same cycle may be batched together。
 
-**事件合并**
+   类似于下面：
 
-为了性能，React 可能会将多次 setState 调用合并为一次更新。multiple calls during the same cycle may be batched together。类似于下面：
+   ```javascript
+   Object.assign(
+     previousState,
+     {quantity: state.quantity + 1},
+     {quantity: state.quantity + 1},
+     ...
+   )
+   ```
 
-```javascript
-Object.assign(
-  previousState,
-  {quantity: state.quantity + 1},
-  {quantity: state.quantity + 1},
-  ...
-)
-```
+   后面的调用覆盖前面的调用，因此如果**更新的 state 与当前的 state 有关**，建议传参采用 `updater` function 形式。
 
-后面的调用覆盖前面的调用，因此如果更新的 state 与当前的 state 有关，建议传参采用 `updater` function 形式。
+   > Subsequent calls will override values from previous calls in the same cycle, so the quantity will only be incremented once. If the next state depends on the current state, we recommend using the updater function form.
 
-> Subsequent calls will override values from previous calls in the same cycle, so the quantity will only be incremented once. If the next state depends on the current state, we recommend using the updater function form
+   ```javascript
+   this.setState((state) => {
+     return {quantity: state.quantity + 1};
+   });
+   ```
 
-```javascript
-this.setState((state) => {
-  return {quantity: state.quantity + 1};
-});
-```
+2. **异步**
 
-**异步**
+   由 React 控制的事件处理过程 setState 不会同步更新 this.state，也就是说，在 React 控制之外的情况， setState 会同步更新 this.state。
 
-由 React 控制的事件处理过程 setState 不会同步更新 this.state，也就是说，在 React 控制之外的情况， setState 会同步更新 this.state。
+**补充：**
+
+- **异步与同步**: `setState`并不是单纯的异步或同步，这其实与调用时的环境相关:
+  - 在 **合成事件** 和 **生命周期钩子(除 componentDidUpdate)** 中，`setState` 是"异步"的；
+    - **原因**: 因为在 setState 的实现中，有一个判断: 当更新策略正在事务流的执行中时，该组件更新会被推入 `dirtyComponents` 队列中等待执行；否则，开始执行 `batchedUpdates` 队列更新；
+      - 在生命周期钩子调用中，更新策略都处于更新之前，组件仍处于事务流中，而`componentDidUpdate`是在更新之后，此时组件已经不在事务流中了，因此则会同步执行；
+      - 在合成事件中，React 是基于 **事务流完成的事件委托机制** 实现，也是处于事务流中；
+    - **问题**: 无法在`setState`后马上从`this.state`上获取更新后的值。
+    - **解决**: 如果需要马上同步去获取新值，`setState`其实是可以传入第二个参数的。`setState(updater, callback)`，在回调中即可获取最新值；
+  - 在 **原生事件** 和 **setTimeout** 中，setState 是同步的，可以马上获取更新后的值；
+    - **原因**: 原生事件是浏览器本身的实现，与事务流无关，自然是同步；而`setTimeout`是放置于定时器线程中延后执行，此时事务流已结束，因此也是同步；
+- **批量更新**: 在 **合成事件** 和 **生命周期钩子** 中，`setState`更新队列时，存储的是 **合并状态**(`Object.assign`)。因此前面设置的 key 值会被后面所覆盖，最终只会执行一次更新；
+- **函数式**: 由于 Fiber 及 合并 的问题，官方推荐可以传入 **函数** 的形式。`setState(fn)`，在`fn`中返回新的`state`对象即可，例如`this.setState((state, props) => newState)；`
+  - 使用函数式，可以用于避免`setState`的批量更新的逻辑，传入的函数将会被 **顺序调用**；
+- **注意事项**:
+  - setState 合并，在 合成事件 和 生命周期钩子 中多次连续调用会被优化为一次；
+  - 当组件已被销毁，如果再次调用 setState，React 会报错警告，通常有两种解决办法:
+    - 将数据挂载到外部，通过 props 传入，如放到 Redux 或 父级中；
+    - 在组件内部维护一个状态量 (isUnmounted)，`componentWillUnmount`中标记为 true，在`setState`前进行判断；
 
 
 
@@ -466,9 +493,11 @@ class Component extends React.Component {
    }
    ```
 
-   - - 在`componentDidUpdate`使用`setState`时，必须加条件，否则将进入死循环；
-     - `getSnapshotBeforeUpdate(prevProps, prevState)`可以在更新之前获取最新的渲染数据，它的调用是在 render 之后， update 之前；
-     - `shouldComponentUpdate`: 默认每次调用`setState`，一定会最终走到 diff 阶段，但可以通过`shouldComponentUpdate`的生命钩子返回`false`来直接阻止后面的逻辑执行，通常是用于做条件渲染，优化渲染的性能。
+6. 在`componentDidUpdate`使用`setState`时，必须加条件，否则将进入死循环；
+
+7. `getSnapshotBeforeUpdate(prevProps, prevState)`可以在更新之前获取最新的渲染数据，它的调用是在 render 之后， update 之前；
+
+8. `shouldComponentUpdate`: 默认每次调用`setState`，一定会最终走到 diff 阶段，但可以通过`shouldComponentUpdate`的生命钩子返回`false`来直接阻止后面的逻辑执行，通常是用于做条件渲染，优化渲染的性能。
 
 
 
@@ -591,16 +620,195 @@ render() {
 
 ## HOC(高阶组件)
 
-- 高阶组件是重用组件逻辑的高级方法，是一种源于 React 的组件模式。
--  HOC 是自定义组件，在它之内包含另一个组件。
-- 可以接受子组件提供的任何动态，但不会修改或复制其输入组件中的任何行为。你可以认为 HOC 是“纯（Pure）”组件。
+HOC(Higher Order Componennt) 是在 React 机制下社区形成的一种组件模式，在很多第三方开源库中表现强大。
 
-### HOC 用途
+**简述**:
 
-- 代码重用、逻辑和引导抽象
-- 渲染劫持
-- 状态抽象和控制
-- Props 控制
+- 高阶组件不是组件，是 **增强函数**，可以输入一个元组件，返回出一个新的增强组件；
+- 高阶组件的主要作用是 **代码复用**，**操作** 状态和参数；
+
+**用法**:
+
+- **属性代理 (Props Proxy)**: 返回出一个组件，它基于被包裹组件进行 **功能增强**；
+
+  - **默认参数**: 可以为组件包裹一层默认参数；
+
+    ```javascript
+    function proxyHoc(Comp) {
+    	return class extends React.Component {
+    		render() {
+    			const newProps = {
+    				name: 'tayde',
+    				age: 1,
+    			}
+    			return <Comp {...this.props} {...newProps} />
+    		}
+    	}
+    }
+    ```
+
+  - **提取状态**: 可以通过 props 将被包裹组件中的 state 依赖外层，例如用于转换受控组件:
+
+    ```javascript
+    function withOnChange(Comp) {
+    	return class extends React.Component {
+    		constructor(props) {
+    			super(props)
+    			this.state = {
+    				name: '',
+    			}
+    		}
+    		onChangeName = () => {
+    			this.setState({
+    				name: 'dongdong',
+    			})
+    		}
+    		render() {
+    			const newProps = {
+    				value: this.state.name,
+    				onChange: this.onChangeName,
+    			}
+    			return <Comp {...this.props} {...newProps} />
+    		}
+    	}
+    }
+    ```
+
+    使用姿势如下，这样就能非常快速的将一个 `Input` 组件转化成受控组件。
+
+    ```react
+    const NameInput = props => (<input name="name" {...props} />)
+    export default withOnChange(NameInput)
+    ```
+
+  - **包裹组件**: 可以为被包裹元素进行一层包装
+
+    ```javascript
+    function withMask(Comp) {
+      return class extends React.Component {
+          render() {
+    		  return (
+    		      <div>
+    				  <Comp {...this.props} />
+    					<div style={{
+    					  width: '100%',
+    					  height: '100%',
+    					  backgroundColor: 'rgba(0, 0, 0, .6)',
+    				  }} 
+    			  </div>
+    		  )
+    	  }
+      }
+    }
+    ```
+
+- **反向继承** (Inheritance Inversion): 返回出一个组件，**继承于被包裹组件**，常用于以下操作:
+
+  ```javascript
+  function IIHoc(Comp) {
+      return class extends Comp {
+          render() {
+              return super.render();
+          }
+      };
+  }
+  ```
+
+  - **渲染劫持** (Render Highjacking)
+
+    - **条件渲染**: 根据条件，渲染不同的组件
+
+      ```javascript
+      function withLoading(Comp) {
+          return class extends Comp {
+              render() {
+                  if(this.props.isLoading) {
+                      return <Loading />
+                  } else {
+                      return super.render()
+                  }
+              }
+          };
+      }
+      ```
+
+    - 可以直接修改被包裹组件渲染出的 React 元素树
+
+  - **操作状态** (Operate State): 可以直接通过 `this.state` 获取到被包裹组件的状态，并进行操作。但这样的操作容易使 state 变得难以追踪，不易维护，谨慎使用。
+
+应用场景：
+
+- **权限控制**，通过抽象逻辑，统一对页面进行权限判断，按不同的条件进行页面渲染:
+
+  ```javascript
+  function withAdminAuth(WrappedComponent) {
+      return class extends React.Component {
+  		constructor(props){
+  			super(props)
+  			this.state = {
+  		    	isAdmin: false,
+  			}
+  		} 
+  		async componentWillMount() {
+  		    const currentRole = await getCurrentUserRole();
+  		    this.setState({
+  		        isAdmin: currentRole === 'Admin',
+  		    });
+  		}
+  		render() {
+  		    if (this.state.isAdmin) {
+  		        return <Comp {...this.props} />;
+  		    } else {
+  		        return (<div>您没有权限查看该页面，请联系管理员！</div>);
+  		    }
+  		}
+      };
+  }
+  ```
+
+- **性能监控**，包裹组件的生命周期，进行统一埋点:
+
+  ```javascript
+  function withTiming(Comp) {
+      return class extends Comp {
+          constructor(props) {
+              super(props);
+              this.start = Date.now();
+              this.end = 0;
+          }
+          componentDidMount() {
+              super.componentDidMount && super.componentDidMount();
+              this.end = Date.now();
+              console.log(`${WrappedComponent.name} 组件渲染时间为 ${this.end - this.start} ms`);
+          }
+          render() {
+              return super.render();
+          }
+      };
+  }
+  ```
+
+- **代码复用**，可以将重复的逻辑进行抽象。
+
+使用注意:
+
+1. **纯函数**: 增强函数应为纯函数，避免侵入修改元组件；
+
+2. **避免用法污染**: 理想状态下，应透传元组件的无关参数与事件，尽量保证用法不变；
+
+3. **命名空间**: 为 HOC 增加特异性的组件名称，这样能便于开发调试和查找问题；
+
+4. **引用传递**: 如果需要传递元组件的 refs 引用，可以使用`React.forwardRef`；
+
+5. **静态方法**: 元组件上的静态方法并无法被自动传出，会导致业务层无法调用；解决:
+
+   - 函数导出
+
+   - 静态方法赋值
+
+6. **重新渲染**: 由于增强函数每次调用是返回一个新组件，因此如果在 Render 中使用增强函数，就会导致每次都重新渲染整个HOC，而且之前的状态会丢失；
+
+
 
 ### 纯组件
 
@@ -691,6 +899,10 @@ var MyComponent = React.createClass({
 
 ### 定义
 
+Redux 是一个 **数据管理中心**，可以把它理解为一个全局的 data store 实例。它通过一定的使用规则和限制，保证着数据的健壮性、可追溯和可预测性。它与 React 无关，可以独立运行于任何 JavaScript 环境中，从而也为同构应用提供了更好的数据同步通道。
+
+**概括：**
+
 - Redux 是当今最热门的前端开发库之一。
 - 它是 JavaScript 程序的可预测状态容器，用于整个应用的状态管理。
 - 使用 Redux 开发的应用易于测试，可以在不同环境中运行，并显示一致的行为。
@@ -705,11 +917,14 @@ var MyComponent = React.createClass({
 
 2. **状态是只读的**
 
-   改变状态的唯一方法是去触发一个动作。动作是描述变化的普通 JS 对象。就像 state 是数据的最小表示一样，该操作是对数据更改的最小表示。
+   > 动作是描述变化的普通 JS 对象。就像 state 是数据的最小表示一样，该操作是对数据更改的最小表示。
+
+   - Redux Store 中的数据无法被直接修改；
+   - 严格控制修改的执行，改变状态的唯一方法是去触发一个动作；
 
 3. **使用纯函数进行更改**
 
-   为了指定状态树如何通过操作进行转换，你需要纯函数。纯函数是那些返回值仅取决于其参数值的函数。
+   状态树转换，规定只能通过一个纯函数 (Reducer) 来描述修改。纯函数是那些返回值仅取决于其参数值的函数。
 
 ![clipboard.png](https://segmentfault.com/img/bVbqdU5?w=515&h=485)
 
@@ -731,31 +946,103 @@ var MyComponent = React.createClass({
 
    只显示 Store 提供的数据
 
+![img](1-20210106214922585)
+
 #### 定义 Action
+
+作为一个行为载体，用于映射相应的 Reducer，并且它可以成为数据的载体，将数据从应用传递至 store 中，是 store **唯一的数据源**。
 
 - 必须具有 Type 属性，表示正在执行的 ACTION 类型，且必须定义为字符串常量，并且还可以向其添加更多的属性
 - Redux 中，Action 被名为 Action Creators 的函数所创建
 
 ```react
-function addTodo(text) {
-    return {
-        type: ADD_TODO,
-        text
-    }
+// 一个普通的 Action
+const action = {
+	type: 'ADD_LIST',
+	item: 'list-item-1',
 }
+
+// 使用：
+store.dispatch(action)
+
+// 通常为了便于调用，会有一个 Action 创建函数 (action creater)
+funtion addList(item) {
+	return const action = {
+		type: 'ADD_LIST',
+		item,
+	}
+}
+
+// 调用就会变成:
+dispatch(addList('list-item-1'))
 ```
 
 #### Reducer 作用
+
+用于描述如何修改数据的纯函数，Action 属于行为名称，而 Reducer 便是修改行为的实质。
 
 - 纯函数，规定应用程序状态在响应 ACTION 后如何改变
 - 接受先前的状态和 ACTION 来工作，然后返回一个新的状态
 - 它根据操作的类型确定需要执行哪种更新，然后返回新的值。如果不需要完成任务，它会返回原来的状态。
 
+```javascript
+// 一个常规的 Reducer
+// @param {state}: 旧数据
+// @param {action}: Action 对象
+// @returns {any}: 新数据
+const initList = []
+function ListReducer(state = initList, action) {
+	switch (action.type) {
+		case 'ADD_LIST':
+			return state.concat([action.item])
+			break
+		defalut:
+			return state
+	}
+}
+```
+
+> **注意**:
+>
+> 1. 遵守数据不可变，不要去直接修改 state，而是返回出一个 **新对象**，可以使用 `assign / copy / extend / 解构` 等方式创建新对象；
+> 2. 默认情况下需要 **返回原数据**，避免数据被清空；
+> 3. 最好设置 **初始值**，便于应用的初始化及数据稳定；
+
+**进阶**
+
+- **React-Redux**: 结合 React 使用；
+  - `<Provider>`: 将 store 通过 context 传入组件中；
+  - `connect` : 一个高阶组件，可以方便在 React 组件中使用 Redux；
+    - 将`store`通过`mapStateToProps`进行筛选后使用`props`注入组件
+    - 根据`mapDispatchToProps`创建方法，当组件调用时使用`dispatch`触发对应的`action`
+- **Reducer 的拆分与重构**:
+  - 随着项目越大，如果将所有状态的 reducer 全部写在一个函数中，将会 **难以维护**；
+  - 可以将 reducer 进行拆分，也就是 **函数分解**，最终再使用`combineReducers()`进行重构合并；
+- **异步 Action**: 由于 Reducer 是一个严格的纯函数，因此无法在 Reducer 中进行数据的请求，需要先获取数据，再`dispatch(Action)`即可，下面是三种不同的异步实现:
+  - [redex-thunk](https://github.com/reduxjs/redux-thunk)
+  - [redux-saga](https://github.com/redux-saga/redux-saga)
+  - [redux-observable](https://github.com/redux-observable/redux-observable)
+
+
+
 #### Store
 
-- Store 是一个 JavaScript 对象，它可以保存程序的状态，并提供一些方法来访问状态、调度操作和注册侦听器。
-- 应用程序的整个状态/对象树保存在单一存储中。因此，Redux 非常简单且是可预测的。
-- 可以将中间件传递到 store 来处理数据，并记录改变存储状态的各种操作。所有操作都通过 reducer 返回一个新状态。
+全局 Store 单例， 每个 Redux 应用下只有一个 store， 它具有以下方法供使用:
+
+- `getState`: 获取 state；
+- `dispatch`: 触发 action, 更新 state；
+- `subscribe`: 订阅数据变更，注册监听器；
+
+```javascript
+// 创建
+const store = createStore(Reducer, initStore)
+```
+
+> Store 是一个 JavaScript 对象，它可以保存程序的状态，并提供一些方法来访问状态、调度操作和注册侦听器。
+>
+> 应用程序的整个状态/对象树保存在单一存储中。因此，Redux 非常简单且是可预测的。
+>
+> 可以将中间件传递到 store 来处理数据，并记录改变存储状态的各种操作。所有操作都通过 reducer 返回一个新状态。
 
 ### 七个优点
 
@@ -1198,28 +1485,383 @@ React.PureComponent 与 React.Component 类似，不同的是 React.Component �
 
 ## Hooks
 
+React 中通常使用 **类定义** 或者 **函数定义** 创建组件:
+
+在类定义中，我们可以使用到许多 React 特性，例如 state、 各种组件生命周期钩子等，但是在函数定义中，我们却无能为力，因此 React 16.8 版本推出了一个新功能 (React Hooks)，通过它，可以更好的在函数定义组件中使用 React 特性。
+
+**好处**:
+
+1. **跨组件复用**: 其实 render props / HOC 也是为了复用，相比于它们，Hooks 作为官方的底层 API，最为轻量，而且改造成本小，不会影响原来的组件层次结构和传说中的嵌套地狱；
+2. 类定义更为复杂:
+   - 不同的生命周期会使逻辑变得分散且混乱，不易维护和管理；
+   - 时刻需要关注`this`的指向问题；
+   - 代码复用代价高，高阶组件的使用经常会使整个组件树变得臃肿；
+3. **状态与UI隔离**: 正是由于 Hooks 的特性，状态逻辑会变成更小的粒度，并且极容易被抽象成一个自定义 Hooks，组件中的状态和 UI 变得更为清晰和隔离。
+
+**注意**:
+
+1. 避免在 循环/条件判断/嵌套函数 中调用 hooks，保证调用顺序的稳定；
+2. 只有 函数定义组件 和 hooks 可以调用 hooks，避免在 类组件 或者 普通函数 中调用；
+3. 不能在`useEffect`中使用`useState`，React 会报错提示；
+4. 类组件不会被替换或废弃，不需要强制改造类组件，两种方式能并存；
+
+
+
 ### 基础钩子
 
-[`useState`](https://reactjs.org/docs/hooks-reference.html#usestate)
+- 状态钩子[`useState`](https://reactjs.org/docs/hooks-reference.html#usestate)
 
-[`useEffect`](https://reactjs.org/docs/hooks-reference.html#useeffect)
+  用于定义组件的 State，其到类定义中`this.state`的功能；
+
+  ```javascript
+  // useState 只接受一个参数: 初始状态
+  // 返回的是组件名和更改该组件对应的函数
+  const [flag, setFlag] = useState(true);
+  // 修改状态
+  setFlag(false)
+  	
+  // 上面的代码映射到类定义中:
+  this.state = {
+  	flag: true	
+  }
+  const flag = this.state.flag
+  const setFlag = (bool) => {
+      this.setState({
+          flag: bool,
+      })
+  }
+  ```
+
+- 生命周期钩子[`useEffect`](https://reactjs.org/docs/hooks-reference.html#useeffect)
+
+  类定义中有许多生命周期函数，而在 React Hooks 中也提供了一个相应的函数 (`useEffect`)，这里可以看做`componentDidMount`、`componentDidUpdate`和`componentWillUnmount`的结合。
+
+  useEffect(callback, [source]) 接受两个参数：
+
+  - `callback`: 钩子回调函数；
+  - `source`: 设置触发条件，仅当 source 发生改变时才会触发；
+  - `useEffect`钩子在没有传入`[source]`参数时，默认在每次 render 时都会优先调用上次保存的回调中返回的函数，后再重新调用回调；
+
+  ```javascript
+  useEffect(() => {
+  	// 组件挂载后执行事件绑定
+  	console.log('on')
+  	addEventListener()
+  	
+  	// 组件 update 时会执行事件解绑
+  	return () => {
+  		console.log('off')
+  		removeEventListener()
+  	}
+  }, [source]);
+  
+  
+  // 每次 source 发生改变时，执行结果(以类定义的生命周期，便于大家理解):
+  // --- DidMount ---
+  // 'on'
+  // --- DidUpdate ---
+  // 'off'
+  // 'on'
+  // --- DidUpdate ---
+  // 'off'
+  // 'on'
+  // --- WillUnmount --- 
+  // 'off'
+  ```
+
+  通过第二个参数，我们便可模拟出几个常用的生命周期:
+
+  - `componentDidMount`: 传入`[]`时，就只会在初始化时调用一次；
+
+    ```javascript
+    const useMount = (fn) => useEffect(fn, [])
+    ```
+
+  - `componentWillUnmount`: 传入`[]`，回调中的返回的函数也只会被最终执行一次；
+
+    ```javascript
+    const useUnmount = (fn) => useEffect(() => fn, [])
+    ```
+
+  - `mounted`: 可以使用 useState 封装成一个高度可复用的 mounted 状态;
+
+    ```javascript
+    const useMounted = () => {
+        const [mounted, setMounted] = useState(false);
+        useEffect(() => {
+            !mounted && setMounted(true);
+            return () => setMounted(false);
+        }, []);
+        return mounted;
+    }
+    ```
+
+  - `componentDidUpdate`: `useEffect`每次均会执行，其实就是排除了 DidMount 后即可；
+
+    ```javascript
+    const mounted = useMounted() 
+    useEffect(() => {
+        mounted && fn()
+    })
+    ```
+
+  
 
 [`useContext`](https://reactjs.org/docs/hooks-reference.html#usecontext)
+
+获取 context 对象
 
 ### 新增钩子（React 16.8）
 
 [`useReducer`](https://reactjs.org/docs/hooks-reference.html#usereducer)
 
+类似于 Redux 思想的实现，但其并不足以替代 Redux，可以理解成一个组件内部的 redux:
+
+- 并不是持久化存储，会随着组件被销毁而销毁；
+- 属于组件内部，各个组件是相互隔离的，单纯用它并无法共享数据；
+- 配合`useContext`的全局性，可以完成一个轻量级的 Redux；([easy-peasy](https://github.com/ctrlplusb/easy-peasy))
+
 [`useCallback`](https://reactjs.org/docs/hooks-reference.html#usecallback)
+
+缓存回调函数，避免传入的回调每次都是新的函数实例而导致依赖组件重新渲染，具有性能优化的效果；
 
 [`useMemo`](https://reactjs.org/docs/hooks-reference.html#usememo)
 
+用于缓存传入的 props，避免依赖的组件每次都重新渲染；
+
 [`useRef`](https://reactjs.org/docs/hooks-reference.html#useref)
+
+获取组件的真实节点；
 
 [`useImperativeHandle`](https://reactjs.org/docs/hooks-reference.html#useimperativehandle)
 
 [`useLayoutEffect`](https://reactjs.org/docs/hooks-reference.html#uselayouteffect)
 
+- DOM更新同步钩子。用法与`useEffect`类似，只是区别于执行时间点的不同。
+- `useEffect`属于异步执行，并不会等待 DOM 真正渲染后执行，而`useLayoutEffect`则会真正渲染后才触发；
+- 可以获取更新后的 state；
+
 [`useDebugValue`](https://reactjs.org/docs/hooks-reference.html#usedebugvalue)
 
-## shouldComponent
+**自定义钩子**
+
+基于 Hooks 可以引用其它 Hooks 这个特性，我们可以编写自定义钩子，如上面的`useMounted`。又例如，我们需要每个页面自定义标题:
+
+```react
+function useTitle(title) {
+  useEffect(
+    () => {
+      document.title = title;
+    });
+}
+
+// 使用:
+function Home() {
+	const title = '我是首页'
+	useTitle(title)
+	return (
+		<div>{title}</div>
+	)
+}
+```
+
+# SSR
+
+俗称 **服务端渲染** (Server Side Render)，讲人话就是: 直接在服务端层获取数据，渲染出完成的 HTML 文件，直接返回给用户浏览器访问。
+
+**前后端分离**: 前端与服务端隔离，前端动态获取数据，渲染页面。
+
+**痛点**:
+
+- **首屏渲染性能瓶颈**:
+  - 空白延迟: HTML下载时间 + JS下载/执行时间 + 请求时间 + 渲染时间。在这段时间内，页面处于空白的状态。
+- **SEO 问题**: 由于页面初始状态为空，因此爬虫无法获取页面中任何有效数据，因此对搜索引擎不友好。
+  - 虽然一直有在提动态渲染爬虫的技术，不过据我了解，大部分国内搜索引擎仍然是没有实现。
+
+最初的服务端渲染，便没有这些问题。但我们不能返璞归真，既要保证现有的前端独立的开发模式，又要由服务端渲染，因此我们使用 React SSR。
+
+**原理**:
+
+- Node 服务: 让前后端运行同一套代码成为可能。
+- Virtual Dom: 让前端代码脱离浏览器运行。
+
+**条件**: Node 中间层、 React / Vue 等框架。 结构大概如下:
+
+![img](1-20210106222604212)
+
+**开发流程**: (此处以 React + Router + Redux + Koa 为例)
+
+1. 在同个项目中，**搭建** 前后端部分，常规结构:
+
+   - build
+   - public
+   - src
+     - client
+     - server
+
+2. server 中使用 Koa **路由监听** 页面访问:
+
+   ```react
+   import * as Router from 'koa-router'
+   
+   const router = new Router()
+   // 如果中间也提供 Api 层
+   router.use('/api/home', async () => {
+   	// 返回数据
+   })
+   
+   router.get('*', async (ctx) => {
+   	// 返回 HTML
+   })
+   ```
+
+3. 通过访问 url **匹配** 前端页面路由:
+
+   ```react
+   // 前端页面路由
+   import { pages } from '../../client/app'
+   import { matchPath } from 'react-router-dom'
+   
+   // 使用 react-router 库提供的一个匹配方法
+   const matchPage = matchPath(ctx.req.url, page)
+   ```
+
+4. 通过页面路由的配置进行 **数据获取**。通常可以在页面路由中增加 SSR 相关的静态配置，用于抽象逻辑，可以保证服务端逻辑的通用性，如:
+
+   ```javascript
+   class HomePage extends React.Component{
+   	public static ssrConfig = {
+   		  cache: true,
+            fetch() {
+           	  // 请求获取数据
+            }
+       }
+   }
+   ```
+
+   获取数据通常有两种情况:
+
+   - 中间层也使用 **http** 获取数据，则此时 fetch 方法可前后端共享；
+
+     ```javascript
+     const data = await matchPage.ssrConfig.fetch()
+     ```
+
+   - 中间层并不使用 http，是通过一些 **内部调用**，例如 Rpc 或 直接读数据库 等，此时也可以直接由服务端调用对应的方法获取数据。通常，这里需要在 ssrConfig 中配置特异性的信息，用于匹配对应的数据获取方法。
+
+     ```react
+     // 页面路由
+     class HomePage extends React.Component{
+     	public static ssrConfig = {
+             fetch: {
+             	 url: '/api/home',
+             }
+         }
+     }
+     
+     // 根据规则匹配出对应的数据获取方法
+     // 这里的规则可以自由，只要能匹配出正确的方法即可
+     const controller = matchController(ssrConfig.fetch.url)
+     
+     // 获取数据
+     const data = await controller(ctx)
+     ```
+
+   5. 创建 Redux store，并将数据`dispatch`到里面:
+
+      ```javascript
+      import { createStore } from 'redux'
+      // 获取 Clinet层 reducer
+      // 必须复用前端层的逻辑，才能保证一致性；
+      import { reducers } from '../../client/store'
+      
+      // 创建 store
+      const store = createStore(reducers)
+       
+      // 获取配置好的 Action
+      const action = ssrConfig.action
+      
+      // 存储数据	
+      store.dispatch(createAction(action)(data))
+      ```
+
+   6. 注入 Store， 调用`renderToString`将 React Virtual Dom 渲染成 **字符串**:
+
+      ```react
+      import * as ReactDOMServer from 'react-dom/server'
+      import { Provider } from 'react-redux'
+      
+      // 获取 Clinet 层根组件
+      import { App } from '../../client/app'
+      
+      const AppString = ReactDOMServer.renderToString(
+      	<Provider store={store}>
+      		<StaticRouter
+      			location={ctx.req.url}
+      			context={{}}>
+      			<App />
+      		</StaticRouter>
+      	</Provider>
+      )
+      ```
+
+   7. 将 AppString 包装成完整的 html 文件格式；
+
+   8. 此时，已经能生成完整的 HTML 文件。但只是个纯静态的页面，没有样式没有交互。接下来我们就是要插入 JS 与 CSS。我们可以通过访问前端打包后生成的`asset-manifest.json`文件来获取相应的文件路径，并同样注入到 Html 中引用。
+
+      ```react
+      const html = `
+      	<!DOCTYPE html>
+      	<html lang="zh">
+      		<head></head>
+      		<link href="${cssPath}" rel="stylesheet" />
+      		<body>
+      			<div id="App">${AppString}</div>
+      			<script src="${scriptPath}"></script>
+      		</body>
+      	</html>
+      `
+      ```
+
+   9. 进行 **数据脱水**: 为了把服务端获取的数据同步到前端。主要是将数据序列化后，插入到 html 中，返回给前端。
+
+      ```react
+      import serialize from 'serialize-javascript'
+      // 获取数据
+      const initState = store.getState()
+      const html = `
+      	<!DOCTYPE html>
+      	<html lang="zh">
+      		<head></head>
+      		<body>
+      			<div id="App"></div>
+      			<script type="application/json" id="SSR_HYDRATED_DATA">${serialize(initState)}</script>
+      		</body>
+      	</html>
+      `
+      
+      ctx.status = 200
+      ctx.body = html
+      ```
+
+      > **Tips**:
+      >
+      > 这里比较特别的有两点:
+      >
+      > 1. 使用了`serialize-javascript`序列化 store， 替代了`JSON.stringify`，保证数据的安全性，避免代码注入和 XSS 攻击；
+      > 2. 使用 json 进行传输，可以获得更快的加载速度；
+
+   10. Client 层 **数据吸水**: 初始化 store 时，以脱水后的数据为初始化数据，同步创建 store。
+
+       ```javascript
+       const hydratedEl = document.getElementById('SSR_HYDRATED_DATA')
+       const hydrateData = JSON.parse(hydratedEl.textContent)
+       
+       // 使用初始 state 创建 Redux store
+       const store = createStore(reducer, hydrateData)
+       ```
+
+       
+
+# shouldComponent
+
