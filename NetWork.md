@@ -86,16 +86,17 @@ HTTP的名字「超文本协议传输」，它可以拆成三个部分：
 - 传输
 - 协议
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlU4cfNS4t8C0AjG8YleW3FjITV4h4aQNn1iboHhjALOGicsFsLuQAXwVaQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/http三部分.jpg)
 
 *1. 「协议」*
 
 在生活中，我们也能随处可见「协议」，例如：
 
 - 刚毕业时会签一个「三方协议」；
+
 - 找房子时会签一个「租房协议」；
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlUZor6NTMkR1NwyYqut8YBYdQQgwTic0iclibo8LSlicZVSSZRoeu45zCLAw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)三方协议和租房协议
+  ![image-20210107175650590](images/协议类比.jpg)
 
 生活中的协议，本质上与计算机中的协议是相同的，协议的特点:
 
@@ -116,7 +117,9 @@ HTTP 协议是一个**双向协议**。
 
 我们在上网冲浪时，浏览器是请求方 A ，百度网站就是应答方 B。双方约定用 HTTP 协议来通信，于是浏览器把请求数据发送给网站，网站再把一些数据返回给浏览器，最后由浏览器渲染在屏幕，就可以看到图片、视频了。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlUZzUNhbz8lJy4NPLT3iaFFU09Wg5OcrHwXLYP8a1pmaBseMLKxJd7cLw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)请求 - 应答
+![图片](images/请求应答.jpg)
+
+请求 - 应答
 
 数据虽然是在 A 和 B 之间传输，但允许中间有**中转或接力**。
 
@@ -148,7 +151,7 @@ OK，经过了对 HTTP 里这三个名词的详细解释，就可以给出比「
 
 > HTTP 常见的状态码，有哪些？
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlUfV6qkzg4yHtOibAfTv6hTicOx73F55WWl4nW2FWlXnDJ7Igd9kvrrRnA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/http状态码.jpg)
 
 *1xx*
 
@@ -204,7 +207,7 @@ OK，经过了对 HTTP 里这三个名词的详细解释，就可以给出比「
 
 客户端发送请求时，用来指定服务器的域名。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_jpg/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlU6aoJZ8ROGvuttxDGXYnKXgzDdOBXibKpZVoqhkArdZ3QvMBBDaLONkw/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/访问.jpg)
 
 
 
@@ -218,7 +221,7 @@ Host: www.A.com
 
 服务器在返回数据时，会有 `Content-Length` 字段，表明本次回应的数据长度。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_jpg/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlU79Ir1qmS5DMj7XLLibaibsbUEUN5JyB2ugmEHcxwIe7JBkBHM99XQp3g/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/资源大小.jpg)
 
 
 
@@ -232,7 +235,7 @@ Content-Length: 1000
 
 `Connection` 字段最常用于客户端要求服务器使用 TCP 持久连接，以便其他请求复用。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_jpg/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlUlhrVicZt4iaLPPibcD8KQV4z9vqwAaAjdtkjUo5fGlKOsTaicbtEDO4u1Q/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/应答.jpg)
 
 HTTP/1.1 版本的默认连接都是持久连接，但为了兼容老版本的 HTTP，需要指定 `Connection` 首部字段的值为 `Keep-Alive`。
 
@@ -246,7 +249,7 @@ Connection: keep-alive
 
 `Content-Type` 字段用于服务器回应时，告诉客户端，本次数据是什么格式。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_jpg/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlUPPfeuboYtO6sBBQw5JI76dSrAoNlvjs2TysKiaPyVGHrtjFJiblIhfNQ/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/格式.jpg)
 
 ```
 Content-Type: text/html; charset=utf-8
@@ -266,7 +269,7 @@ Accept: */*
 
 `Content-Encoding` 字段说明数据的压缩方法。表示服务器返回的数据使用了什么压缩格式
 
-![图片](https://mmbiz.qpic.cn/mmbiz_jpg/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlUn83Xqku5tIB6zNdHsnFH08xfURlVHdtGQiaYfF21ib3koxICwrwRnckg/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/压缩格式.jpg)
 
 ```
 Content-Encoding: gzip
@@ -288,13 +291,13 @@ Accept-Encoding: gzip, deflate
 
 比如，你打开我的文章，浏览器就会发送 GET 请求给服务器，服务器就会返回文章的所有文字及资源。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_jpg/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlU3JTe0R3a3PI7B4ZGmmJbu8VG7L7GoicAvIBKCPXbrHdw9gicic50kqptQ/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)GET 请求
+![图片](images/getReq.jpg)GET 请求
 
 而`POST` 方法则是相反操作，它向 `URI` 指定的资源提交数据，数据就放在报文的 body 里。
 
 比如，你在我文章底部，敲入了留言后点击「提交」，浏览器就会执行一次 POST 请求，把你的留言文字放进了报文 body 里，然后拼接好 POST 请求头，通过 TCP 协议发送给服务器。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_jpg/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlUtIwC51jPmhF03FClzgibIp29fbNtLyjicic0xJqd5Lmia7cs2GHlcgXn6w/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)POST 请求
+![图片](images/postReq.jpg)POST 请求
 
 > GET 和 POST 方法都是安全和幂等的吗？
 
@@ -351,7 +354,7 @@ HTTP 协议里有优缺点一体的**双刃剑**，分别是「无状态、明�
 
 相当于，**在客户端第一次请求后，服务器会下发一个装有客户信息的「小贴纸」，后续客户端请求服务器的时候，带上「小贴纸」，服务器就能认得了了**，
 
-![图片](https://mmbiz.qpic.cn/mmbiz_jpg/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlUNPyKRfRoJdjCtBnMxia0ObgHaMxbPQDG4fdddhefBg8dhGeFE2Yj18A/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)Cookie 技术
+![图片](images/带cookie请求.jpg)Cookie 技术
 
 *2. 明文传输双刃剑*
 
@@ -381,7 +384,7 @@ HTTP 协议是基于 **TCP/IP**，并且使用了「**请求 - 应答**」的通
 
 持久连接的特点是，只要任意一端没有明确提出断开连接，则保持 TCP 连接状态。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_jpg/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlUShM2XNfyDWNRBB3TMZrmxcmlEibkfNuIkn5Rg0KIOQMO4ARjJQphaPg/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/长短连接.jpg)
 
 *2. 管道网络传输*
 
@@ -391,7 +394,7 @@ HTTP/1.1 采用了长连接的方式，这使得管道（pipeline）网络传输
 
 举例来说，客户端需要请求两个资源。以前的做法是，在同一个TCP连接里面，先发送 A 请求，然后等待服务器做出回应，收到后再发出 B 请求。管道机制则是允许浏览器同时发出 A 请求和 B 请求。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_jpg/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlU1VFq32MSkYOOuWLwoicjDbwdmWmmkiazufEY2icNrVhUzNU32o6I3gu8w/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/管道传输.jpg)
 
 但是服务器还是按照**顺序**，先回应 A 请求，完成后再回应 B 请求。要是 前面的回应特别慢，后面就会有许多请求排队等着。这称为「队头堵塞」。
 
@@ -401,7 +404,7 @@ HTTP/1.1 采用了长连接的方式，这使得管道（pipeline）网络传输
 
 因为当顺序发送的请求序列中的一个请求因为某种原因被阻塞时，在后面排队的所有请求也一同被阻塞了，会招致客户端一直请求不到数据，这也就是「**队头阻塞**」。**好比上班的路上塞车**。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_jpg/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlUcDl19EFtPvibXSLqDp1dGeIiaP0lDI4WfeCaRcoe0PbdgomJH0HTyOkg/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/三次握手阻塞.jpg)
 
 总之 HTTP/1.1 的性能一般般，后续的 HTTP/2 和 HTTP/3 就是在优化 HTTP 的性能。
 
@@ -430,7 +433,7 @@ HTTP 由于是明文传输，所以安全上存在以下三个风险：
 
 HTTP**S** 在 HTTP 与 TCP 层之间加入了 `SSL/TLS` 协议。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_jpg/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlUzdWm2toFZmoutgdMlZichgjsFggJOHXg6Z09ckSyeTPpkdywfljh3uw/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/协议栈.jpg)
 
 可以很好的解决了上述的风险：
 
