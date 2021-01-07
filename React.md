@@ -192,7 +192,7 @@ ReactDOM.render(
 
 React 中的一个调用结构，用于包装一个方法，结构为: **initialize - perform(method) - close**。通过事务，可以统一管理一个方法的开始与结束；处于事务流中，表示进程正在执行一些操作；
 
-![img](1)
+![img](images/TransactionWraper.jpg)
 
 ### setState()
 
@@ -946,7 +946,7 @@ Redux 是一个 **数据管理中心**，可以把它理解为一个全局的 da
 
    只显示 Store 提供的数据
 
-![img](1-20210106214922585)
+![img](images/ReduxModel.jpg)
 
 #### 定义 Action
 
@@ -1687,7 +1687,7 @@ function Home() {
 
 **条件**: Node 中间层、 React / Vue 等框架。 结构大概如下:
 
-![img](1-20210106222604212)
+![img](images/SSR.jpg)
 
 **开发流程**: (此处以 React + Router + Redux + Koa 为例)
 
@@ -1767,7 +1767,7 @@ function Home() {
      const data = await controller(ctx)
      ```
 
-   5. 创建 Redux store，并将数据`dispatch`到里面:
+   1. 创建 Redux store，并将数据`dispatch`到里面:
 
       ```javascript
       import { createStore } from 'redux'
@@ -1785,7 +1785,7 @@ function Home() {
       store.dispatch(createAction(action)(data))
       ```
 
-   6. 注入 Store， 调用`renderToString`将 React Virtual Dom 渲染成 **字符串**:
+   2. 注入 Store， 调用`renderToString`将 React Virtual Dom 渲染成 **字符串**:
 
       ```react
       import * as ReactDOMServer from 'react-dom/server'
@@ -1805,9 +1805,9 @@ function Home() {
       )
       ```
 
-   7. 将 AppString 包装成完整的 html 文件格式；
+   3. 将 AppString 包装成完整的 html 文件格式；
 
-   8. 此时，已经能生成完整的 HTML 文件。但只是个纯静态的页面，没有样式没有交互。接下来我们就是要插入 JS 与 CSS。我们可以通过访问前端打包后生成的`asset-manifest.json`文件来获取相应的文件路径，并同样注入到 Html 中引用。
+   4. 此时，已经能生成完整的 HTML 文件。但只是个纯静态的页面，没有样式没有交互。接下来我们就是要插入 JS 与 CSS。我们可以通过访问前端打包后生成的`asset-manifest.json`文件来获取相应的文件路径，并同样注入到 Html 中引用。
 
       ```react
       const html = `
@@ -1823,7 +1823,7 @@ function Home() {
       `
       ```
 
-   9. 进行 **数据脱水**: 为了把服务端获取的数据同步到前端。主要是将数据序列化后，插入到 html 中，返回给前端。
+   5. 进行 **数据脱水**: 为了把服务端获取的数据同步到前端。主要是将数据序列化后，插入到 html 中，返回给前端。
 
       ```react
       import serialize from 'serialize-javascript'
@@ -1851,7 +1851,7 @@ function Home() {
       > 1. 使用了`serialize-javascript`序列化 store， 替代了`JSON.stringify`，保证数据的安全性，避免代码注入和 XSS 攻击；
       > 2. 使用 json 进行传输，可以获得更快的加载速度；
 
-   10. Client 层 **数据吸水**: 初始化 store 时，以脱水后的数据为初始化数据，同步创建 store。
+   6.  Client 层 **数据吸水**: 初始化 store 时，以脱水后的数据为初始化数据，同步创建 store。
 
        ```javascript
        const hydratedEl = document.getElementById('SSR_HYDRATED_DATA')
