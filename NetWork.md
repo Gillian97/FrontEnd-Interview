@@ -1,5 +1,9 @@
 # HTTP
 
+> HTTP 协议入门——阮一峰
+>
+> http://www.ruanyifeng.com/blog/2016/08/http.html
+
 ## TLS/SSL
 
 TLS 是 SSL 标准化后的名称，两者是同一个东西的不同阶段。
@@ -117,8 +121,6 @@ HTTP 协议是一个**双向协议**。
 数据虽然是在 A 和 B 之间传输，但允许中间有**中转或接力**。
 
 就好像第一排的同学想穿递纸条给最后一排的同学，那么传递的过程中就需要经过好多个同学（中间人），这样的传输方式就从「A < --- > B」，变成了「A <-> N <-> M <-> B」。
-
-![img](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
 
 而在 HTTP 里，需要中间人遵从 HTTP 协议，只要不打扰基本的数据传输，就可以添加任意额外的东西。
 
