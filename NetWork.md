@@ -42,12 +42,12 @@ PKI = CA(认证中心)+RA(注册中心)+DS(目录服务)服务器
 
 ### HTTP
 
-#### 1.0 协议缺陷
+1.0 协议缺陷
 
 - 无法复用链接，完成即断开，**重新慢启动和 TCP 3次握手**
 - head of line blocking: **线头阻塞**，导致请求之间互相影响
 
-#### 1.1 改进
+1.1 改进
 
 - **长连接**(默认 keep-alive)，复用
 - host 字段指定对应的虚拟站点
@@ -61,7 +61,7 @@ PKI = CA(认证中心)+RA(注册中心)+DS(目录服务)服务器
     - Last-Modified
     - Etag
 
-#### 2.0
+2.0
 
 - 多路复用
 - 二进制分帧层: 应用层和传输层之间
@@ -70,15 +70,15 @@ PKI = CA(认证中心)+RA(注册中心)+DS(目录服务)服务器
 
 
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlUfaroic4mYY8ibHCdicAsWJibSgEbPVBNEK2aD6RK7nod68Het5BKvhq8Cw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/HTTP大纲.jpg)
 
-#### 01 HTTP 基本概念
+#### 1. HTTP 基本概念
 
 > HTTP 是什么？描述一下
 
 HTTP 是超文本传输协议，也就是**H**yperText **T**ransfer **P**rotocol。
 
-> 能否详细解释「超文本传输协议」？
+##### 详细解释「超文本传输协议」
 
 HTTP的名字「超文本协议传输」，它可以拆成三个部分：
 
@@ -119,8 +119,6 @@ HTTP 协议是一个**双向协议**。
 
 ![图片](images/请求应答.jpg)
 
-请求 - 应答
-
 数据虽然是在 A 和 B 之间传输，但允许中间有**中转或接力**。
 
 就好像第一排的同学想穿递纸条给最后一排的同学，那么传递的过程中就需要经过好多个同学（中间人），这样的传输方式就从「A < --- > B」，变成了「A <-> N <-> M <-> B」。
@@ -149,7 +147,7 @@ OK，经过了对 HTTP 里这三个名词的详细解释，就可以给出比「
 
 这种说法是**不正确**的。因为也可以是「服务器< -- >服务器」，所以采用**两点之间**的描述会更准确。
 
-> HTTP 常见的状态码，有哪些？
+##### HTTP 常见的状态码
 
 ![图片](images/http状态码.jpg)
 
@@ -201,7 +199,7 @@ OK，经过了对 HTTP 里这三个名词的详细解释，就可以给出比「
 
 「**503 Service Unavailable**」表示服务器当前很忙，暂时无法响应服务器，类似“网络服务正忙，请稍后重试”的意思。
 
-> http 常见字段有哪些？
+##### HTTP 常见字段
 
 *Host*
 
@@ -215,11 +213,11 @@ OK，经过了对 HTTP 里这三个名词的详细解释，就可以给出比「
 Host: www.A.com
 ```
 
-有了 `Host` 字段，就可以将请求发往「同一台」服务器上的不同网站。
+有了 `Host` 字段，就可以将请求发往「同一台」服务器上的不同网站，为虚拟主机的兴起打下了基础。
 
 *Content-Length 字段*
 
-服务器在返回数据时，会有 `Content-Length` 字段，表明本次回应的数据长度。
+HTTP/1.1 新增，因为增加了管道传输。服务器在返回数据时，会有 `Content-Length` 字段，表明本次回应的数据长度。
 
 ![图片](images/资源大小.jpg)
 
@@ -243,11 +241,11 @@ HTTP/1.1 版本的默认连接都是持久连接，但为了兼容老版本的 H
 Connection: keep-alive
 ```
 
-一个可以复用的 TCP 连接就建立了，直到客户端或服务器主动关闭连接。但是，这不是标准字段。
+一个可以复用的 TCP 连接就建立了，直到客户端或服务器主动关闭连接。但是，这不是标准字段，不是根本的解决办法。
 
 *Content-Type 字段*
 
-`Content-Type` 字段用于服务器回应时，告诉客户端，本次数据是什么格式。
+`Content-Type` 字段用于服务器回应时，告诉客户端，本次数据是什么格式。关于字符的编码，1.0版规定，头信息必须是 ASCII 码，后面的数据可以是任何格式。
 
 ![图片](images/格式.jpg)
 
@@ -265,9 +263,26 @@ Accept: */*
 
 上面代码中，客户端声明自己可以接受任何格式的数据。
 
+常见的`Content-Type`字段的值，这些数据类型总称为`MIME type`，每个值包括一级类型和二级类型，之间用斜杠分隔。
+
+```
+- text/plain
+- text/html
+- text/css
+- image/jpeg
+- image/png
+- image/svg+xml
+- audio/mp4
+- video/mp4
+- application/javascript
+- application/pdf
+- application/zip
+- application/atom+xml
+```
+
 *Content-Encoding 字段*
 
-`Content-Encoding` 字段说明数据的压缩方法。表示服务器返回的数据使用了什么压缩格式
+由于发送的数据可以是任何格式，因此可以把数据压缩后再发送。`Content-Encoding` 字段说明数据的压缩方法，表示服务器返回的数据使用了什么压缩格式。
 
 ![图片](images/压缩格式.jpg)
 
@@ -283,7 +298,7 @@ Content-Encoding: gzip
 Accept-Encoding: gzip, deflate
 ```
 
-#### 02 GET 与 POST
+#### 2. GET 与 POST
 
 > 说一下 GET 和 POST 的区别？
 
@@ -312,9 +327,9 @@ Accept-Encoding: gzip, deflate
 
 ------
 
-#### 03 HTTP 特性
+#### 3. HTTP 特性（默认1.1版本）
 
-> 你知道的 HTTP（1.1） 的优点有哪些，怎么体现的？
+##### 优点及体现
 
 HTTP 最凸出的优点是「简单、灵活和易于扩展、应用广泛和跨平台」。
 
@@ -328,13 +343,13 @@ HTTP协议里的各类请求方法、URI/URL、状态码、头字段等每个组
 
 同时 HTTP 由于是工作在应用层（ `OSI` 第七层），则它**下层可以随意变化**。
 
-HTTPS 也就是在 HTTP 与 TCP 层之间增加了 SSL/TLS 安全传输层，HTTP/3 甚至把 TCPP 层换成了基于 UDP 的 QUIC。
+HTTPS 也就是在 HTTP 与 TCP 层之间增加了 SSL/TLS 安全传输层，HTTP/3 甚至把 TCP 层换成了基于 UDP 的 QUIC。
 
 *3. 应用广泛和跨平台*
 
 互联网发展至今，HTTP 的应用范围非常的广泛，从台式机的浏览器到手机上的各种 APP，从看新闻、刷贴吧到购物、理财、吃鸡，HTTP 的应用**片地开花**，同时天然具有**跨平台**的优越性。
 
-> 那它的缺点呢？
+##### 缺点及体现
 
 HTTP 协议里有优缺点一体的**双刃剑**，分别是「无状态、明文传输」，同时还有一大缺点「不安全」。
 
@@ -346,15 +361,13 @@ HTTP 协议里有优缺点一体的**双刃剑**，分别是「无状态、明�
 
 例如登录->添加购物车->下单->结算->支付，这系列操作都要知道用户的身份才行。但服务器不知道这些请求是有关联的，每次都要问一遍身份信息。
 
-这样每操作一次，都要验证信息，这样的购物体验还能愉快吗？别问，问就是**酸爽**！
-
 对于无状态的问题，解法方案有很多种，其中比较简单的方式用 **Cookie** 技术。
 
 `Cookie` 通过在请求和响应报文中写入 Cookie 信息来控制客户端的状态。
 
-相当于，**在客户端第一次请求后，服务器会下发一个装有客户信息的「小贴纸」，后续客户端请求服务器的时候，带上「小贴纸」，服务器就能认得了了**，
+相当于，**在客户端第一次请求后，服务器会下发一个装有客户信息的「小贴纸」，后续客户端请求服务器的时候，带上「小贴纸」，服务器就能认得了了**。
 
-![图片](images/带cookie请求.jpg)Cookie 技术
+![图片](images/带cookie请求.jpg)
 
 *2. 明文传输双刃剑*
 
@@ -372,13 +385,13 @@ HTTP 比较严重的缺点就是不安全：
 
 HTTP 的安全问题，可以用 HTTPS 的方式解决，也就是通过引入 SSL/TLS 层，使得在安全上达到了极致。
 
-> 那你说下 HTTP/1.1 的性能如何？
+##### 性能
 
 HTTP 协议是基于 **TCP/IP**，并且使用了「**请求 - 应答**」的通信模式，所以性能的关键就在这**两点**里。
 
 *1. 长连接*
 
-早期 HTTP/1.0 性能上的一个很大的问题，那就是每发起一个请求，都要新建一次 TCP 连接（三次握手），而且是串行请求，做了无畏的 TCP 连接建立和断开，增加了通信开销。
+早期 HTTP/1.0 性能上的一个很大的问题，那就是每发起一个请求，都要新建一次 TCP 连接（三次握手），而且是串行请求，做了无谓的 TCP 连接建立和断开，增加了通信开销。
 
 为了解决上述 TCP 连接问题，HTTP/1.1 提出了**长连接**的通信方式，也叫持久连接。这种方式的好处在于减少了 TCP 连接的重复建立和断开所造成的额外开销，减轻了服务器端的负载。
 
@@ -396,7 +409,7 @@ HTTP/1.1 采用了长连接的方式，这使得管道（pipeline）网络传输
 
 ![图片](images/管道传输.jpg)
 
-但是服务器还是按照**顺序**，先回应 A 请求，完成后再回应 B 请求。要是 前面的回应特别慢，后面就会有许多请求排队等着。这称为「队头堵塞」。
+但服务器还是按照**顺序**，先回应 A 请求，完成后再回应 B 请求。要是 前面的回应特别慢，后面就会有许多请求排队等着，称为「队头堵塞」。
 
 *3. 队头阻塞*
 
@@ -404,13 +417,61 @@ HTTP/1.1 采用了长连接的方式，这使得管道（pipeline）网络传输
 
 因为当顺序发送的请求序列中的一个请求因为某种原因被阻塞时，在后面排队的所有请求也一同被阻塞了，会招致客户端一直请求不到数据，这也就是「**队头阻塞**」。**好比上班的路上塞车**。
 
+为了避免这个问题，只有两种方法：一是减少请求数，二是同时多开持久连接。这导致了很多的网页优化技巧，比如合并脚本和样式表、将图片嵌入CSS代码、域名分片（domain sharding）等等。如果HTTP协议设计得更好一些，这些额外的工作是可以避免的。
+
 ![图片](images/三次握手阻塞.jpg)
 
 总之 HTTP/1.1 的性能一般般，后续的 HTTP/2 和 HTTP/3 就是在优化 HTTP 的性能。
 
-------
+##### 新增特点
 
-#### 04 HTTP 与 HTTPS
+*1. 持久连接*
+
+*2. 管道机制*
+
+*3. Content*-Length 字段
+
+*4. 分块传输编码*
+
+使用`Content-Length`字段的前提条件是，服务器发送回应之前，必须知道回应的数据长度。
+
+对于一些很耗时的动态操作来说，这意味着服务器要等到所有操作完成，才能发送数据，显然这样的效率不高。更好的处理方法是，产生一块数据，就发送一块，采用"流模式"（stream）取代"缓存模式"（buffer）。
+
+因此，1.1版规定可以不使用`Content-Length`字段，而使用["分块传输编码"](https://zh.wikipedia.org/wiki/分块传输编码)（chunked transfer encoding）。只要请求或回应的头信息有`Transfer-Encoding`字段，就表明回应将由数量未定的数据块组成。
+
+```http
+Transfer-Encoding: chunked
+```
+
+每个非空的数据块之前，会有一个16进制的数值，表示这个块的长度。最后是一个大小为0的块，就表示本次回应的数据发送完了。下面是一个例子。
+
+```http
+HTTP/1.1 200 OK
+Content-Type: text/plain
+Transfer-Encoding: chunked
+
+25
+This is the data in the first chunk
+
+1C
+and this is the second one
+
+3
+con
+
+8
+sequence
+
+0
+```
+
+*5. 新增方法与 Host 字段*
+
+1.1版还新增了许多动词方法：`PUT`、`PATCH`、`HEAD`、 `OPTIONS`、`DELETE`。
+
+ 另外，客户端请求的头信息新增了`Host`字段，用来指定服务器的域名。
+
+#### 4. HTTP 与 HTTPS
 
 > HTTP 与 HTTPS 有哪些区别？
 
@@ -420,6 +481,8 @@ HTTP/1.1 采用了长连接的方式，这使得管道（pipeline）网络传输
 4. HTTPS 协议需要向 CA（证书权威机构）申请数字证书，来保证服务器的身份是可信的。
 
 
+
+##### HTTP 风险
 
 > HTTPS 解决了 HTTP 的哪些问题？
 
@@ -443,17 +506,21 @@ HTTP**S** 在 HTTP 与 TCP 层之间加入了 `SSL/TLS` 协议。
 
 可见，只要自身不做「恶」，SSL/TLS 协议是能保证通信是安全的。
 
+
+
+##### HTTPS 解决方案
+
 > HTTPS 是如何解决上面的三个风险的？
 
 - **混合加密**的方式实现信息的**机密性**，解决了窃听的风险。
 - **摘要算法**的方式来实现**完整性**，它能够为数据生成独一无二的「指纹」，指纹用于校验数据的完整性，解决了篡改的风险。
-- 将服务器公钥放入到**数字证书**中，解决了冒充的风险。
+- 将服务器公钥放入到**数字证书**中，解决了冒充的风险（中间人攻击）。
 
 *1. 混合加密*
 
 通过**混合加密**的方式可以保证信息的**机密性**，解决了窃听的风险。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_jpg/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlUYNGEmfY95A74GR3xicqXKZCDI7Q4icgQu7CuSSx9QiaFlr4Py49RHonjw/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)混合加密
+![图片](images/混合加密.jpg)混合加密
 
 HTTPS 采用的是**对称加密**和**非对称加密**结合的「混合加密」方式：
 
@@ -469,7 +536,7 @@ HTTPS 采用的是**对称加密**和**非对称加密**结合的「混合加密
 
 **摘要算法**用来实现**完整性**，能够为数据生成独一无二的「指纹」，用于校验数据的完整性，解决了篡改的风险。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_jpg/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlUicIliaBcr2XAXpMdeibLG4MMticpkX0e6xZHbXeiavMu7faJcL2TdVj0Udw/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)校验完整性
+![图片](images/摘要算法.jpg)校验完整性
 
 客户端在发送明文之前会通过摘要算法算出明文的「指纹」，发送的时候把「指纹 + 明文」一同
 加密成密文后，发送给服务器，服务器解密后，用相同的摘要算法算出发送过来的明文，通过比较客户端携带的「指纹」和当前算出的「指纹」做比较，若「指纹」相同，说明数据是完整的。
@@ -482,9 +549,11 @@ HTTPS 采用的是**对称加密**和**非对称加密**结合的「混合加密
 
 所以这里就需要借助第三方权威机构 `CA` （数字证书认证机构），将**服务器公钥放在数字证书**（由数字证书认证机构颁发）中，只要证书是可信的，公钥就是可信的。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_jpg/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlUibyiaEab7NMrTn632LZmYQe5qaibibT0xsOs7ic6u98ypWJBjbPMzOUCb2g/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/数字证书.jpg)
 
 通过数字证书的方式保证服务器公钥的身份，解决冒充的风险。
+
+##### HTTPS 建立连接
 
 > HTTPS  是如何建立连接的？其间交互了什么？
 
@@ -498,13 +567,13 @@ SSL/TLS 协议基本流程：
 
 SSL/TLS 的「握手阶段」涉及**四次**通信，可见下图：
 
-![图片](https://mmbiz.qpic.cn/mmbiz_jpg/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlUMRTqQDVOJHMZe3JoN5TqSb0uYicOqMH2qHgic7M6rtCrjPOToDjBm11A/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/SSL:TLS 协议基本流程.jpg)
 
 注：HTTPS 连接建立过程
 
 SSL/TLS 协议建立的详细流程：
 
-*1. ClientHello*
+###### *1. ClientHello*
 
 首先，由客户端向服务器发起加密通信请求，也就是 `ClientHello` 请求。
 
@@ -516,7 +585,7 @@ SSL/TLS 协议建立的详细流程：
 
 （3）客户端支持的密码套件列表，如 RSA 加密算法。
 
-*2. SeverHello*
+###### *2. SeverHello*
 
 服务器收到客户端请求后，向客户端发出响应，也就是 `SeverHello`。服务器回应的内容有如下内容：
 
@@ -528,7 +597,7 @@ SSL/TLS 协议建立的详细流程：
 
 （4）服务器的数字证书。
 
-*3.客户端回应*
+###### *3.客户端回应*
 
 客户端收到服务器的回应之后，首先通过浏览器或者操作系统中的 CA 公钥，确认服务器的数字证书的真实性。
 
@@ -542,7 +611,7 @@ SSL/TLS 协议建立的详细流程：
 
 上面第一项的随机数是整个握手阶段的第三个随机数，这样服务器和客户端就同时有三个随机数，接着就用双方协商的加密算法，**各自生成**本次通信的「会话秘钥」。
 
-*4. 服务器的最后回应*
+###### *4. 服务器的最后回应*
 
 服务器收到客户端的第三个随机数（`pre-master key`）之后，通过协商的加密算法，计算出本次通信的「会话秘钥」。然后，向客户端发生最后的信息：
 
@@ -552,9 +621,9 @@ SSL/TLS 协议建立的详细流程：
 
 至此，整个 SSL/TLS 的握手阶段全部结束。接下来，客户端与服务器进入加密通信，就完全是使用普通的 HTTP 协议，只不过用「会话秘钥」加密内容。
 
-------
+#### 5. HTTP/1.1、HTTP/2、HTTP/3 演变
 
-#### 05 HTTP/1.1、HTTP/2、HTTP/3 演变
+##### HTTP/1.1 优化
 
 > 说说 HTTP/1.1 相比 HTTP/1.0 提高了什么性能？
 
@@ -566,12 +635,12 @@ HTTP/1.1 相比 HTTP/1.0 性能上的改进：
 但 HTTP/1.1 还是有性能瓶颈：
 
 - 请求 / 响应头部（Header）未经压缩就发送，首部信息越多延迟越大。只能压缩 `Body` 的部分；
-- 发送冗长的首部。每次互相发送相同的首部造成的浪费较多；
-- 服务器是按请求的顺序响应的，如果服务器响应慢，会招致客户端一直请求不到数据，也就是队头阻塞；
+- 发送**冗长首部**。每次互相发送相同的首部造成的浪费较多（HTTP/1.1 头部仍然是ASCII编码）；
+- 服务器是按请求的顺序响应的，如果服务器响应慢，会招致客户端一直请求不到数据，也就是**队头阻塞**；
 - 没有请求优先级控制；
-- 请求只能从客户端开始，服务器只能被动响应。
+- 请求只能从客户端开始，服务器只能被动响应（HTTP 本身设计就是请求-应答式）。
 
-
+##### HTTP/2 优化
 
 > 那上面的 HTTP/1.1 的性能瓶颈，HTTP/2 做了什么优化？
 
@@ -579,51 +648,62 @@ HTTP/2 协议是基于 HTTPS 的，所以 HTTP/2 的安全性也是有保障的�
 
 那 HTTP/2 相比 HTTP/1.1 性能上的改进：
 
-*1. 头部压缩*
+###### *1. 头部压缩*
 
-HTTP/2 会**压缩头**（Header）如果你同时发出多个请求，他们的头是一样的或是相似的，那么，协议会帮你**消除重复的分**。
+HTTP 协议不带有状态，每次请求都必须附上所有信息。所以，请求的很多字段都是重复的，比如`Cookie`和`User Agent`，一模一样的内容，每次请求都必须附带，这会浪费很多带宽，也影响速度。
 
-这就是所谓的 `HPACK` 算法：在客户端和服务器同时维护一张头信息表，所有字段都会存入这个表，生成一个索引号，以后就不发送同样字段了，只发送索引号，这样就**提高速度**了。
+HTTP/2 对这一点做了优化，引入了头信息压缩机制（header compression）。
 
-*2. 二进制格式*
+- 头信息使用`gzip`或`compress`压缩后再发送；
+- `HPACK` 算法：客户端和服务器同时维护一张头信息表，所有字段都会存入这个表，生成一个索引号，以后就不发送同样字段了，只发送索引号，这样就**提高速度**了。
+
+HTTP/2 会**压缩头**（Header），如果你同时发出多个请求，他们的头是一样的或是相似的，那么，协议会帮你**消除重复的部分**。
+
+###### *2. 二进制格式*
 
 HTTP/2 不再像 HTTP/1.1 里的纯文本形式的报文，而是全面采用了**二进制格式。**
 
 头信息和数据体都是二进制，并且统称为帧（frame）：**头信息帧和数据帧**。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlUahoiazC1GOBz9ICKnAd4f1PesMoT4wK4RiciaSO8e4jVakTIKfvgYCdpg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/HTTP1.1&2.jpg)
 
 这样虽然对人不友好，但是对计算机非常友好，因为计算机只懂二进制，那么收到报文后，无需再将明文的报文转成二进制，而是直接解析二进制报文，这**增加了数据传输的效率**。
 
-*3. 数据流*
+二进制协议的一个好处是，可以定义额外的帧。HTTP/2 定义了近十种帧，为将来的高级应用打好了基础。
 
-HTTP/2 的数据包不是按顺序发送的，同一个连接里面连续的数据包，可能属于不同的回应。因此，必须要对数据包做标记，指出它属于哪个回应。
+###### *3. 多路复用（多工）*
 
-每个请求或回应的所有数据包，称为一个数据流（`Stream`）。
-
-每个数据流都标记着一个独一无二的编号，其中规定客户端发出的数据流编号为奇数， 服务器发出的数据流编号为偶数
-
-客户端还可以**指定数据流的优先级**。优先级高的请求，服务器就先响应该请求。
-
-![图片](https://mmbiz.qpic.cn/mmbiz_jpg/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlUicf9XsgyOGDvTA9SsOicIz8t3pSibrAHTN6TW83WCmZsSeDqtZibJnoRHg/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
-
-HTTP/1 ~ HTTP/2
-
-*4. 多路复用*
-
-HTTP/2 是可以在**一个连接中并发多个请求或回应，而不用按照顺序一一对应**。
+HTTP/2 复用TCP连接，**在一个连接里，客户端和浏览器都可以同时发送多个请求或回应**。
 
 移除了 HTTP/1.1 中的串行请求，不需要排队等待，也就不会再出现「队头阻塞」问题，**降低了延迟，大幅度提高了连接的利用率**。
 
 举例来说，在一个 TCP 连接里，服务器收到了客户端 A 和 B 的两个请求，如果发现 A 处理过程非常耗时，于是就回应 A 请求已经处理好的部分，接着回应 B 请求，完成后，再回应 A 请求剩下的部分。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_jpg/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlUZraxmGoMaxYbmqYhVW3Plx9mKM1RllEVibUysw2PCPmiaRd6H2nDuYWg/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/多路复用.jpg)
 
-*5. 服务器推送*
+###### *4. 数据流*
+
+HTTP/2 的数据包不是按顺序发送的，同一个连接里面连续的数据包，可能属于不同的回应。因此，必须要对数据包做标记，指出它属于哪个回应。
+
+每个请求或回应的所有数据包，称为一个数据流（`Stream`）。
+
+每个数据流都标记着一个独一无二的编号，其中规定客户端发出的数据流编号为奇数， 服务器发出的数据流编号为偶数。
+
+数据流发送到一半的时候，客户端和服务器都可以发送信号（`RST_STREAM`帧），取消这个数据流。1.1版取消数据流的唯一方法，就是关闭TCP连接。这就是说，HTTP/2 可以取消某一次请求，同时保证TCP连接还打开着，可以被其他请求使用。
+
+客户端还可以**指定数据流的优先级**。优先级高的请求，服务器就先响应该请求。
+
+![图片](images/HTTP1-2.jpg)
+
+###### *5. 服务器推送*
 
 HTTP/2 还在一定程度上改善了传统的「请求 - 应答」工作模式，服务不再是被动地响应，也可以**主动**向客户端发送消息。
 
-举例来说，在浏览器刚请求 HTML 的时候，就提前把可能会用到的 JS、CSS 文件等静态资源主动发给客户端，**减少延时的等待**，也就是服务器推送（Server Push，也叫 Cache Push）。
+常见场景是客户端请求一个网页，这个网页里面包含很多静态资源。正常情况下，客户端必须收到网页后，解析HTML源码，发现有静态资源，再发出静态资源请求。其实，服务器可以预期到客户端请求网页后，很可能会再请求静态资源，所以就主动把这些静态资源随着网页一起发给客户端了。
+
+举例来说，在浏览器刚请求 HTML 的时候，服务器就提前把可能会用到的 JS、CSS 文件等静态资源主动发给客户端，**减少延时的等待**，也就是服务器推送（Server Push，也叫 Cache Push）。
+
+##### HTTP/3 优化
 
 > HTTP/2 有哪些缺陷？HTTP/3 做了哪些优化？
 
@@ -636,23 +716,21 @@ HTTP/2 主要的问题在于：多个 HTTP 请求在复用一个 TCP 连接，�
 
 这都是基于 TCP 传输层的问题，所以 **HTTP/3 把 HTTP 下层的 TCP 协议改成了 UDP！**
 
-![图片](https://mmbiz.qpic.cn/mmbiz_jpg/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlUy5OSaaTftjD7JmdU4AUMnlrGOWXnMYss5sCxMMTPUibLeHIgdsdkklQ/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
-
-HTTP/1 ~ HTTP/3
+![图片](images/HTTP1-3.jpg)
 
 UDP 发生是不管顺序，也不管丢包的，所以不会出现 HTTP/1.1 的队头阻塞 和 HTTP/2 的一个丢包全部重传问题。
 
-大家都知道 UDP 是不可靠传输的，但基于 UDP 的 **QUIC 协议** 可以实现类似 TCP 的可靠性传输。
+大家都知道 UDP 是不可靠传输的，但基于 UDP 的 **QUIC 协议**（快速 UDP Internet 连接） 可以实现类似 TCP 的可靠性传输。
 
 - QUIC 有自己的一套机制可以保证传输的可靠性的。当某个流发生丢包时，只会阻塞这个流，**其他流不会受到影响**。
-- TL3 升级成了最新的 `1.3` 版本，头部压缩算法也升级成了 `QPack`。
+- TLS 升级成了最新的 `1.3` 版本，头部压缩算法也升级成了 `QPack`。
 - HTTPS 要建立一个连接，要花费 6 次交互，先是建立三次握手，然后是 `TLS/1.3` 的三次握手。QUIC 直接把以往的 TCP 和 `TLS/1.3` 的 6 次交互**合并成了 3 次，减少了交互次数**。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_jpg/J0g14CUwaZfXG1113Sjm0iaOXfoOv0tlUyP3HNicKS2J21mHQD9EepOiciakC8nRkrX9C3I0hjC6Fhjvd4nLiakuLeg/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/TCP_HTTPS（TLS:1.3）&QUIC_HTTPS.jpg)
 
-注：TCP HTTPS（TLS/1.3） 和 QUIC HTTPS
+所以， QUIC 是一个在 UDP 之上的 **伪** TCP + TLS + HTTP/2 的多路复用的协议。
 
-所以， QUIC 是一个在 UDP 之上的**伪** TCP + TLS + HTTP/2 的多路复用的协议。
+![img](images/HTTP3.jpg)
 
 QUIC 是新协议，对于很多网络设备，根本不知道什么是 QUIC，只会当做 UDP，这样会出现新的问题。所以 HTTP/3 现在普及的进度非常的缓慢，不知道未来 UDP 是否能够逆袭 TCP。
 
@@ -668,7 +746,7 @@ QUIC 是新协议，对于很多网络设备，根本不知道什么是 QUIC，�
 
 我很早之前写过一篇关于 HTTP 和 HTTPS 的文章，但对于 HTTPS 介绍还不够详细，只讲了比较基础的部分，所以这次我们再来深入一下 HTTPS，用**实战抓包**的方式，带大家再来窥探一次 HTTPS。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZeMSNGtbYLcgAkWmcscQz2FDSHMqiaWcfSJXzDqPKdTAlqZ3MbqDB2YQy98OlYSxic2PBC7cXtxRpmg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/HTTPS大纲.jpg)
 
 对于还不知道对称加密和非对称加密的同学，你先复习我以前的这篇文章[「硬核！30 张图解 HTTP 常见的面试题」，](https://mp.weixin.qq.com/s?__biz=MzUxODAzNDg4NQ==&mid=2247483971&idx=1&sn=8f2d5dae3d95efc446061b352c8e9961&scene=21#wechat_redirect)本篇文章默认大家已经具备了这些知识。
 
@@ -684,7 +762,7 @@ HTTP 由于是明文传输，所谓的明文，就是说客户端与服务端通
 
 HTTP**S** 在 HTTP 与 TCP 层之间加入了 TLS 协议，来解决上述的风险。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_jpg/J0g14CUwaZeMSNGtbYLcgAkWmcscQz2FkDKoDib57FOWVb8zZyXf65GEme6ibHkPTVxOmazHqicLDicX7iacFFMt22A/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/TL协议栈.jpg)
 
 TLS 协议是如何解决 HTTP 的风险的呢？
 
@@ -694,7 +772,7 @@ TLS 协议是如何解决 HTTP 的风险的呢？
 
 可见，有了 TLS 协议，能保证 HTTP 通信是安全的了，那么在进行 HTTP 通信前，需要先进行 TLS 握手。TLS 的握手过程，如下图：
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZeMSNGtbYLcgAkWmcscQz2FpC63OTRvfL58f1ia8BMeWkV4JiaWP3H7icHXRNzRicOcAgksdHEKhfghDA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/TLS握手过程.jpg)
 
 上图简要概述来 TLS 的握手过程，其中每一个「框」都是一个记录（*record*），记录是 TLS 收发数据的基本单位，类似于 TCP 里的 segment。多个记录可以组合成一个 TCP 包发送，所以**通常经过「四个消息」就可以完成 TLS 握手，也就是需要 2个 RTT 的时延**，然后就可以在安全的通信环境里发送 HTTP 报文，实现 HTTPS 协议。
 
@@ -716,11 +794,11 @@ TLS 协议是如何解决 HTTP 的风险的呢？
 
 我用 Wireshark 工具抓了用 RSA 密钥交换的 TLS 握手过程，你可以从下面看到，一共经历来四次握手：
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZeMSNGtbYLcgAkWmcscQz2F5yMsNUQw7IDrWibuKEc2nZrZ19NxMiaiaJnxuH0lX4pREXgltQCtfn8fA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/Wireshark抓包.jpg)
 
 对应 Wireshark 的抓包，我也画了一幅图，你可以从下图很清晰地看到该过程：
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZeMSNGtbYLcgAkWmcscQz2FUFgpNul4Wsl9bo0nPW4eQQVGwawWqnspllfnHibd7DfZic9PhwGk3Qibg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/Wireshark抓包过程.jpg)
 
 那么，接下来针对每一个 TLS 握手做进一步的介绍。
 
@@ -728,7 +806,7 @@ TLS 协议是如何解决 HTTP 的风险的呢？
 
 客户端首先会发一个「**Client Hello**」消息，字面意思我们也能理解到，这是跟服务器「打招呼」。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZeMSNGtbYLcgAkWmcscQz2FCOMAhxqC7oqlIvuPv4Ey5RTZJ4EZBEib53BDrqG9ibZGMz47eiaIc1lAg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/TLS_1_shake.jpg)
 
 消息里面有客户端使用的 TLS 版本号、支持的密码套件列表，以及生成的**随机数（\*Client Random\*）**，这个随机数会被服务端保留，它是生成对称加密密钥的材料之一。
 
@@ -738,7 +816,7 @@ TLS 协议是如何解决 HTTP 的风险的呢？
 
 接着，返回「**Server Hello**」消息，消息里面有服务器确认的 TLS 版本号，也给出了随机数（Server Random），然后从客户端的密码套件列表选择了一个合适的密码套件。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZeMSNGtbYLcgAkWmcscQz2FnRQEoa9rdibVx5u7dXtibzYAkyEKmV2tH17Wfw02bq01bu70nkKepfoA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/TLS_2_shake.jpg)
 
 可以看到，服务端选择的密码套件是 “Cipher Suite: TLS_RSA_WITH_AES_128_GCM_SHA256”。
 
@@ -754,11 +832,11 @@ TLS 协议是如何解决 HTTP 的风险的呢？
 
 然后，服务端为了证明自己的身份，会发送「**Server Certificate**」给客户端，这个消息里含有数字证书。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZeMSNGtbYLcgAkWmcscQz2FXnwkheIKP0ZntqKGqQqquOqY5wrlzesS2yMmDwP829YPUxWys9Esyw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/TLS_server_resp_1.jpg)
 
 随后，服务端发了「**Server Hello Done**」消息，目的是告诉客户端，我已经把该给你的东西都给你了，本次打招呼完毕。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZeMSNGtbYLcgAkWmcscQz2FBicOgS0GbvV25iaN3fwr7uahdup16eiaSVGeQjuib4em03Bf99UH3iaGia2w/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/TLS_server_resp_2.jpg)
 
 ##### 客户端验证证书
 
@@ -785,9 +863,9 @@ TLS 协议是如何解决 HTTP 的风险的呢？
 
 ###### 数字证书签发和验证流程
 
-如下图图所示，为数字证书签发和验证流程：
+如下图所示，为数字证书签发和验证流程：
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZeMSNGtbYLcgAkWmcscQz2FDs6YbvyPGPicN6bQGpSk2ewFWFuvBb5ibYicw1BOLmL8FvlZQiaQQktiawQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/数字证书签发和验证.jpg)
 
 CA 签发证书的过程，如上图左边部分：
 
@@ -805,7 +883,7 @@ CA 签发证书的过程，如上图左边部分：
 
 但事实上，证书的验证过程中还存在一个证书信任链的问题，因为我们向 CA 申请的证书一般不是根证书签发的，而是由中间证书签发的，比如百度的证书，从下图你可以看到，证书的层级有三级：
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZeMSNGtbYLcgAkWmcscQz2FePeu3cunSEzn9DnXZNHMXX8U0RbiastCrbribicnFyaG6Ren7cf2LHmicw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/证书信任链.jpg)
 
 对于这种三级层级关系的证书的验证过程如下：
 
@@ -817,15 +895,15 @@ CA 签发证书的过程，如上图左边部分：
 
 总括来说，由于用户信任 GlobalSign，所以由 GlobalSign 所担保的 baidu.com 可以被信任，另外由于用户信任操作系统或浏览器的软件商，所以由软件商预载了根证书的 GlobalSign 都可被信任。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZeMSNGtbYLcgAkWmcscQz2FvcYdkks31YoBkTDJjQHQwpTsZwFECc1W1Rbib3tNMOo8mqliaFickK1zw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/证书信任流程.jpg)
 
 操作系统里一般都会内置一些根证书，比如我的 MAC 电脑里内置的根证书有这么多：
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZeMSNGtbYLcgAkWmcscQz2FF6gpUOGJAlXHIz4jctStA0YIgiajty4zicGiavPKVKqBHqTkVO94MqsUw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/内置根证书.jpg)
 
 这样的一层层地验证就构成了一条信任链路，整个证书信任链验证流程如下图所示：
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZeMSNGtbYLcgAkWmcscQz2FnVg8iaauiavwm6J75icEXibIY5uVKQrAz8y8Mv5TibM7GHKcItZhSj7Zq3g/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/证书信任链验证流程.jpg)
 
 最后一个问题，为什么需要证书链这么麻烦的流程？Root CA 为什么不直接颁发证书，而是要搞那么多中间层级呢？
 
@@ -835,7 +913,7 @@ CA 签发证书的过程，如上图左边部分：
 
 客户端验证完证书后，认为可信则继续往下走。接着，客户端就会生成一个新的**随机数 (\*pre-master\*)**，用服务器的 RSA 公钥加密该随机数，通过「**Change Cipher Key Exchange**」消息传给服务端。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZeMSNGtbYLcgAkWmcscQz2FiamYgc26wrJhSYiaISqtFSiaVXX0rWlfcCzYZFYn7aBW5Js92IUftd2uw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/TLS_3_shake_req.jpg)
 
 服务端收到后，用 RSA 私钥解密，得到客户端发来的随机数 (pre-master)。
 
@@ -845,11 +923,11 @@ CA 签发证书的过程，如上图左边部分：
 
 生成完会话密钥后，然后客户端发一个「**Change Cipher Spec**」，告诉服务端开始使用加密方式发送消息。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZeMSNGtbYLcgAkWmcscQz2Fet3HJibmAy1icLrvBy2PibPrCIHuiauSL0HK3IkTMLLftJ2t8MgF33uJPQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/TLS_3_shake_resp_1.jpg)
 
 然后，客户端再发一个「**Encrypted Handshake Message（Finishd）**」消息，把之前所有发送的数据做个摘要，再用会话密钥（master secret）加密一下，让服务器做个验证，验证加密通信是否可用和之前握手信息是否有被中途篡改过。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZeMSNGtbYLcgAkWmcscQz2FT7HEWE4jSjBdAiaxFs3HK9ckUaOXSEVlicnra6b7cMfKcT5VLz6RTQZw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/TLS_3_shake_req_2.jpg)
 
 可以发现，「Change Cipher Spec」之前传输的 TLS 握手数据都是明文，之后都是对称密钥加密的密文。
 
@@ -867,7 +945,7 @@ CA 签发证书的过程，如上图左边部分：
 
 为了解决这一问题，于是就有了 DH 密钥协商算法，这里简单介绍它的工作流程。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZeMSNGtbYLcgAkWmcscQz2FNtnx63504UXDmkkECwp82HxYuGot1u8wIBiapBax2dyQhbsWiaykCIDA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](images/DH密钥.jpg)
 
 客户端和服务端各自会生成随机数，并以此作为私钥，然后根据公开的 DH 计算公示算出各自的公钥，通过 TLS 握手双方交换各自的公钥，这样双方都有自己的私钥和对方的公钥，然后双方根据各自持有的材料算出一个随机数，这个随机数的值双方都是一样的，这就可以作为后续对称加密时使用的密钥。
 
