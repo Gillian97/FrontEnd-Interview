@@ -1382,7 +1382,7 @@ Access-Control-Max-Age: 1728000
 
 ```http
 PUT /cors HTTP/1.1
-// 头信息的`Origin`字段是浏览器自动添加的。
+//  头信息的`Origin`字段为浏览器自动添加
 Origin: http://api.bob.com
 Host: api.alice.com
 X-Custom-Header: value
@@ -1517,7 +1517,7 @@ HMACSHA256(
 客户端收到 JWT Token 后，可存储在 Cookie 或者 LocalStorage 中。后面客户端每次发请求，均需要带上这个 JWT Token 。客户端请求共有如下位置可以放置：
 
 1. Cookie （不能跨域）
-2. HTTP 请求头 Authorization 字段
+2. HTTP 请求头 `Authorization` 字段
 3. POST 请求的数据体中 （跨域时）
 
 ### 注意
