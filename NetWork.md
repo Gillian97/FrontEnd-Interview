@@ -1,4 +1,4 @@
-# HTTP
+#  HTTP
 
 > HTTP 协议入门——阮一峰
 >
@@ -937,21 +937,21 @@ CA 签发证书的过程，如上图左边部分：
 
 最后，就用「会话密钥」加解密 HTTP 请求和响应了。
 
-------
-
 #### RSA 算法的缺陷
 
 **使用 RSA 密钥协商算法的最大问题是不支持前向保密**。因为客户端传递随机数（用于生成对称加密密钥的条件之一）给服务端时使用的是公钥加密的，服务端收到到后，会用私钥解密得到随机数。所以一旦服务端的私钥泄漏了，过去被第三方截获的所有 TLS 通讯密文都会被破解。
 
 为了解决这一问题，于是就有了 DH 密钥协商算法，这里简单介绍它的工作流程。
 
+#### DH 密钥协商算法
+
 ![图片](images/DH密钥.jpg)
 
-客户端和服务端各自会生成随机数，并以此作为私钥，然后根据公开的 DH 计算公示算出各自的公钥，通过 TLS 握手双方交换各自的公钥，这样双方都有自己的私钥和对方的公钥，然后双方根据各自持有的材料算出一个随机数，这个随机数的值双方都是一样的，这就可以作为后续对称加密时使用的密钥。
+客户端和服务端各自会生成随机数，并以此作为私钥，然后根据公开的 DH 计算公式算出各自的公钥，通过 TLS 握手双方交换各自的公钥，这样双方都有自己的私钥和对方的公钥，然后双方根据各自持有的材料算出一个随机数，这个随机数的值双方都是一样的，这就可以作为后续对称加密时使用的密钥。
 
 DH 密钥交换过程中，**即使第三方截获了 TLS 握手阶段传递的公钥，在不知道的私钥的情况下，也是无法计算出密钥的，而且每一次对称加密密钥都是实时生成的，实现前向保密**。
 
-但因为 DH 算法的计算效率问题，后面出现了 ECDHE 密钥协商算法，我们现在大多数网站使用的正是 ECDHE 密钥协商算法，关于 ECDHE 握手的过程，将在下一篇揭晓，尽情期待哦
+但因为 DH 算法的计算效率问题，后面出现了 ECDHE 密钥协商算法，我们现在大多数网站使用的正是 ECDHE 密钥协商算法。
 
 
 
@@ -1033,7 +1033,7 @@ DH 密钥交换过程中，**即使第三方截获了 TLS 握手阶段传递的�
 
    HTTP 协议中没有明确说明 POST 会产生两个 TCP 数据包，而且实际测试(Chrome)发现，header 和 body 不会分开发送。
 
-   所以，header 和 body 分开发送是部分浏览器或框架的请求方法，不属于 post 必然行为。
+   所以，header 和 body 分开发送是部分浏览器或框架的请求方法，不属于 POST 必然行为。
 
 ## options 何时发出
 
@@ -1163,7 +1163,7 @@ TCP建立连接的过程叫做握手，握手需要在客户和服务器之间�
 
   TCP 设有一个 **保活计时器**。服务器每收到一次客户的数据，就重新设置保活计时器，时间的设置通常是两小时。若两小时没有收到客户的数据，服务器就发送一个 探测报文段 ，以后则每隔 75 秒钟发送一次。若一连发送 10 个探测报文段后仍无客户的响应，服务器就认为客户端出了故障，接着就关闭这个连接。
 
-
+![图片](images/TCP机制.jpg)
 
 ### 滑动窗口: 流量控制
 
@@ -1222,11 +1222,198 @@ Cross-Origin resource sharing W3C标准，跨域资源共享。
 
 允许浏览器向跨源服务器发出 XMLHttpRequest 请求，克服 AJAX 只能同源使用的限制。
 
+主要是服务器需要实现 CORS 接口，当前所有浏览器都支持 CORS。
+
+CORS 请求默认不发送 Cookie 和 HTTP 认证信息.
+
+### 简单请求
+
+历史上表表单一直可以发简单请求，兼容表单。
+
+```
+两种情况需要同时满足
+
+1. 请求方法是以下三种方法之一：
+HEAD
+GET
+POST
+
+2. HTTP的头信息不超出以下几种字段：
+Accept
+Accept-Language
+Content-Language
+Last-Event-ID
+Content-Type：只限于三个值application/x-www-form-urlencoded、multipart/form-data、text/plain
+```
+
+发送时： 浏览器自动在报文头中添加 Origin 字段，标识源。
+
+```http
+GET /cors HTTP/1.1
+Origin: http://api.bob.com
+Host: api.alice.com
+Accept-Language: en-US
+Connection: keep-alive
+User-Agent: Mozilla/5.0...
+```
+
+返回时：源被许可，则返回报文中多出以下字段：
+
+```http
+// 前三个与 CORS 有关
+// 必须，请求中的源或者*
+Access-Control-Allow-Origin: http://api.bob.com
+// 可选, true, 允许请求包含 Cookie, 否则不包含该字段
+Access-Control-Allow-Credentials: true
+可选, CORS请求时，XMLHttpRequest对象的getResponseHeader()方法只能拿到6个基本字段：
+Cache-Control/Content-Language/Content-Type/Expires/Last-Modified/Pragma。如果想拿到其他字段，就必须在Access-Control-Expose-Headers里面指定
+// 下述指定, getResponseHeader('FooBar')可以返回FooBar字段的值。
+Access-Control-Expose-Headers: FooBar
+Content-Type: text/html; charset=utf-8	
+```
+
+请求包含 Cookie , 服务器同意 + 请求添加 `withCredentials`属性。
+
+```javascript
+var xhr = new XMLHttpRequest();
+xhr.withCredentials = true;
+```
+
+注意: 如果要发送Cookie
+
+- `Access-Control-Allow-Origin`就**不能设为星号**，必须指定明确的、与请求网页一致的域名。
+- Cookie 依然遵循同源政策，只有用**服务器域名设置的Cookie才会上传**，其他域名的Cookie并不会上传
+- （跨源）原网页代码中的`document.cookie`也无法读取服务器域名下的Cookie。
+
+### 非简单请求
+
+不同时满足两种上述两种情况。对服务器有特殊要求的请求, 请求方法是 `PUT`/`DELETE` 或者 Content-Type 是`application/json`。
+
+正式通信之前,增加一次预检请求,服务器会校验下述信息,同意才能发送正式请求,否则报错.
+
+- 请求源是否合法
+
+- 是否支持加下来的请求方法
+- 可以使用哪些 HTTP 头信息
+
+示例:
+
+```javascript
+// 非简单请求
+var url = 'http://api.alice.com/cors';
+var xhr = new XMLHttpRequest();
+// HTTP 请求的方法是 PUT
+xhr.open('PUT', url, true);
+// 发送一个自定义头信息 X-Custom-Header
+xhr.setRequestHeader('X-Custom-Header', 'value');
+xhr.send();
+```
+
+#### 预检请求
+
+服务器发送上述请求之前,会发送预检请求.
+
+示例:预检请求的头信息.
+
+```http
+// 请求方法是OPTIONS，表示这个请求是用来询问的
+OPTIONS /cors HTTP/1.1
+Origin: http://api.bob.com
+// 列出浏览器的CORS请求会用到哪些HTTP方法
+Access-Control-Request-Method: PUT
+// 一个逗号分隔的字符串，指定浏览器CORS请求会额外发送的头信息字段
+Access-Control-Request-Headers: X-Custom-Header
+Host: api.alice.com
+Accept-Language: en-US
+Connection: keep-alive
+User-Agent: Mozilla/5.0...
+```
+
+#### 预检请求回应
+
+服务器收到"预检"请求以后，检查了`Origin`、`Access-Control-Request-Method`和`Access-Control-Request-Headers`字段以后，确认允许跨源请求，就可以做出回应。
+
+肯定回应:
+
+```http
+HTTP/1.1 200 OK
+Date: Mon, 01 Dec 2008 01:15:39 GMT
+Server: Apache/2.0.61 (Unix)
+Access-Control-Allow-Origin: http://api.bob.com
+Access-Control-Allow-Methods: GET, POST, PUT
+Access-Control-Allow-Headers: X-Custom-Header
+Content-Type: text/html; charset=utf-8
+Content-Encoding: gzip
+Content-Length: 0
+Keep-Alive: timeout=2, max=100
+Connection: Keep-Alive
+Content-Type: text/plain
+```
+
+否定回应:
+
+如果服务器否定了"预检"请求，会返回一个正常的HTTP回应，但是没有任何CORS相关的头信息字段，则触发一个错误，被`XMLHttpRequest`对象的`onerror`回调函数捕获.
+
+```http
+// error 信息
+XMLHttpRequest cannot load http://api.alice.com.
+Origin http://api.bob.com is not allowed by Access-Control-Allow-Origin.
+```
+
+服务器回应的其他CORS相关字段如下。
+
+```http
+// 表明服务器支持的所有跨域请求的方法。
+// 注意，返回的是所有支持的方法，而不单是浏览器请求的那个方法。这是为了避免多次"预检"请求。
+Access-Control-Allow-Methods: GET, POST, PUT
+// 如果浏览器请求包括Access-Control-Request-Headers字段，则Access-Control-Allow-Headers字段是必需的。它也是一个逗号分隔的字符串，表明服务器支持的所有头信息字段，不限于浏览器在"预检"中请求的字段。
+Access-Control-Allow-Headers: X-Custom-Header
+// 允许请求携带 Cookie
+Access-Control-Allow-Credentials: true
+// 该字段可选，用来指定本次预检请求的有效期，单位为秒。下面结果中，有效期是20天（1728000秒），即允许缓存该条回应1728000秒（即20天），在此期间，不用发出另一条预检请求。
+Access-Control-Max-Age: 1728000
+```
+
+#### 正式跨域请求
+
+一旦服务器通过了"预检"请求，以后每次浏览器正常的CORS请求，就都跟简单请求一样，会有一个`Origin`头信息字段。服务器的回应，也都会有一个`Access-Control-Allow-Origin`头信息字段。
+
+下面是"预检"请求之后，浏览器的正常CORS请求。
+
+```http
+PUT /cors HTTP/1.1
+// 头信息的`Origin`字段是浏览器自动添加的。
+Origin: http://api.bob.com
+Host: api.alice.com
+X-Custom-Header: value
+Accept-Language: en-US
+Connection: keep-alive
+User-Agent: Mozilla/5.0...
+```
+
+下面是服务器正常的回应。
+
+```http
+// `Access-Control-Allow-Origin`字段是每次回应头信息都必定包含的。
+Access-Control-Allow-Origin: http://api.bob.com
+Content-Type: text/html; charset=utf-8
+```
+
+### 与 JSONP 比较
+
+CORS与JSONP的使用目的相同，但是比JSONP更强大。
+
+JSONP只支持`GET`请求，CORS支持所有类型的HTTP请求。JSONP的优势在于支持老式浏览器，以及可以向不支持CORS的网站请求数据。
+
+
+
+https://www.ruanyifeng.com/blog/2016/04/cors.html
+
 ## JSONP
 
 JSON with Padding，JSON 的一种“使用模式”，可以让网页从别的域名/网站那里获取数据，即跨域读取数据。
 
-利用`<script>`标签不受跨域限制的特点，缺点是只能支持 get 请求。
+利用`<script>`标签不受跨域限制的特点，缺点是只能支持 GET 请求。
 
 ```javascript
 function jsonp(url, jsonpCallback, success) {
@@ -1256,7 +1443,7 @@ JSON Web Tokens，跨域认证解决方案。
 3. 服务器向用户返回一个 session_id，写入用户 Cookie
 4. 用户随后每次请求都带着 Cookie，服务器通过cookie知道用户的session_id，找到之前保存的用户数据，得知用户身份
 
-考虑到服务器分布式的特性，需要 session 共享
+考虑到服务器分布式的特性，需要 session 共享：
 
 1. session持久化，但是持久化挂了风险太大，且操作不便
 2. 直接将用户信息存在客户端，客户端每次发请求时都带着，JWT是这类方案代表
