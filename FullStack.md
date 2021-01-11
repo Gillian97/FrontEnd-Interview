@@ -1,10 +1,10 @@
 ## Hybrid
 
-随着 Web技术 和 移动设备 的快速发展，在各家大厂中，Hybrid 技术已经成为一种最主流最不可取代的架构方案之一。一套好的 Hybrid 架构方案能让 App 既能拥有 **极致的体验和性能**，同时也能拥有 Web技术 **灵活的开发模式、跨平台能力以及热更新机制**。因此，相关的 Hybrid 领域人才也是十分的吃香，精通Hybrid 技术和相关的实战经验，也是面试中一项大大的加分项。
+随着 Web技术 和 移动设备 的快速发展，在各家大厂中，Hybrid 技术已经成为一种最主流最不可取代的架构方案之一。一套好的 Hybrid 架构方案能让 App 既能拥有 **极致的体验和性能**，同时也能拥有 Web技术 **灵活的开发模式、跨平台能力以及热更新机制**。因此，相关的 Hybrid 领域人才也是十分的吃香，精通 Hybrid 技术和相关的实战经验，也是面试中一项大大的加分项。
 
 ### 1. 混合方案简析
 
-Hybrid App，俗称 **混合应用**，即混合了 Native技术 与 Web技术 进行开发的移动应用。现在比较流行的混合方案主要有三种，主要是在UI渲染机制上的不同:
+Hybrid App，俗称 **混合应用**，即混合了 Native 技术 与 Web 技术 进行开发的移动应用。现在比较流行的混合方案主要有三种，主要是在UI渲染机制上的不同:
 
 - **Webview UI**:
   - 通过 JSBridge 完成 H5 与 Native 的双向通讯，并 **基于 Webview** 进行页面的渲染；
@@ -19,7 +19,7 @@ Hybrid App，俗称 **混合应用**，即混合了 Native技术 与 Web技术 �
   - **优势**: 用户体验好于常规 Webview 方案，且通常依托的平台也能提供更为友好的开发调试体验以及功能；
   - **劣势**: 需要依托于特定的平台的规范限定
 
-### 2. Webviev
+### 2. Webview
 
 Webview 是 Native App 中内置的一款基于 Webkit 内核 的浏览器，主要由两部分组成:
 
@@ -37,9 +37,9 @@ Hybrid技术 中最核心的点就是 Native端 与 H5端 之间的 **双向通�
 - JavaScript 通知 Native
 
   - **API注入**，Native 直接在 JS 上下文中挂载数据或者方法
-  - - 延迟较低，在安卓4.1以下具有安全性问题，风险较高
+    - 延迟较低，在安卓4.1以下具有安全性问题，风险较高
   - WebView **URL Scheme** 跳转拦截
-  - - 兼容性好，但延迟较高，且有长度限制
+    - 兼容性好，但延迟较高，且有长度限制
   - WebView 中的 **prompt/console/alert拦截**(通常使用 prompt)
 
 - **Native 通知 Javascript**:
@@ -50,18 +50,18 @@ Hybrid技术 中最核心的点就是 Native端 与 H5端 之间的 **双向通�
     // Swift
     webview.stringByEvaluatingJavaScriptFromString("alert('NativeCall')")
     ```
+    
+  - **Android**: loadUrl (4.4-)
 
-- - **Android**: loadUrl (4.4-)
-
-    ```javascript
+    ```java
     // 调用js中的JSBridge.trigger方法
     // 该方法的弊端是无法获取函数返回值；
     webView.loadUrl("javascript:JSBridge.trigger('NativeCall')")
     ```
 
-- - **Android**: evaluateJavascript (4.4+)
+  - **Android**: evaluateJavascript (4.4+)
 
-    ```javascript
+    ```java
     // 4.4+后使用该方法便可调用并获取函数返回值；
     mWebView.evaluateJavascript（"javascript:JSBridge.trigger('NativeCall')", 	 new ValueCallback<String>() {
         @Override
@@ -143,7 +143,7 @@ Webpack 已经成为了现在前端工程化中最重要的一环，通过Webpac
   (function(modules) {
   	// 模拟 require 函数，从内存中加载模块；
   	function __webpack_require__(moduleId) {
-  		// 缓存模块
+  		// 缓存模块 
   		if (installedModules[moduleId]) {
   			return installedModules[moduleId].exports;
   		}
@@ -262,12 +262,12 @@ module.exports = function(htmlSource) {
 
 - **事件流机制**:
 
-Webpack 就像工厂中的一条产品流水线。原材料经过 Loader 与 Plugin 的一道道处理，最后输出结果。
+  Webpack 就像工厂中的一条产品流水线。原材料经过 Loader 与 Plugin 的一道道处理，最后输出结果。
 
-- 通过链式调用，按顺序串起一个个 Loader；
-- 通过事件流机制，让 Plugin 可以插入到整个生产过程中的每个步骤中；
+  - 通过链式调用，按顺序串起一个个 Loader；
+  - 通过事件流机制，让 Plugin 可以插入到整个生产过程中的每个步骤中；
 
-Webpack 事件流编程范式的核心是基础类 **Tapable**，是一种 **观察者模式** 的实现事件的订阅与广播：
+  Webpack 事件流编程范式的核心是基础类 **Tapable**，是一种 **观察者模式** 的实现事件的订阅与广播：
 
 ```javascript
 const { SyncHook } = require("tapable")
@@ -308,9 +308,9 @@ Webpack 中两个最重要的类 Compiler 与 Compilation 便是继承于 Tapabl
 
 - **代码优化**:
 
-  - **无用代码消除**，是许多编程语言都具有的优化手段，这个过程称为 DCE (dead code elimination)，即 **删除不可能执行的代码**；
+  - **无用代码消除**
 
-    例如我们的 UglifyJs，它就会帮我们在生产环境中删除不可能被执行的代码;
+    是许多编程语言都具有的优化手段，这个过程称为 DCE (dead code elimination)，即 **删除不可能执行的代码**。例如我们的 UglifyJs，它就会帮我们在生产环境中删除不可能被执行的代码;
 
     ```javascript
     var fn = function() {
@@ -324,7 +324,7 @@ Webpack 中两个最重要的类 Compiler 与 Compilation 便是继承于 Tapabl
 
   - **摇树优化** (Tree-shaking)，这是一种形象比喻。我们把打包后的代码比喻成一棵树，这里其实表示的就是，通过工具 "摇" 我们打包后的 js 代码，将没有使用到的无用代码 "摇" 下来 (删除)。即 消除那些被 **引用了但未被使用** 的模块代码。
 
-  - - **原理**: 由于是在编译时优化，因此最基本的前提就是语法的静态分析，**ES6的模块机制** 提供了这种可能性。不需要运行时，便可进行代码字面上的静态分析，确定相应的依赖关系。
+    - **原理**: 由于是在编译时优化，因此最基本的前提就是语法的静态分析，**ES6的模块机制** 提供了这种可能性。不需要运行时，便可进行代码字面上的静态分析，确定相应的依赖关系。
     - **问题**: 具有 **副作用** 的函数无法被 tree-shaking。
       - 在引用一些第三方库，需要去观察其引入的代码量是不是符合预期；
       - 尽量写纯函数，减少函数的副作用；
@@ -332,7 +332,7 @@ Webpack 中两个最重要的类 Compiler 与 Compilation 便是继承于 Tapabl
 
 - **code-spliting**: **代码分割** 技术，将代码分割成多份进行 **懒加载** 或 **异步加载**，避免打包成一份后导致体积过大，影响页面的首屏加载；
 
-- - Webpack 中使用 SplitChunksPlugin 进行拆分；
+  - Webpack 中使用 SplitChunksPlugin 进行拆分；
   - 按 **页面** 拆分: 不同页面打包成不同的文件；
   - 按 **功能** 拆分:
     - 将类似于播放器，计算库等大模块进行拆分后再懒加载引入；
@@ -343,7 +343,7 @@ Webpack 中两个最重要的类 Compiler 与 Compilation 便是继承于 Tapabl
 
 - **编译性能优化**:
 
-- - 升级至 **最新** 版本的 webpack，能有效提升编译性能；
+  - 升级至 **最新** 版本的 webpack，能有效提升编译性能；
   - 使用 **dev-server / 模块热替换 (HMR)** 提升开发体验；
     - 监听文件变动 **忽略 node_modules** 目录能有效提高监听时的编译效率；
   - **缩小编译范围**:
@@ -383,7 +383,7 @@ Webpack 中两个最重要的类 Compiler 与 Compilation 便是继承于 Tapabl
 
 - **循环**: 循环通常是编码性能的关键点；
 
-  - 代码的性能问题会再循环中被指数倍放大；
+  - 代码的性能问题会在循环中被指数倍放大；
   - **最佳实践**:
     - 尽可能 **减少循环次数**；
       - 减少遍历的数据量；
@@ -458,17 +458,17 @@ Webpack 中两个最重要的类 Compiler 与 Compilation 便是继承于 Tapabl
   - 使用 <link> 替代原生 @import；
 - **html 优化**:
   - **减少 dom 数量**，避免不必要的节点或嵌套；
-  - **避免****<img src="" />****空标签**，能减少服务器压力，因为 src 为空时，浏览器仍然会发起请求
+  - **避免**`<img src="" />`空标签，能减少服务器压力，因为 src 为空时，浏览器仍然会发起请求
     - IE 向页面所在的目录发送请求；
     - Safari、Chrome、Firefox 向页面本身发送请求；
     - Opera 不执行任何操作。
   - 图片提前 **指定宽高** 或者 **脱离文档流**，能有效减少因图片加载导致的页面回流；
   - **语义化标签** 有利于 SEO 与浏览器的解析时间；
-  - 减少使用 table 进行布局，避免使用<br />与<hr />；
+  - 减少使用 table 进行布局，避免使用`<br />`与`<hr />`；
 
 ### 2. 页面基础优化
 
-- **引入位置**: css 文件<head>中引入， js 文件<body>底部引入；
+- **引入位置**: css 文件`<head>`中引入， js 文件`<body>`底部引入；
   - 影响首屏的，优先级很高的 js 也可以头部引入，甚至内联；
 - **减少请求** (http 1.0 - 1.1)，合并请求，正确设置 http 缓存；
 - **减少文件体积**:
