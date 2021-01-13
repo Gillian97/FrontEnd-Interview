@@ -1413,7 +1413,14 @@ https://www.ruanyifeng.com/blog/2016/04/cors.html
 
 JSON with Padding，JSON 的一种“使用模式”，可以让网页从别的域名/网站那里获取数据，即跨域读取数据。
 
+原理: 动态地向 HTML 中插入一个 `<script src="url"></script>` 标签去加载异步资源。
+
 利用`<script>`标签不受跨域限制的特点，缺点是只能支持 GET 请求。
+
+script 标签的 crossorigin 属性可以取以下值：
+
+- `anonymous`(默认) 在加载此脚本资源时不会带上用户的 Cookies；
+- `use-credentials` 在加载此脚本资源时会带上用户的 Cookies。
 
 ```javascript
 function jsonp(url, jsonpCallback, success) {
