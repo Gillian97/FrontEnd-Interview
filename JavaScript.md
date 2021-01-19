@@ -3968,6 +3968,70 @@ dog
 
 ## Node 中的 Event Loop
 
+![Node.js](/Users/jinlingzhang/Documents/personal/FrontEnd-Interview/images/Node-Event-Loop2.png)
+
+根据上图，Node.js的运行机制如下。
+
+> （1）V8引擎解析JavaScript脚本。
+>
+> （2）解析后的代码，调用Node API。
+>
+> （3）[libuv库](https://github.com/joyent/libuv)负责Node API的执行。它将不同的任务分配给不同的线程，形成一个Event Loop（事件循环），以异步的方式将任务的执行结果返回给V8引擎。
+>
+> （4）V8引擎再将结果返回给用户。
+
+process.nextTick方法可以在当前"执行栈"的尾部----下一次Event Loop（主线程读取"任务队列"）之前----触发回调函数。也就是说，它指定的任务总是发生在所有异步任务之前。
+
+setImmediate方法则是在当前"任务队列"的尾部添加事件(正常添加异步事件)，也就是说，它指定的任务总是在下一次Event Loop时执行，这与setTimeout(fn, 0)很像。
+
+由于process.nextTick方法指定的回调函数，总是在当前"执行栈"的尾部触发，所以不仅函数A比setTimeout指定的回调函数timeout先执行，而且函数B也比timeout先执行。这说明，**如果有多个process.nextTick语句（不管它们是否嵌套），将全部在当前"执行栈"执行**。
+
+```javascript
+process.nextTick(function A() {
+  console.log(1);
+  process.nextTick(function B(){console.log(2);});
+});
+
+setTimeout(function timeout() {
+  console.log('TIMEOUT FIRED');
+}, 0)
+// 1
+// 2
+// TIMEOUT FIRED
+```
+
+setImmediate
+
+```javascript
+setImmediate(function A() {
+  console.log(1);
+  setImmediate(function B(){console.log(2);});
+});
+
+setTimeout(function timeout() {
+  console.log('TIMEOUT FIRED');
+}, 0);
+// 1
+// TIMEOUT FIRED
+// 2
+```
+
+process.nextTick和setImmediate的一个重要区别：
+
+多个process.nextTick语句总是在当前"执行栈"一次执行完，多个setImmediate可能则需要多次loop才能执行完。事实上，这正是Node.js 10.0版添加setImmediate方法的原因，否则像下面这样的递归调用process.nextTick，将会没完没了，主线程根本不会去读取"事件队列".
+
+```javascript
+process.nextTick(function foo() {
+  process.nextTick(foo);
+});
+```
+
+> 由于process.nextTick指定的回调函数是在本次"事件循环"触发，而setImmediate指定的是在下次"事件循环"触发，所以很显然，前者总是比后者发生得早，而且执行效率也高（因为不用检查"任务队列"）。
+
+
+
+![Node事件循环](images/Node-Event-Loop.png)
+
 1. timer 阶段: 执行到期的`setTimeout / setInterval`队列回调
 
 2. I/O 阶段: 执行上轮循环残流的`callback`

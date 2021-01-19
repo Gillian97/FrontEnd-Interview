@@ -96,11 +96,17 @@ style-loader
 
 # babel
 
+[Babel](https://babeljs.io/)是一个广泛使用的转码器，可以将ES6代码转为ES5代码，从而在现有环境执行。
+
 ​	AST
 ​	babylon
 ​	babel-traverse
 ​	babel-generator
 ​	babel打包后生成了什么
+
+
+
+
 
 # Hybrid
 
