@@ -21,11 +21,16 @@
 
 ## 触发条件
 
-- 根元素
-- `position: absolute/fixed`
-- `display: inline-block / table`
-- `float` 元素
-- `ovevflow` !== `visible`
+- 根元素（或其他包含它的元素）
+- 浮动元素（元素的 `float != none`）
+- 绝对定位元素（元素具有 `position = absolute/fixed`）
+- 内联块（元素具有 `display: inline-block`）
+- 表格单元格（元素具有 `display: table-cell`，HTML 表格单元格默认属性）
+- 表格标题（元素具有 `display: table-caption`，HTML 表格标题默认属性）
+- 具有 `overflow` 且值不是 `visible` 的块元素
+- 弹性盒子（`flex` 或 `inline-flex`）
+- `display: flow-root`
+- `column-span: all`
 
 ## 规则
 
@@ -50,18 +55,19 @@
 ## 触发条件
 
 - 根层叠上下文(`html`)
-- `position`
-- css3属性
+- `position`不等于 `static`,并且设置了 z-index
+- CSS3 属性
   - `flex`
-  - `transform`
-  - `opacity`
-  - `filter`
-  - `will-change`
+  - `transform` 不是 `none`
+  - `opacity` 不是 1
+  - `filter` 不是 `none`
+  - `isolation` 不是 `isolate`
+  - `will-change` 指定的属性值为上面任何一个
   - `-webkit-overflow-scrolling`
 
 ## 层叠等级
 
-层叠上下文在z轴上的排序
+层叠上下文在 z 轴上的排序
 
 - 在同一层叠上下文中，层叠等级才有意义
 - `z-index`的优先级最高
