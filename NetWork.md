@@ -1043,7 +1043,7 @@ DH 密钥交换过程中，**即使第三方截获了 TLS 握手阶段传递的�
 - 200: 成功，并返回数据
 - 201: 已创建
 - 202: 已接受
-- 203: 成为，但未授权
+- 203: 成功，但未授权
 - 204: 成功，无内容
 - 205: 成功，重置内容
 - 206: 成功，部分内容
@@ -1180,7 +1180,55 @@ https://mp.weixin.qq.com/s/Tc09ovdNacOtnMOMeRc_uA
 
 
 
+UDP 不提供复杂的控制机制，利用 IP 提供面向「无连接」的通信服务。
 
+UDP 协议真的非常简单，头部只有 `8` 个字节（ 64 位），UDP 的头部格式如下：
+
+![图片](images/UDP头部.jpg)
+
+- 目标和源端口：主要是告诉 UDP 协议应该把报文发给哪个进程。
+- 包长度：该字段保存了 UDP 首部的长度跟数据的长度之和。
+- 校验和：校验和是为了提供可靠的 UDP 首部和数据而设计。
+
+**TCP 和 UDP 区别：**
+
+*1. 连接*
+
+- TCP 是面向连接的传输层协议，传输数据前先要建立连接。
+- UDP 是不需要连接，即刻传输数据。
+
+*2. 服务对象*
+
+- TCP 是一对一的两点服务，即一条连接只有两个端点。
+- UDP 支持一对一、一对多、多对多的交互通信
+
+*3. 可靠性*
+
+- TCP 是可靠交付数据的，数据可以无差错、不丢失、不重复、按需到达。
+- UDP 是尽最大努力交付，不保证可靠交付数据。
+
+*4. 拥塞控制、流量控制*
+
+- TCP 有拥塞控制和流量控制机制，保证数据传输的安全性。
+- UDP 则没有，即使网络非常拥堵了，也不会影响 UDP 的发送速率。
+
+*5. 首部开销*
+
+- TCP 首部长度较长，会有一定的开销，首部在没有使用「选项」字段时是 `20` 个字节，如果使用了「选项」字段则会变长的。
+- UDP 首部只有 8 个字节，并且是固定不变的，开销较小。
+
+**TCP 和 UDP 应用场景：**
+
+由于 TCP 是面向连接，能保证数据的可靠性交付，因此经常用于：
+
+- `FTP` 文件传输
+- `HTTP` / `HTTPS`
+
+由于 UDP 面向无连接，它可以随时发送数据，再加上UDP本身的处理既简单又高效，因此经常用于：
+
+- 包总量较少的通信，如 `DNS` 、`SNMP` 等
+- 视频、音频等多媒体通信
+- 广播通信
 
 # 跨域
 
@@ -1222,7 +1270,7 @@ Cross-Origin resource sharing W3C标准，跨域资源共享。
 
 允许浏览器向跨源服务器发出 XMLHttpRequest 请求，克服 AJAX 只能同源使用的限制。
 
-主要是服务器需要实现 CORS 接口，当前所有浏览器都支持 CORS。
+主要是**服务器需要实现 CORS 接口，当前所有浏览器都支持 CORS**。
 
 CORS 请求默认不发送 Cookie 和 HTTP 认证信息.
 
@@ -1230,7 +1278,7 @@ CORS 请求默认不发送 Cookie 和 HTTP 认证信息.
 
 历史上表表单一直可以发简单请求，兼容表单。
 
-```
+```http
 两种情况需要同时满足
 
 1. 请求方法是以下三种方法之一：
@@ -1313,10 +1361,9 @@ xhr.send();
 
 服务器发送上述请求之前,会发送预检请求.
 
-示例:预检请求的头信息.
+示例:预检请求的头信息.请求方法是OPTIONS，表示这个请求是用来询问的
 
 ```http
-// 请求方法是OPTIONS，表示这个请求是用来询问的
 OPTIONS /cors HTTP/1.1
 Origin: http://api.bob.com
 // 列出浏览器的CORS请求会用到哪些HTTP方法
@@ -1354,7 +1401,7 @@ Content-Type: text/plain
 
 如果服务器否定了"预检"请求，会返回一个正常的HTTP回应，但是没有任何CORS相关的头信息字段，则触发一个错误，被`XMLHttpRequest`对象的`onerror`回调函数捕获.
 
-```http
+```
 // error 信息
 XMLHttpRequest cannot load http://api.alice.com.
 Origin http://api.bob.com is not allowed by Access-Control-Allow-Origin.
@@ -1382,7 +1429,7 @@ Access-Control-Max-Age: 1728000
 
 ```http
 PUT /cors HTTP/1.1
-//  头信息的`Origin`字段为浏览器自动添加
+//  头信息的 Origin 字段为浏览器自动添加
 Origin: http://api.bob.com
 Host: api.alice.com
 X-Custom-Header: value
@@ -1394,7 +1441,7 @@ User-Agent: Mozilla/5.0...
 下面是服务器正常的回应。
 
 ```http
-// `Access-Control-Allow-Origin`字段是每次回应头信息都必定包含的。
+// Access-Control-Allow-Origin 字段是每次回应头信息都必定包含的。
 Access-Control-Allow-Origin: http://api.bob.com
 Content-Type: text/html; charset=utf-8
 ```
@@ -1769,7 +1816,10 @@ Cookie 窃取：JS 脚本收集用户环境的信息（Cookie），通过图片�
 
 防护：
 
-- cookie 设置 httpOnly
+- Cookie 设置 HttpOnly
+
+  是包含在 http 返回头 Set-Cookie 里面的一个附加的flag，所以它是后端服务器对 Cookie 设置的一个附加的属性，客户端保存 Cookie 时使用 HttpOnly 标志(需要浏览器支持)，客户端 JS 脚本将无法读取到 Cookie 信息，这样能有效的防止XSS攻击.
+
 - 转义页面上的输入内容和输出内容
 
 ### CSP
@@ -1780,14 +1830,14 @@ Content Security Policy，网页安全政策。**应对 XSS**。
 
 #### 启用 CSP 方法
 
-1. HTTP 头信息设置 Content-Security-Policy 字段
+1. HTTP 头信息设置 `Content-Security-Policy` 字段
 
    ```json
    Content-Security-Policy: script-src 'self'; object-src 'none';style-src cdn.example.org third-party.org; child-src https:
    // 多个值并列 用空格分隔
    ```
 
-2. 网页的 <meta> 标签设置
+2. 网页的 `<meta>` 标签设置
 
    ```html
    <meta http-equiv="Content-Security-Policy" content="script-src 'self'; object-src 'none'; style-src cdn.example.org third-party.org; child-src https:">
@@ -1807,7 +1857,7 @@ Content Security Policy，网页安全政策。**应对 XSS**。
 
 CSP 提供很多限制选项，涉及安全的各个方面。
 
-```json
+```js
 script-src：外部脚本
 style-src：样式表
 img-src：图像
@@ -1823,7 +1873,7 @@ manifest-src：manifest 文件
 
 选项值：
 
-```
+```json
 主机名：example.org，https://example.com:443
 路径名：example.org/resources/js/
 通配符：*.example.org，*://*.example.com:*（表示任意协议、任意子域名、任意端口）
@@ -1850,7 +1900,7 @@ Content-Security-Policy: default-src 'self' ; style-src cdn.example.org third-pa
 
 限制网页与其他的 URL 发生联系。
 
-```
+```json
 frame-ancestors：限制嵌入框架的网页
 base-uri：限制<base#href>
 form-action：限制<form#action>
@@ -1858,7 +1908,7 @@ form-action：限制<form#action>
 
 #### 其他限制
 
-```
+```json
 block-all-mixed-content：HTTPS 网页不得加载 HTTP 资源（浏览器已经默认开启）
 upgrade-insecure-requests：自动将网页上所有加载外部资源的 HTTP 链接换成 HTTPS 协议
 plugin-types：限制可以使用的插件格式
@@ -1867,7 +1917,7 @@ sandbox：浏览器行为的限制，比如不能有弹出窗口等。
 
 #### 报告脚本注入行为
 
-```
+```json
 Content-Security-Policy: default-src 'self'; ...; report-uri /my_amazing_csp_report_parser;
 // 将注入行为报告给 /my_amazing_csp_report_parser 这个网址
 
@@ -1892,7 +1942,7 @@ Content-Security-Policy-Report-Only: default-src 'self'; ...; report-uri /my_ama
 Content-Security-Policy: script-src 'nonce-EDNnf03nceIOfn39fn3e9h3sdfa'
 ```
 
-浏览期页面内嵌脚本必须带上这个 token 才能执行：
+浏览器页面内嵌脚本必须带上这个 token 才能执行：
 
 ```html
 <script nonce=EDNnf03nceIOfn39fn3e9h3sdfa>
@@ -1902,7 +1952,7 @@ Content-Security-Policy: script-src 'nonce-EDNnf03nceIOfn39fn3e9h3sdfa'
 
 **hash 值**
 
-服务器给出一个允许执行脚本的 hash 值。计算脚本 hash 值时，不包括<script>标签。
+服务器给出一个允许执行脚本的 hash 值。计算脚本 hash 值时，不包括`<script>`标签。
 
 ```
 Content-Security-Policy: script-src 'sha256-qznLcsROx4GACP2dm0UCKCzCG-HiZ1guq6ZZDob_Tng='
@@ -2069,7 +2119,7 @@ HTTP劫持现象：访问着github页面，右下角出现弹窗小广告。
 
 有图可知，114.114.114.114:53 是本机的域名解析服务器，53 是默认端口。NS = Name Server，A = Address。
 
-Mac 的DNS 服务器 IP 地址保存在 `/etc/resolv.conf` 中。
+Mac 的 DNS 服务器 IP 地址保存在 `/etc/resolv.conf` 中。
 
 ### DNS 劫持方法
 

@@ -5188,9 +5188,7 @@ function square(n){
 
 通过解析转化成的`AST`如下图:
 
-
-
-![img](https://user-gold-cdn.xitu.io/2019/2/14/168e9d95910dd187?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+![img](images/AST.jpg)
 
 # babel 编译原理
 
@@ -5244,7 +5242,7 @@ function square(n){
 
 ### Node 分布式架构
 
-![img](https://pic2.zhimg.com/80/v2-7801db51fdf8a3a4f4a11cb76308b1fd_1440w.jpg)
+![img](images/node分布式.jpg)
 
 
 

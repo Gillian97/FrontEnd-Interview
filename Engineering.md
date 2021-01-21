@@ -62,7 +62,7 @@ style-loader
 
 ## 	常用的loader
 
-## 	常用的webpack
+## 	常用的plugin
 
 ## 	webpack构建流程
 

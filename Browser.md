@@ -836,7 +836,7 @@ worker.onmessage = function (event) {
 - 无法使用 `document` / `window` / `alert` / `confirm`
 - 无法加载本地资源
 
-
+参考: http://www.ruanyifeng.com/blog/2018/07/web-worker.html
 
 ## 浏览器事件
 
@@ -1165,7 +1165,7 @@ document.body.addEventListener("click", () => {
 
 > 计算
 
-白屏结束时间点：浏览器开始渲染 <body> 或者解析完 <head> 的时刻
+白屏结束时间点：浏览器开始渲染 `<body>` 或者解析完 `<head>` 的时刻
 
 ### 首屏时间
 
