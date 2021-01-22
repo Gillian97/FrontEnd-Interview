@@ -534,7 +534,7 @@ console.log(test()); // undefined
 
 #### undefined 与 null 区别
 
-两者使用 == 时为true，=== 时为false.
+两者使用 == 时为 `true`，=== 时为 `false`.
 
 ```javascript
 console.log(undefined == null，undefined === null);
@@ -1593,7 +1593,6 @@ var name = "The Window";
 
 var object = {
   name: "My Object",
-
   getNameFunc: function () {
     return function () {
       console.log(this);
@@ -1854,6 +1853,47 @@ obj.speak.call(newObj，'合肥'，'上海'); // Cookie is 40 合肥*上海
 obj.speak.apply(newObj，['合肥'，'上海']); // Cookie is 40 合肥*上海
 obj.speak.bind(newObj，'合肥'，'上海')(); // Cookie is 40 合肥*上海
 obj.speak.bind(newObj，['合肥'，'上海'])(); // Cookie is 40 合肥,上海*undefined
+```
+
+### 手写三个函数
+
+call
+
+```javascript
+Function.prototype.call2 = function(newObj = window){
+  newObj.fn = this;
+  let args = [...arguments].slice(1);
+  let res = newObj.fn(...args);
+  delete newObj.fn;
+  return res;
+}
+```
+
+apply
+
+```javascript
+Function.prototype.apply2 = function (newObj = window) {
+  newObj.fn = this;
+  let res;
+  if (arguments[1]) res = newObj.fn(...arguments[1])
+  else res = newObj.fn()
+  delete newObj.fn;
+  return res;
+}
+```
+
+bind
+
+```javascript
+Function.prototype.bind2 = function (newObj = window) {
+  if (typeof this !== 'function') throw new Error('error')
+  let that = this;
+  let args = [...arguments].slice(1);
+  return function newFn () {
+    if (this instanceof newFn) return new that(...args, ...arguments)
+    return that.apply(newObj, args.concat(...arguments))
+  }
+}
 ```
 
 
@@ -4886,56 +4926,177 @@ export 5;
 
 # 防抖与节流
 
-防抖与节流函数是一种最常用的 **高频触发优化方式**，能对性能有较大的帮助。
+背景： 用户一些操作会导致频繁触发监听函数，但是有些时候并不希望事件触发过程中频繁的触发函数。
+
+示例：
+
+```html
+<div id="content"
+    style="height:150px;line-height:150px;text-align:center; color: #fff;background-color:#ccc;font-size:80px;">
+</div>
+  <script>
+    let num = 1;
+    let content = document.getElementById('content');
+
+    function count() {
+      content.innerHTML = num++;
+    };
+    content.onmousemove = count;
+  </script>
+```
+
+随着鼠标在灰色区域移动，会一直调用count函数，使得数字不断增加。
+
+防抖和节流是一种比较好的解决方案，是最常用的 **高频触发优化方式**，能对性能有较大的帮助。
 
 - **防抖 (debounce)**: 将多次高频操作优化为只在最后一次执行，通常使用的场景是：用户输入，只需在输入完成后做一次输入校验即可。
 
+  **触发事件后在 n 秒内函数只能执行一次，如果在 n 秒内又触发了事件，则会重新计算函数执行时间。**
+
+  分为非立即执行版与立即执行版。
+
+  非立即执行版
+
   ```javascript
-  function debounce(fn, wait, immediate) {
-      let timer = null
+  function debounce(func, wait) {
+      let timeout;
+      return function () {
+          // 确保返回的函数 this 指向不变以及参数的传递
+          let context = this;
+          let args = arguments;
   
-      return function() {
-          let args = arguments
-          let context = this
-  
-          if (immediate && !timer) {
-              fn.apply(context, args)
-          }
-  
-          if (timer) clearTimeout(timer)
-          timer = setTimeout(() => {
-              fn.apply(context, args)
-          }, wait)
+          if (timeout) clearTimeout(timeout);
+          
+          timeout = setTimeout(() => {
+              func.apply(context, args)
+          }, wait);
       }
+  }
+  ```
+
+  立即执行版
+
+  ```javascript
+  function debounce(func, wait) {
+      let timeout;
+      return function () {
+          let context = this;
+          let args = arguments;
+  
+          if (timeout) clearTimeout(timeout);
+  
+          let callNow = !timeout;
+          timeout = setTimeout(() => {
+              timeout = null;
+          }, wait)
+  
+          if (callNow) func.apply(context, args)
+      }
+  }
+  ```
+
+  兼具版
+
+  ```javascript
+  function debounce(func, wait, immediate) {
+    let timeout;
+    return function () {
+      let context = this;
+      let args = arguments;
+  
+      if (timeout) clearTimeout(timeout);
+      if (immediate) {
+        var callNow = !timeout;
+        timeout = setTimeout(() => {
+          timeout = null;
+        }, wait)
+        if (callNow) func.apply(context, args)
+      } else {
+        timeout = setTimeout(function () {
+          func.apply(context, args)
+        }, wait);
+      }
+    }
   }
   ```
 
 - **节流(throttle)**: 每隔一段时间后执行一次，也就是降低频率，将高频操作优化成低频操作，通常使用场景: 滚动条事件 或者 resize 事件，通常每隔 100~500 ms执行一次即可。
 
+  **连续触发事件但是在 n 秒中只执行一次函数**
+  
+  不管事件触发有多频繁，都会保证在规定时间内一定会执行一次真正的事件处理函数，而函数防抖只是在最后一次事件后才触发一次函数。
+  
+  时间戳版
+  
   ```javascript
-  function throttle(fn, wait, immediate) {
-      let timer = null
-      let callNow = immediate
-      
+  function throttle(func, wait) {
+      let previous = 0;
       return function() {
-          let context = this,
-              args = arguments
-  
-          if (callNow) {
-              fn.apply(context, args)
-              callNow = false
+          let now = Date.now();
+          let context = this;
+          let args = arguments;
+          if (now - previous > wait) {
+              func.apply(context, args);
+              previous = now;
           }
+      }
+  }
+  ```
   
-          if (!timer) {
-              timer = setTimeout(() => {
-                  fn.apply(context, args)
-                  timer = null
+  定时器版
+  
+```javascript
+  function throttle(func, wait) {
+      let timeout;
+      return function() {
+          let context = this;
+          let args = arguments;
+          if (!timeout) {
+              timeout = setTimeout(() => {
+                  timeout = null;
+                  func.apply(context, args)
               }, wait)
           }
       }
   }
   ```
-
+  
+  兼具版
+  
+  ```javascript
+  /**
+   * @desc 函数节流
+   * @param func 函数
+   * @param wait 延迟执行毫秒数
+   * @param type 1 表时间戳版，2 表定时器版
+   */
+  function throttle(func, wait ,type) {
+      if(type===1){
+          let previous = 0;
+      }else if(type===2){
+          let timeout;
+      }
+      return function() {
+          let context = this;
+          let args = arguments;
+          if(type===1){
+              let now = Date.now();
+              if (now - previous > wait) {
+                  func.apply(context, args);
+                  previous = now;
+              }
+          }else if(type===2){
+              if (!timeout) {
+                  timeout = setTimeout(() => {
+                      timeout = null;
+                      func.apply(context, args)
+                  }, wait)
+              }
+          }
+      }
+  }
+  ```
+  
   
 
 # 垃圾回收 Garbage Collection
