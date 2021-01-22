@@ -2415,7 +2415,7 @@ d.speak(); // cookie is girl and barks
 
 #### instanceof 运算符
 
-判断一个对象是否来自某一个类，即是否能在实例的 **原型对象链** 中找到该构造函数的 `prototype` 属性所指向的**原型对象**，找得到就返回 `true`。
+判断一个实例是否属于某个类（判断类型或者父类的实例），即是否能在实例的 **原型对象链** 中找到该构造函数的 `prototype` 属性所指向的**原型对象**，找得到就返回 `true`。
 
 ```javascript
 // __proto__: 代表原型对象链
@@ -2424,7 +2424,7 @@ instance.[__proto__...] === instance.constructor.prototype
 // return true
 ```
 
-示例：
+使用示例：
 
 ```javascript
 class Animal {
@@ -2443,6 +2443,28 @@ console.log(dog instanceof Animal，dog instanceof Object); // true true
 
 // TO DO 
 console.log(dog instanceof Object.prototype); // TypeError: Right-hand side of 'instanceof' is not callable
+```
+
+参考实现：
+
+```javascript
+function myInstanceof(left, right) {
+    if (typeof right !== "function") throw new Error("right not a function");
+    // 左边必须得是个对象，不能为空
+    if (!left || typeof left !== "object" && typeof left !== "function") return false;
+    // 遍历 left 的原型链，直到找到 right
+    let leftVal = left.__proto__;
+    let rightVal = right.prototype;
+    while (leftVal) {
+        // 这里判断对象相等，判断的是引用，因为在 JS 中只有一个
+        // 平时判断对象相等，得逐个判断属性或者转成 string
+        if (leftVal === rightVal) return true;
+        leftVal = leftVal.__proto__;
+    }
+    return false;
+}
+
+myInstanceof(() => { }, Function); // true
 ```
 
 
