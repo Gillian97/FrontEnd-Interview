@@ -80,6 +80,8 @@ webpack 压缩代码方式
 
 SEO 优化（首屏加载优化）
 
+SSR
+
 **Git**
 
 git reset/git revert 区别
