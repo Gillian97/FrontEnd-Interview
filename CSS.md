@@ -4,8 +4,8 @@
 
 根据计算宽高的区域可分为：
 
-- `content-box` (W3C 标准盒模型)
-- `border-box` (IE 盒模型)
+- `content-box` (W3C 标准盒模型，元素宽高值仅包含 content)
+- `border-box` (IE 盒模型，元素宽高包含 border 和 padding)
 - `padding-box` (FireFox 曾经支持)
 - `margin-box` (浏览器未实现)
 
@@ -103,16 +103,134 @@
 
 ## 伪类和伪元素
 
+# 浮动
+
+## 浮动概念
+
+> 浮动的框可以向左或向右移动，直到它的外边缘碰到**包含框**或**另一个浮动框的边框**为止。
+>
+> 由于浮动框不在文档的普通流中，所以文档的普通流中的块框表现得就像浮动框不存在一样。
+
+特点：
+
+* 浮动元素会从普通文档流中脱离，但浮动元素影响的不仅是自己，它会影响周围的元素对其进行环绕；
+* 不管一个元素是行内元素还是块级元素，只要被设置了浮动，那浮动元素就会形成一个块级框，可以设置它的宽度和高度，因此浮动元素常常用于制作横向配列的菜单，可以设置大小并且横向排列。
+
+1. 当把框 1 向右浮动时，它脱离文档流并且向右移动，直到它的右边缘碰到包含框的右边缘：
+
+![CSS 浮动实例 - 向右浮动的元素](images/ct_css_positioning_floating_right_example.png)
+
+2. 当框 1 向左浮动时，它脱离文档流并且向左移动，直到它的左边缘碰到包含框的左边缘。因为它不再处于文档流中，所以它不占据空间，实际上覆盖住了框 2，使框 2 从视图中消失。
+
+   如果把所有三个框都向左移动，那么框 1 向左浮动直到碰到包含框，另外两个框向左浮动直到碰到**前一个浮动框**。
+
+![CSS 浮动实例 - 向左浮动的元素](images/ct_css_positioning_floating_left_example.png)
+
+3. 如果包含框太窄，无法容纳水平排列的三个浮动元素，那么其它浮动块向下移动，直到有足够的空间。如果浮动元素的高度不同，那么当它们向下移动时可能被其它浮动元素“卡住”：
+
+![CSS 浮动实例 2 - 向左浮动的元素 ](images/ct_css_positioning_floating_left_example_2.png)
+
+### float 属性
+
+| 值      | 描述                                                 |
+| :------ | :--------------------------------------------------- |
+| left    | 元素向左浮动。                                       |
+| right   | 元素向右浮动。                                       |
+| none    | 默认值。元素不浮动，并会显示在其在文本中出现的位置。 |
+| inherit | 规定应该从父元素继承 float 属性的值。                |
+
+```css
+/* 把图像向右浮动 */
+img {
+  /* 定义元素在哪个方向浮动 */
+  float:right;
+}
+```
+
+在 CSS 中，任何元素都可以浮动。浮动元素会生成一个块级框，而不论它本身是何种元素。
+
+### 重叠问题
+
+* 行内元素与浮动元素发生重叠，其边框、背景和内容都会显示在浮动元素之上
+* 块级元素与浮动元素发生重叠时，边框和背景会显示在浮动元素之下，内容会显示在浮动元素之下
+
+### clear 属性
+
+浮动框旁边的行框被缩短，从而给浮动框留出空间，行框围绕浮动框。
+
+因此，创建浮动框可以使文本围绕图像：
+
+![行框围绕浮动框](images/ct_css_positioning_floating_linebox.png)
+
+clear 属性的值可以是 left、right、both 或 none，确保当前元素的哪些边不应该挨着浮动框。clear 只对元素本身的布局起作用。
+
+```css
+/* 图像的左右两侧均不允许出现浮动元素*/
+img {
+  float:left;
+  clear:both;
+}
+
+/* 下述 h3 标题行的左右两侧均不允许出现浮动元素*/
+.text_line {
+	clear:both;
+	margin-bottom:2px;
+}
+
+<h3 class="text_line">第二行</h3>
+```
 
 
-# 清除浮动
 
-> 去除浮动影响，防止父级高度塌陷
+## 清除浮动
+
+### 高度塌陷问题
+
+一个块级元素如果没有设置高度，其高度是由子元素撑开的。如果对子元素设置了浮动，那么子元素就会脱离文档流，也就是说父元素没有内容可以撑开其高度，这样父级元素的高度就会被忽略，这就是所谓的高度塌陷。
+
+为了防止高度塌陷，因此需要清除浮动。
+
+1. 给父元素定义高度
+   * 优点：操作简单
+   * 缺点：高度定死
+   
+2. 添加一个空元素 `<div class="clear"></div> (.clear { clear: both })`
+   * 优点：浏览器支持好
+   * 缺点：凭空多出很多无用空节点
+   
+3. 让父元素也一起浮动
+   
+   * 缺点：无法解决实际问题
+   
+4. 父元素设置为 `display: table`
+   
+   * 缺点：会产生新的问题
+   
+5. 父元素设置 `overflow: hidden auto`
+   
+   * 缺点：无法显示溢出的元素
+   
+6. 父元素伪元素设置清除浮动
+
+   ```css
+   .father {
+     ...
+   }
+   
+   .father:: after {
+     content: ' ';
+     display: block;
+     height: 0;
+     clear: both;
+     visibility: hidden;
+   }
+   ```
+
+   
 
 - 通过增加尾元素清除浮动
   - `:after / <br> : clear: both`
 - 创建父级 BFC
-- 父级设置高度
 
 # flex
 
@@ -126,23 +244,138 @@
 
 # 单位
 
-px
+## 相对长度
 
-rem
+相对长度单位指定了一个长度相对于另一个长度的属性。对于不同的设备相对长度更适用。
 
-em
+| 单位    | 描述                                                         |
+| ------- | :----------------------------------------------------------- |
+| **em**  | 它是描述相对于应用在当前元素的字体尺寸，所以它也是相对长度单位。一般浏览器字体大小默认为16px，则2em == 32px； |
+| ex      | 依赖于英文字母小 x 的高度                                    |
+| ch      | 数字 0 的宽度                                                |
+| **rem** | rem 是根 em（root em）的缩写，rem作用于非根元素时，相对于根元素字体大小(默认的 16 px)；rem作用于根元素字体大小时，相对于其出初始字体大小。 |
+| **vw**  | viewpoint width，视窗宽度，1vw=视窗宽度的1%                  |
+| vh      | viewpoint height，视窗高度，1vh=视窗高度的1%                 |
+| vmin    | vw和vh中较小的那个。                                         |
+| vmax    | vw和vh中较大的那个。                                         |
+| **%**   |                                                              |
 
-vm
+## 绝对长度
 
-%
+| 单位 | 描述                       |
+| ---- | -------------------------- |
+| px * | 像素 (1px = 1/96th of 1in) |
+| in   | 英寸 (1in = 96px = 2.54cm) |
+
+像素或许被认为是最好的"设备像素"，而这种像素长度和你在显示器上看到的文字屏幕像素无关。px实际上是一个按角度度量的单位。
 
 # rem 适配方案
 
 # position 取值
 
+通过使用 [position 属性](https://www.w3school.com.cn/cssref/pr_class_position.asp)，我们可以选择 4 种不同类型的定位，这会影响元素框生成的方式。
+
+position 属性值的含义：
+
+- static
+
+  元素框正常生成。块级元素生成一个矩形框，作为文档流的一部分，行内元素则会创建一个或多个行框，置于其父元素中。
+
+- relative
+
+  元素框偏移某个距离，相对于它原来应该在的位置。元素仍保持其未定位前的形状，它原本所占的空间仍保留。
+
+- absolute
+
+  元素框从文档流完全删除，并相对于**其包含块**定位（相对于其父元素定位）。包含块可能是文档中的另一个元素或者是初始包含块。元素原先在正常文档流中所占的空间会关闭，就好像元素原来不存在一样。元素定位后生成一个块级框，而不论原来它在正常流中生成何种类型的框。
+
+- fixed
+
+  元素框的表现类似于将 position 设置为 absolute，不过其包含块是**视窗**本身。
+
+**提示：**相对定位实际上被看作普通流定位模型的一部分，因为元素的位置相对于它在普通流中的位置。
+
 # 行内元素、块元素
 
 # 媒体查询
+
+用于响应式布局监听屏幕大小变化。
+
+多媒体查询由多种媒体组成，可以包含一个或多个表达式，表达式根据条件是否成立返回 true 或 false。
+
+如果指定的多媒体类型匹配设备类型则查询结果返回 true，文档会在匹配的设备上显示指定样式效果。
+
+除非你使用了 not 或 only 操作符，否则所有的样式会适应在所有设备上显示效果。
+
+- **not:** not是用来排除掉某些特定的设备的，比如 @media not print（非打印设备）。
+- **only:** 用来定某种特别的媒体类型。对于支持Media Queries的移动设备来说，如果存在only关键字，移动设备的Web浏览器会忽略only关键字并直接根据后面的表达式应用样式文件。对于不支持Media Queries的设备但能够读取Media Type类型的Web浏览器，遇到only关键字时会忽略这个样式文件。
+- **all:** 所有设备，这个应该经常看到。
+
+## CSS3 多媒体类型
+
+| 值     | 描述                             |
+| :----- | :------------------------------- |
+| all    | 用于所有多媒体类型设备           |
+| print  | 用于打印机                       |
+| screen | 用于电脑屏幕，平板，智能手机等。 |
+| speech | 用于屏幕阅读器                   |
+
+示例：
+
+在屏幕可视窗口尺寸大于 480 像素时将菜单浮动到页面左侧：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"> 
+<title>菜鸟教程(runoob.com)</title> 
+<style>
+.wrapper {overflow:auto;}
+
+#main {margin-left: 4px;}
+#leftsidebar {float: none;width: auto;}
+#menulist {margin:0;padding:0;}
+
+.menuitem {
+    background:#CDF0F6;
+    border:1px solid #d4d4d4;
+    border-radius:4px;
+    list-style-type:none;
+    margin:4px;
+    padding:2px;
+}
+
+@media screen and (min-width: 480px) {
+    #leftsidebar {width:200px;float:left;}
+    #main {margin-left:216px;}
+}
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+  <div id="leftsidebar">
+    <ul id="menulist">
+      <li class="menuitem">Menu-item 1</li>
+      <li class="menuitem">Menu-item 2</li>
+      <li class="menuitem">Menu-item 3</li>
+      <li class="menuitem">Menu-item 4</li>
+      <li class="menuitem">Menu-item 5</li>
+   </ul>
+  </div>
+  <div id="main">
+    <h1>重置浏览器窗口查看效果！</h1>
+    <p>在屏幕可视窗口尺寸大于 480 像素时将菜单浮动到页面左侧。</p>
+  </div>
+</div>
+
+</body>
+</html>
+```
+
+
 
 # CSS Modules
 
@@ -469,7 +702,7 @@ Flex 布局是轴线布局，只能指定"项目"针对轴线的位置，可以�
 
 ## 容器属性
 
-### display 属性
+> display 属性
 
 `display: grid`指定一个容器采用网格布局。
 
@@ -574,25 +807,267 @@ div {
 
 上图是`display: inline-grid`的[效果](https://jsbin.com/qatitav/edit?html,css,output)。
 
-> 注意，设为网格布局以后，容器子元素（项目）的`float`、`display: inline-block`、`display: table-cell`、`vertical-align`和`column-*`等设置都将失效。
+**注意**：设为网格布局以后，容器子元素（项目）的`float`、`display: inline-block`、`display: table-cell`、`vertical-align`和`column-*`等设置都将失效。
 
-### grid-template-columns 属性， grid-template-rows 属性
+> grid-template-columns 属性， grid-template-rows 属性
 
-### grid-row-gap 属性， grid-column-gap 属性， grid-gap 属性
+`grid-template-columns`属性定义每一列的列宽，`grid-template-rows`属性定义每一行的行高。
 
-### grid-template-areas 属性
+```css
+.container {
+  display: grid;
+  grid-template-columns: 100px 100px 100px;
+  grid-template-rows: 100px 100px 100px;
+}
+```
 
-### grid-auto-flow 属性
+上面代码指定了一个三行三列的网格，列宽和行高都是`100px`。
 
-### justify-items 属性， align-items 属性， place-items 属性
+除了使用绝对单位，也可以使用百分比。
 
-### justify-content 属性， align-content 属性， place-content 属性
+```css
+.container {
+  display: grid;
+  grid-template-columns: 33.33% 33.33% 33.33%;
+  grid-template-rows: 33.33% 33.33% 33.33%;
+}
+```
 
-### grid-auto-columns 属性， grid-auto-rows 属性
+**repeat() 函数**
 
-### grid-template 属性， grid 属性
+接受两个参数，第一个参数是重复的次数（上例是3），第二个参数是所要重复的值。
+
+```css
+.container {
+  display: grid;
+  grid-template-columns: repeat(3, 33.33%);
+  grid-template-rows: repeat(3, 33.33%);
+}
+```
+
+重复某种模式
+
+定义了6列，第一列和第四列的宽度为`100px`，第二列和第五列为`20px`，第三列和第六列为`80px`
+
+```css
+grid-template-columns: repeat(2, 100px 20px 80px);
+```
+
+auto-fill 关键字
+
+有时，单元格的大小是固定的，但是容器的大小不确定。如果希望每一行（或每一列）容纳尽可能多的单元格，这时可以使用`auto-fill`关键字表示自动填充。
+
+```css
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 100px);
+}
+```
+
+表示每列宽度`100px`，然后自动填充，直到容器不能放置更多的列。
+
+![img](images/grid-auto-fill.jpg)
+
+**fr 关键字**
+
+为了方便表示比例关系，网格布局提供了`fr`关键字（fraction 的缩写，意为"片段"）。如果两列的宽度分别为`1fr`和`2fr`，就表示后者是前者的两倍。
+
+```css
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+```
+
+[上面代码](https://jsbin.com/hadexek/edit?html,css,output)表示两个相同宽度的列。
+
+`fr`可以与绝对长度的单位结合使用，这时会非常方便。
+
+```css
+.container {
+  display: grid;
+  grid-template-columns: 150px 1fr 2fr;
+}
+```
+
+[上面代码](https://jsbin.com/remowec/edit?html,css,output)表示，第一列的宽度为150像素，第二列的宽度是第三列的一半。
+
+**minmax()**
+
+`minmax()`函数产生一个长度范围，表示长度就在这个范围之中。它接受两个参数，分别为最小值和最大值。
+
+```css
+grid-template-columns: 1fr 1fr minmax(100px, 1fr);
+```
+
+上面代码中，`minmax(100px, 1fr)`表示列宽不小于`100px`，不大于`1fr`。
+
+**auto 关键字**
+
+`auto`关键字表示由浏览器自己决定长度。
+
+```css
+grid-template-columns: 100px auto 100px;
+```
+
+上面代码中，第二列的宽度，基本上等于该列单元格的最大宽度，除非单元格内容设置了`min-width`，且这个值大于最大宽度。
+
+**网格线的名称**
+
+`grid-template-columns`属性和`grid-template-rows`属性里面，还可以使用方括号，指定每一根网格线的名字，方便以后的引用。
+
+```css
+.container {
+  display: grid;
+  grid-template-columns: [c1] 100px [c2] 100px [c3] auto [c4];
+  grid-template-rows: [r1] 100px [r2] 100px [r3] auto [r4];
+}
+```
+
+上面代码指定网格布局为3行 x 3列，因此有4根垂直网格线和4根水平网格线。方括号里面依次是这八根线的名字。
+
+网格布局允许同一根线有多个名字，比如`[fifth-line row-5]`。
+
+**布局实例**
+
+`grid-template-columns`属性对于网页布局非常有用。两栏式布局只需要一行代码。
+
+```css
+.wrapper {
+  display: grid;
+  grid-template-columns: 70% 30%;
+}
+```
+
+上面代码将左边栏设为70%，右边栏设为30%。
+
+传统的十二网格布局，写起来也很容易。
+
+```css
+grid-template-columns: repeat(12, 1fr);
+```
+
+> row-gap 属性， column-gap 属性， gap 属性
+
+`row-gap`属性设置行与行的间隔（行间距）
+
+`column-gap`属性设置列与列的间隔（列间距）。
+
+```css
+.container {
+  row-gap: 20px;
+  column-gap: 20px;
+}
+```
+
+`gap`属性是`column-gap`和`row-gap`的合并简写形式，语法如下。
+
+```css
+gap: <row-gap> <column-gap>;
+```
+
+因此，上面一段 CSS 代码等同于下面的代码。
+
+```css
+.container {
+  gap: 20px 20px;
+}
+```
+
+如果`gap`省略了第二个值，浏览器认为第二个值等于第一个值。
+
+> grid-template-areas 属性
+
+网格布局允许指定"区域"（area），一个区域由单个或多个单元格组成。`grid-template-areas`属性用于定义区域。
+
+```css
+.container {
+  display: grid;
+  grid-template-columns: 100px 100px 100px;
+  grid-template-rows: 100px 100px 100px;
+  grid-template-areas: 'a b c'
+                       'd e f'
+                       'g h i';
+}
+```
+
+上面代码先划分出9个单元格，然后将其定名为`a`到`i`的九个区域，分别对应这九个单元格。
+
+多个单元格合并成一个区域的写法如下。
+
+```css
+grid-template-areas: 'a a a'
+                     'b b b'
+                     'c c c';
+```
+
+上面代码将9个单元格分成`a`、`b`、`c`三个区域。
+
+下面是一个布局实例。
+
+```css
+grid-template-areas: "header header header"
+                     "main main sidebar"
+                     "footer footer footer";
+```
+
+上面代码中，顶部是页眉区域`header`，底部是页脚区域`footer`，中间部分则为`main`和`sidebar`。
+
+如果某些区域不需要利用，则使用"点"（`.`）表示。
+
+```css
+grid-template-areas: 'a . c'
+                     'd . f'
+                     'g . i';
+```
+
+上面代码中，中间一列为点，表示没有用到该单元格，或者该单元格不属于任何区域。
+
+**注意**：区域的命名会影响到网格线。每个区域的起始网格线，会自动命名为`区域名-start`，终止网格线自动命名为`区域名-end`。比如，区域名为`header`，则起始位置的水平网格线和垂直网格线叫做`header-start`，终止位置的水平网格线和垂直网格线叫做`header-end`。
+
+> grid-auto-flow 属性
+
+划分网格以后，容器的子元素会按照顺序，自动放置在每一个网格。默认的放置顺序是"先行后列"，即先填满第一行，再开始放入第二行。
+
+这个顺序由`grid-auto-flow`属性决定，默认值是`row`，即"先行后列"。也可以将它设成`column`，变成"先列后行"。
+
+```css
+grid-auto-flow: column;
+```
+
+`grid-auto-flow`属性除了设置成`row`和`column`，还可以设成`row dense`（表示"先行后列"，并且尽可能紧密填满，尽量不出现空格。）和`column dense`（表示"先列后行"，并且尽可能紧密填满，尽量不出现空格）。这两个值主要用于，某些项目指定位置以后，剩下的项目怎么自动放置。
+
+> justify-items 属性， align-items 属性， place-items 属性
+
+> justify-content 属性， align-content 属性， place-content 属性
+
+> grid-auto-columns 属性， grid-auto-rows 属性
+
+> grid-template 属性， grid 属性
 
 ## 项目属性
+
+> grid-column-start 属性， grid-column-end 属性， grid-row-start 属性， grid-row-end 属性
+
+
+
+
+
+> grid-column 属性， grid-row 属性
+
+
+
+
+
+> grid-area 属性
+
+
+
+
+
+> justify-self 属性， align-self 属性， place-self 属性
+
+
 
 
 
@@ -663,7 +1138,9 @@ div {
 
 ### 伪类
 
-主要是设置元素不同状态时的效果
+主要是设置元素不同状态时的效果。
+
+伪类用于当已有元素处于某种状态时，为其添加对应的样式，这个状态是根据用户行为而动态变化的。
 
 | 序号 | 选择器        | 含义                                    |
 | ---- | ------------- | --------------------------------------- |
@@ -684,9 +1161,15 @@ div {
 > a:active
 > ```
 
+**伪类**选择元素基于的是当前元素处于的状态，或者说元素当前所具有的特性，而不是元素的id、class、属性等静态的标志。由于状态是动态变化的，所以一个元素达到一个特定状态时，它可能得到一个伪类的样式；当状态改变时，它又会失去这个样式。由此可以看出，它的功能和class有些类似，但它是基于文档之外的抽象，所以叫伪类。
+
 ### 伪元素
 
-主要是设置元素包含内容以及前后位置的效果
+主要是设置元素包含内容以及前后位置的效果。
+
+伪元素用于创建一些不在文档树中的元素，并为其添加样式。
+
+比如：`:before ` 来为一个元素前增加一些文本，并为这些文本增加样式。用户虽然可以看到这些文本，但是这些文本实际并不在文档树中。
 
 | 序号 | 选择器         | 含义                      |
 | ---- | -------------- | ------------------------- |
@@ -694,6 +1177,14 @@ div {
 | 21.  | E:first-letter | 匹配E元素的第一个字母     |
 | 22.  | E:before       | 在E元素之前插入生成的内容 |
 | 23.  | E:after        | 在E元素之后插入生成的内容 |
+
+**伪元素**是对元素中的特定内容进行操作，它所操作的层次比伪类更深了一层，也因此它的动态性比伪类要低得多。实际上，设计伪元素的目的就是去选取诸如元素内容第一个字（母）、第一行，选取某些内容前面或后面这种普通的选择器无法完成的工作。它控制的内容实际上和元素是相同的，但是它本身只是基于元素的抽象，并不存在于文档中，所以叫伪元素。
+
+> **伪类和伪元素区别：**
+>
+> 伪类的操作对象时文档树中已有的元素，而伪元素则创建一个文档树以外的元素。因此他们之间的区别在于：**有没有创建一个文档树之外的元素**。
+>
+> CSS3 规范中要求使用双冒号(::) 表示伪元素，单冒号(:) 表示伪类
 
 ## CSS3 
 
@@ -781,50 +1272,127 @@ div {
 
 # CSS 动画
 
-## `transition`: 过渡动画
+> 区别：过渡效果需要事件触发（例如鼠标悬停），但是动画是页面加载之后，立即执行的。
 
-- `transition-property`: 属性
-- `transition-duration`: 间隔
-- `transition-timing-function`: 曲线
-- `transition-delay`: 延迟
+## `transition`
+
+过渡动画：CSS3中，我们为了添加某种效果可以从一种样式转变到另一个的时候，无需使用Flash动画或JavaScript。
+
+CSS3 过渡是元素从一种样式逐渐改变为另一种的效果。
+
+要实现这一点，必须规定两项内容：
+
+- 指定要添加效果的CSS属性
+- 指定效果的持续时间。
+
+示例：
+
+```css
+/* 单项改变 */
+div
+{
+	width:100px;
+	height:100px;
+	background:red;
+	transition:width 2s;
+	-webkit-transition:width 2s; /* Safari */
+}
+
+div:hover
+{
+	width:300px;
+}
+
+/* 多项改变 */
+div {
+    width: 100px;
+    height: 100px;
+    background: red;
+    -webkit-transition: width 2s, height 2s, -webkit-transform 2s; /* For Safari 3.1 to 6.0 */
+    transition: width 2s, height 2s, transform 2s;
+}
+
+div:hover {
+    width: 200px;
+    height: 200px;
+    -webkit-transform: rotate(180deg); /* Chrome, Safari, Opera */
+    transform: rotate(180deg);
+}
+```
+
+### transition 属性
+
+- `transition-property`: 属性（规定应用过渡的 CSS 属性的名称）
+- `transition-duration`: 间隔（定义过渡效果花费的时间。默认是 0。）
+- `transition-timing-function`: 曲线（规定过渡效果的时间曲线。默认是 "ease"。）
+- `transition-delay`: 延迟（规定过渡效果何时开始。默认是 0。）
 - 常用钩子: `transitionend`
 
 ## `animation / keyframes`
 
+CSS3 动画：动画是使元素从一种样式逐渐变化为另一种样式的效果。您可以改变任意多的样式任意多的次数。
+
+1. @keyframes 规则
+
+   创建动画。@keyframes 规则内指定一个 CSS 样式和动画将逐步从目前的样式更改为新的样式。
+
+2. 绑定到选择器上才有效果。
+
+   CSS 文件
+
+   ```css
+   div
+   {
+   	width:100px;
+   	height:100px;
+   	background:red;
+   	animation:myfirst 5s;
+   	-webkit-animation:myfirst 5s; /* Safari and Chrome */
+   }
+   
+   @keyframes myfirst
+   {
+   	from {background:red;}
+   	to {background:yellow;}
+   }
+   
+   @-webkit-keyframes myfirst /* Safari and Chrome */
+   {
+   	from {background:red;}
+   	to {background:yellow;}
+   }
+   ```
+
+   元素
+
+   ```html
+   <p><b>注意:</b> 该实例在 Internet Explorer 9 及更早 IE 版本是无效的。</p>
+   ```
+
+   > 注意: 必须定义动画的名称和动画的持续时间。如果省略的持续时间，动画将无法运行，因为默认值是0。
+
+### animation 属性
+
 - `animation-name`: 动画名称，对应`@keyframes`
 
-- `animation-duration`: 间隔
+- `animation-duration`: 间隔（规定动画完成一个周期所花费的秒或毫秒。默认是 0。）
 
-- `animation-timing-function`: 曲线
+- `animation-timing-function`: 曲线（规定动画的速度曲线。默认是 "ease"。）
 
-- `animation-delay`: 延迟
+- `animation-delay`: 延迟（动画何时开始。默认是 0。）
 
-- ```
-  animation-iteration-count
-  ```
-
-  : 次数
-
+- `animation-iteration-count`: 次数（默认 1）
   - `infinite`: 循环动画
-
-- ```
-  animation-direction
-  ```
-
-  : 方向
-
+  
+- `animation-direction`: 方向（默认是 "normal"）
   - `alternate`: 反向播放
+  - `normal`：默认（正向）
 
-- ```
-  animation-fill-mode
-  ```
-
-  : 静止模式
-
+- `animation-fill-mode`: 静止模式
   - `forwards`: 停止时，保留最后一帧
   - `backwards`: 停止时，回到第一帧
-  - `both`: 同时运用 `forwards / backwards`
-
+- `both`: 同时运用 `forwards / backwards`
+  
 - 常用钩子: `animationend`
 
 ## 动画属性
