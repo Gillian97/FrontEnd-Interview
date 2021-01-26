@@ -1,3 +1,5 @@
+> CSS：层叠样式表（Cascading Style Sheets）的简称，是一种标记语言
+
 # 盒模型
 
 页面渲染时，DOM 元素采用的布局模型。可通过 `box-sizing` 进行设置。
@@ -231,14 +233,6 @@ img {
 - 通过增加尾元素清除浮动
   - `:after / <br> : clear: both`
 - 创建父级 BFC
-
-# flex
-
-## 实现九宫格
-
-## flex-shrink 计算规则
-
-## flex-grow 规则
 
 # 等比宽高
 
@@ -1073,6 +1067,76 @@ grid-auto-flow: column;
 
 参考： http://www.ruanyifeng.com/blog/2019/03/grid-layout-tutorial.html
 
+# Flex 布局
+
+阮一峰 http://www.ruanyifeng.com/blog/2015/07/flex-grammar.html
+
+2009年，W3C 提出了一种新的方案----Flex 布局，可以简便、完整、响应式地实现各种页面布局。
+
+Flex 是 Flexible Box 的缩写，意为"弹性布局"，用来为盒状模型提供最大的灵活性。
+
+任何一个容器都可以指定为 Flex 布局。
+
+```css
+.box{
+  display: flex;
+}
+```
+
+行内元素也可以使用 Flex 布局。
+
+```css
+.box{
+  display: inline-flex;
+}
+```
+
+Webkit 内核的浏览器，必须加上`-webkit`前缀。
+
+```css
+.box{
+  display: -webkit-flex; /* Safari */
+  display: flex;
+}
+```
+
+注意，设为 Flex 布局以后，子元素的`float`、`clear`和`vertical-align`属性将失效。
+
+## 基本概念
+
+采用 Flex 布局的元素，称为 Flex 容器（flex container），简称"容器"。它的所有子元素自动成为容器成员，称为 Flex 项目（flex item），简称"项目"。
+
+![img](images/Flex-Box.jpg)
+
+容器默认存在两根轴：水平的主轴（main axis）和垂直的交叉轴（cross axis）。主轴的开始位置（与边框的交叉点）叫做`main start`，结束位置叫做`main end`；交叉轴的开始位置叫做`cross start`，结束位置叫做`cross end`。
+
+项目默认沿主轴排列。单个项目占据的主轴空间叫做`main size`，占据的交叉轴空间叫做`cross size`。
+
+## 容器属性
+
+以下6个属性设置在容器上。
+
+1. flex-direction
+   - 主轴方向
+   - row（默认） | row-reverse | column | column-reverse
+2. flex-wrap
+   - 如果一条轴线排不下，如何换行。
+   - nowrap（默认） | wrap | wrap-reverse
+3. flex-flow
+4. justify-content
+5. align-items
+6. align-content
+
+## 项目属性
+
+## 应用
+
+### 实现九宫格
+
+## flex-shrink 计算规则
+
+## flex-grow 规则
+
 # 使用 CSS 画一个三角形
 
 先编写一个空元素
@@ -1243,7 +1307,159 @@ grid-auto-flow: column;
 
 # CSS3 特性
 
-# link 与 @import 的区别
+参考：https://juejin.cn/post/6844904066926002190
+
+CSS3 是 CSS 的最新标准，CSS3 是向后兼容的。
+
+> CSS3 向后兼容，所以支持 CSS1/2 的写法，在 CSS3 里也可以被使用。而 CSS3 如果是向前兼容，则表示 CSS1/2 可以接受 CSS3 的写法，实际上并不是这样的。所以 CSS3 是向后兼容的。
+
+## 选择器
+
+实现变色表格
+
+```css
+/*奇数行蓝色*/
+tbody tr:nth-child(odd) {
+  background-color: aqua;
+  opacity: 0.7;
+}
+/*偶数行橘色*/
+tbody tr:nth-child(even) {
+  background-color: orange;
+  opacity: 0.7;
+}
+```
+
+更多属性见 CSS3 选择器。
+
+## 盒模型
+
+盒模型有三种：`box-sizing:content-box|border-box|inherit`，默认的是`content-box`。
+
+容器内包含两张图片，宽度都是 50%，但是图片有 border，而元素盒模型默认是 content-box，所以图片会折行，因为溢出了。
+
+```html
+<style>
+    .container img {
+      width: 50%;
+      border: 1px solid #111;
+    }
+</style>
+<div class="container">
+    <img src="./css3.jpg" /><img src="./css3.jpg" />
+</div>
+```
+
+如果让两张图片不折行，在一行里显示，设置`box-sizing:border-box`，如下面所示：
+
+```css
+.container img {
+  box-sizing: border-box;
+  width: 50%;
+  border: 1px solid #111;
+}
+```
+
+因为 border-box 的计算方式是将 border 计算在 width 内部的。
+
+## 布局
+
+### flex 布局
+
+阮一峰 http://www.ruanyifeng.com/blog/2015/07/flex-grammar.html
+
+### 多列布局
+
+`column-count`：设置布局的列数
+
+```html
+<style>
+    .column-2 {
+      column-count: 2;
+    }
+    .column-3 {
+      column-count: 3;
+    }
+</style>
+```
+
+column-gap：规定列之间的间隔
+
+```css
+.column-2 {
+  column-count: 2;
+  column-gap: 80px;
+}
+```
+
+column-rule: 属性设置列之间的宽度、样式和颜色规则
+
+```css
+.column-3 {
+  column-count: 3;
+  column-rule:3px outset #ff0000;
+}
+```
+
+> 多列布局非常适合实现类似报纸、论文以及书本文章类型的布局。
+
+- background-clip: 规定背景的绘制区域
+
+```css
+.container {
+  border: 4px solid orchid;
+  padding: 20px;
+  width: 300px;
+  height: 200px;
+  background-image: url('./css3.jpg');
+  background-clip: border-box; // 默认的，从border开始
+}
+
+<div class="container" />
+```
+
+
+
+<img src="/Users/jinlingzhang/Documents/personal/FrontEnd-Interview/images/bg-clip1.jpg" alt="image-20210126190547962" />
+
+```css
+.container {
+  border: 4px solid orchid;
+  padding: 20px;
+  width: 300px;
+  height: 200px;
+  background-image: url('./css3.jpg');
+  background-clip: content-box;
+}
+```
+
+如下图可以看到，绘制的区域不包含 padding。
+
+
+
+![img](images/bg-clip2.jpg)
+
+
+
+## 背景和边框
+
+### 背景
+
+### 边框
+
+## 文本效果
+
+## 2D/3D转换
+
+### 2D转换
+
+### 3D 转换
+
+## 动画
+
+
+
+# link（html） 与 @import（CSS） 的区别
 
 |              | link                                    | @import                                          |
 | ------------ | --------------------------------------- | ------------------------------------------------ |
