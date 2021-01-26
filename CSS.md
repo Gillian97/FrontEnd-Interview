@@ -81,19 +81,76 @@
 
 ## 水平居中
 
-- 行内元素: `text-align: center`
+- （类）行内元素: `text-align: center`
+
+  - 将一段文字置于容器的水平中点，只要设置text-align属性即可：
+
 - 块级元素: `margin: 0 auto`
+
+  - 先为该容器设置一个明确宽度，然后将margin的水平值设为auto即可。
+
+    ```css
+    div#container {
+    　　width:760px;
+    　　margin:0 auto;
+    }
+    ```
+
 - `absolute + transform`
+
 - `flex + justify-content: center`
 
 ## 垂直居中
 
 - `line-height: height`
+
+  - 单行文字的垂直居中，只要将行高与容器高设为相等即可。
+
+    比如，容器中有一行数字。
+
+    ```html
+    <style>div#container {height: 35px; line-height: 35px;}</style>
+    <div id="container">1234567890</div>
+    ```
+
+    如果有n行文字，那么将行高设为容器高度的n分之一即可。
+
 - `absolute + transform`
+
 - `flex + align-items: center`
+
 - `table`
 
+  - 通过为元素设置 `table-cell` 的父级容器，再使用 `vertical-align` 属性
+
+    ```css
+    body {
+      background: #f06d06;
+      font-size: 80%;
+    }
+    
+    table {
+      background: white;
+      width: 240px;
+      border-collapse: separate;
+      margin: 20px;
+      height: 250px;
+    }
+    
+    table td {
+      background: black;
+      color: white;
+      padding: 20px;
+      border: 10px solid white;
+      /* default is vertical-align: middle; */
+    }
+    ```
+
+    
+
 ## 水平垂直居中
+
+直接看 FE-Essay 里的
 
 - `absolute + transform`
 - `flex + justify-content + align-items`
@@ -646,6 +703,8 @@ module.exports = {
 
 # Grid 网格布局
 
+http://www.ruanyifeng.com/blog/2019/03/grid-layout-tutorial.html
+
 Grid 布局与 [Flex 布局](http://www.ruanyifeng.com/blog/2015/07/flex-grammar.html)有一定的相似性，都可以指定容器内部多个项目的位置。但是，它们也存在重大区别。
 
 Flex 布局是轴线布局，只能指定"项目"针对轴线的位置，可以看作是**一维布局**。Grid 布局则是将容器划分成"行"和"列"，产生单元格，然后指定"项目所在"的单元格，可以看作是**二维布局**。Grid 布局远比 Flex 布局强大。
@@ -1063,10 +1122,6 @@ grid-auto-flow: column;
 
 
 
-
-
-参考： http://www.ruanyifeng.com/blog/2019/03/grid-layout-tutorial.html
-
 # Flex 布局
 
 阮一峰 http://www.ruanyifeng.com/blog/2015/07/flex-grammar.html
@@ -1403,7 +1458,11 @@ column-rule: 属性设置列之间的宽度、样式和颜色规则
 
 > 多列布局非常适合实现类似报纸、论文以及书本文章类型的布局。
 
-- background-clip: 规定背景的绘制区域
+## 背景和边框
+
+### 背景
+
+background-clip: 规定背景的绘制区域
 
 ```css
 .container {
@@ -1420,7 +1479,7 @@ column-rule: 属性设置列之间的宽度、样式和颜色规则
 
 
 
-<img src="/Users/jinlingzhang/Documents/personal/FrontEnd-Interview/images/bg-clip1.jpg" alt="image-20210126190547962" />
+<img src="images/bg-clip1.jpg" alt="image-20210126190547962" />
 
 ```css
 .container {
@@ -1435,62 +1494,106 @@ column-rule: 属性设置列之间的宽度、样式和颜色规则
 
 如下图可以看到，绘制的区域不包含 padding。
 
-
-
 ![img](images/bg-clip2.jpg)
 
+background-size: cover; 扩展元素以填补元素（维持像素长宽比）
 
+background-size: 100px 100px; 缩小图片至指定的大小 .
 
-## 背景和边框
-
-### 背景
+background-size: 50% 100%; 缩小图片至指定的大小，百分比是相对包 含元素的尺寸 .
 
 ### 边框
 
+```css
+    .box {
+      width: 200px;
+      padding: 20px;
+      background-color: gold;
+      margin: 20px 0;
+    }
+
+    .radius {
+      border-radius: 8px;
+    }
+
+    .half-radius {
+      border-top-left-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+
+    .shadow {
+      box-shadow: 10px 10px 5px #888888;
+    }
+
+    .border-img {
+      width: 200px;
+      border: 15px solid transparent;
+      border-image: url(border.png) 30 30 round;
+      -moz-border-image: url(border.png) 30 30 round;
+      /* 老的 Firefox */
+      -webkit-border-image: url(border.png) 30 30 round;
+      /* Safari 和 Chrome */
+      -o-border-image: url(border.png) 30 30 round;
+      /* Opera */
+    }
+```
+
 ## 文本效果
 
-## 2D/3D转换
+**font-face**
 
-### 2D转换
+第一种，如果你有字体文件，可以通过下面这种方式全剧引入字体。
 
-### 3D 转换
+```css
+@font-face { 
+  font-family: fontname; 
+  src:url(font-name.eot); 
+} 
+```
+
+第二种，CSS3 新增`<font>`标签来进行字体的设置。
+
+```html
+<p><font style="font-family: STKaiti">通过font标签来设置字体</font></p>
+```
+
+**text-overflow**
+
+```css
+.overflow {
+  white-space: nowrap; 
+  width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis; /* 溢出框的字体以...显示 */
+}
+<p class="overflow">
+    粉色的来访记录开始大家分开了就是打开理解费拉达斯解放路口的时间见风使舵冷静的思考了几分短裤蓝色粉色的看了飞机老师
+</p>
+```
+
+**text-shadow && word-wrap**
+
+阴影 & 换行效果
+
+```css
+.shadow {
+  width: 100px;
+  text-shadow: 5px 5px 5px #FF0000;
+}
+.wordwrap {
+  word-wrap: break-word;
+}
+
+<p class="shadow wordwrrap">
+    粉色的来访记录开始大家分开了就是打开理解费拉达斯解放路口的时间见风使舵冷静的思考了几分短裤蓝色粉色的看了飞机老师
+</p>
+```
 
 ## 动画
 
-
-
-# link（html） 与 @import（CSS） 的区别
-
-|              | link                                    | @import                                          |
-| ------------ | --------------------------------------- | ------------------------------------------------ |
-| 语法类型     | html                                    | CSS                                              |
-| 兼容问题     | 无                                      | @import 是 css2.1 加入的语法，只有 IE5+ 才可识别 |
-| 加载方式     | 浏览器**加载页面时**同步加载 CSS        | 浏览器**页面加载完成后**再加载@import的CSS       |
-| 优先级       | 高                                      | 低                                               |
-| 功能         | 功能较多，可以定义 RSS，定义 Rel 等作用 | 只能用于加载 CSS                                 |
-| 使用 JS 引入 | 可以                                    | 不可以                                           |
-
-# CSS 预处理器(Sass/Less/Postcss)
-
-原理: 
-
-将类 CSS 语言通过 **Webpack 编译** 转成浏览器可读的真正 CSS。在这层编译之上，便可以赋予 CSS 更多更强大的功能，常用功能:
-
-- 嵌套
-- 变量
-- 循环语句
-- 条件语句
-- 自动前缀
-- 单位转换
-- mixin复用
-
-面试中一般不会重点考察该点，一般介绍下自己在实战项目中的经验即可~
-
-# CSS 动画
-
 > 区别：过渡效果需要事件触发（例如鼠标悬停），但是动画是页面加载之后，立即执行的。
 
-## `transition`
+### `transition`
 
 过渡动画：CSS3中，我们为了添加某种效果可以从一种样式转变到另一个的时候，无需使用Flash动画或JavaScript。
 
@@ -1536,7 +1639,7 @@ div:hover {
 }
 ```
 
-### transition 属性
+#### transition 属性
 
 - `transition-property`: 属性（规定应用过渡的 CSS 属性的名称）
 - `transition-duration`: 间隔（定义过渡效果花费的时间。默认是 0。）
@@ -1544,7 +1647,7 @@ div:hover {
 - `transition-delay`: 延迟（规定过渡效果何时开始。默认是 0。）
 - 常用钩子: `transitionend`
 
-## `animation / keyframes`
+### `animation / keyframes`
 
 CSS3 动画：动画是使元素从一种样式逐渐变化为另一种样式的效果。您可以改变任意多的样式任意多的次数。
 
@@ -1587,7 +1690,7 @@ CSS3 动画：动画是使元素从一种样式逐渐变化为另一种样式的
 
    > 注意: 必须定义动画的名称和动画的持续时间。如果省略的持续时间，动画将无法运行，因为默认值是0。
 
-### animation 属性
+#### animation 属性
 
 - `animation-name`: 动画名称，对应`@keyframes`
 
@@ -1599,7 +1702,7 @@ CSS3 动画：动画是使元素从一种样式逐渐变化为另一种样式的
 
 - `animation-iteration-count`: 次数（默认 1）
   - `infinite`: 循环动画
-  
+
 - `animation-direction`: 方向（默认是 "normal"）
   - `alternate`: 反向播放
   - `normal`：默认（正向）
@@ -1608,10 +1711,10 @@ CSS3 动画：动画是使元素从一种样式逐渐变化为另一种样式的
   - `forwards`: 停止时，保留最后一帧
   - `backwards`: 停止时，回到第一帧
 - `both`: 同时运用 `forwards / backwards`
-  
+
 - 常用钩子: `animationend`
 
-## 动画属性
+### 动画属性
 
 尽量使用动画属性进行动画，能拥有较好的性能表现
 
@@ -1621,6 +1724,150 @@ CSS3 动画：动画是使元素从一种样式逐渐变化为另一种样式的
 - `skew`
 - `opacity`
 - `color`
+
+补充：HTML5 canvas 动画、 JS 的 requestAnimation 动画
+
+### 2D 转换
+
+| 函数                            | 描述                                     |
+| :------------------------------ | :--------------------------------------- |
+| matrix(*n*,*n*,*n*,*n*,*n*,*n*) | 定义 2D 转换，使用六个值的矩阵。         |
+| translate(*x*,*y*)              | 定义 2D 转换，沿着 X 和 Y 轴移动元素。   |
+| translateX(*n*)                 | 定义 2D 转换，沿着 X 轴移动元素。        |
+| translateY(*n*)                 | 定义 2D 转换，沿着 Y 轴移动元素。        |
+| scale(*x*,*y*)                  | 定义 2D 缩放转换，改变元素的宽度和高度。 |
+| scaleX(*n*)                     | 定义 2D 缩放转换，改变元素的宽度。       |
+| scaleY(*n*)                     | 定义 2D 缩放转换，改变元素的高度。       |
+| rotate(*angle*)                 | 定义 2D 旋转，在参数中规定角度。         |
+| skew(*x-angle*,*y-angle*)       | 定义 2D 倾斜转换，沿着 X 和 Y 轴。       |
+| skewX(*angle*)                  | 定义 2D 倾斜转换，沿着 X 轴。            |
+| skewY(*angle*)                  | 定义 2D 倾斜转换，沿着 Y 轴。            |
+
+### 3D 转换
+
+| 函数                                                         | 描述                                      |
+| :----------------------------------------------------------- | :---------------------------------------- |
+| matrix3d(*n*,*n*,*n*,*n*,*n*,*n*, *n*,*n*,*n*,*n*,*n*,*n*,*n*,*n*,*n*,*n*) | 定义 3D 转换，使用 16 个值的 4x4 矩阵。   |
+| translate3d(*x*,*y*,*z*)                                     | 定义 3D 转化。                            |
+| translateX(*x*)                                              | 定义 3D 转化，仅使用用于 X 轴的值。       |
+| translateY(*y*)                                              | 定义 3D 转化，仅使用用于 Y 轴的值。       |
+| translateZ(*z*)                                              | 定义 3D 转化，仅使用用于 Z 轴的值。       |
+| scale3d(*x*,*y*,*z*)                                         | 定义 3D 缩放转换。                        |
+| scaleX(*x*)                                                  | 定义 3D 缩放转换，通过给定一个 X 轴的值。 |
+| scaleY(*y*)                                                  | 定义 3D 缩放转换，通过给定一个 Y 轴的值。 |
+| scaleZ(*z*)                                                  | 定义 3D 缩放转换，通过给定一个 Z 轴的值。 |
+| rotate3d(*x*,*y*,*z*,*angle*)                                | 定义 3D 旋转。                            |
+| rotateX(*angle*)                                             | 定义沿 X 轴的 3D 旋转。                   |
+| rotateY(*angle*)                                             | 定义沿 Y 轴的 3D 旋转。                   |
+| rotateZ(*angle*)                                             | 定义沿 Z 轴的 3D 旋转。                   |
+| perspective(*n*)                                             | 定义 3D 转换元素的透视视图。              |
+
+# link（html） 与 @import（CSS） 的区别
+
+|              | link                                    | @import                                          |
+| ------------ | --------------------------------------- | ------------------------------------------------ |
+| 语法类型     | html                                    | CSS                                              |
+| 兼容问题     | 无                                      | @import 是 css2.1 加入的语法，只有 IE5+ 才可识别 |
+| 加载方式     | 浏览器**加载页面时**同步加载 CSS        | 浏览器**页面加载完成后**再加载@import的CSS       |
+| 优先级       | 高                                      | 低                                               |
+| 功能         | 功能较多，可以定义 RSS，定义 Rel 等作用 | 只能用于加载 CSS                                 |
+| 使用 JS 引入 | 可以                                    | 不可以                                           |
+
+# CSS 预处理器(Sass/Less/Postcss)
+
+原理: 
+
+将类 CSS 语言通过 **Webpack 编译** 转成浏览器可读的真正 CSS。在这层编译之上，便可以赋予 CSS 更多更强大的功能，常用功能:
+
+- 嵌套
+
+  ```css
+  .container {
+        width: @containerWidth;
+        >.row {
+          height: 100%;
+          a {
+            color: #f40;
+            &:hover {
+              color: #f50;
+            }
+          }
+        }
+  }
+  ```
+
+  
+
+- 变量
+
+  ```css
+  // 定义变量
+  @bgColor: #f5f5f5;
+  
+  // 引用变量
+  body{
+      background-color: @bgColor;
+  }
+  ```
+
+- import
+
+  main.css
+
+  ```css
+  /*
+  PS1：被引用的less文件，我们习惯在前面加下划线，表示它是部分文件。
+  PS2：_button1.less里可以引用main.css里的自定义变量。
+  */
+  @btnColor: red;
+  
+  @import url(`_button1.less:');    //这里的路径写的是相对路径
+  
+  body{
+    width: 1024px;
+  }
+  ```
+
+- 循环语句
+
+- 条件语句
+
+- 自动前缀
+
+- 单位转换
+
+- mixin 复用
+
+  ```css
+  /* 定义一个类 */
+  .roundedCorners(@radius: 5px) {
+    -moz-border-radius: @radius;
+    -webkit-border-radius: @radius;
+    border-radius: @radius;
+  }
+  
+  #header {
+    .roundedCorners;
+  }
+  #footer {
+    .roundedCorners(10px);
+  }
+  ```
+
+- 内置函数
+
+  ```css
+  body {
+    background-color: lighten(#000, 10%);   // 让黑色变亮 10%
+    color: darken(#fff, 10%);               // 让白色变暗 10%
+  }
+  ```
+
+  
+
+
+
+面试中一般不会重点考察该点，一般介绍下自己在实战项目中的经验即可~
 
 # 经验
 
