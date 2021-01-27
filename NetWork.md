@@ -1995,7 +1995,7 @@ nonce 和 hash 值也能用在 style-src 选项，控制页面内嵌的样式表
 
 #### POST 类型 CSRF
 
-一般是使用一个自动提交的表单。访问该页面，表单会自动提交，相当于模拟用户完成了一次 POST 请求。
+一般是使用一个自动提交的表单。访问该页面，表单会带有正确 Cookie 并自动提交，相当于模拟用户完成了一次 POST 请求。
 
 ```html
 <form action="http://bank.example/withdraw" method=POST>
@@ -2005,6 +2005,18 @@ nonce 和 hash 值也能用在 style-src 选项，控制页面内嵌的样式表
 </form>
 <script> document.forms[0].submit(); </script> 
 ```
+
+这种第三方网站引导发出的 Cookie，就称为第三方 Cookie。它除了用于 CSRF 攻击，还可以用于用户追踪。
+
+**用户追踪**
+
+比如，Facebook 在第三方网站插入一张看不见的图片。
+
+```html
+<img src="facebook.com" style="visibility:hidden;">
+```
+
+浏览器加载上面代码时，就会向 Facebook 发出带有 Cookie 的请求，从而 Facebook 就会知道你是谁，访问了什么网站。
 
 #### 链接类型 CSRF
 
@@ -2030,7 +2042,7 @@ nonce 和 hash 值也能用在 style-src 选项，控制页面内嵌的样式表
 
 1. 阻止不明外域访问
    1. 同源检测
-   2. Samesite Cookie
+   2. SameSite Cookie
 2. 提交时要求附加本域才能获取的信息
    1. CSRF Token
    2. 双重 Cookie 验证
@@ -2045,6 +2057,68 @@ nonce 和 hash 值也能用在 style-src 选项，控制页面内嵌的样式表
 - Referer Header
 
 这两个信息是浏览器发起请求自动带上的，不能由前端自定义，服务器可以解析这两个字段中的域名，确定请求的来源域。
+
+#### SameSite Cookie
+
+Cookie 的`SameSite`属性用来限制第三方 Cookie，从而减少安全风险。
+
+可以设置以下三个值 Strict/Lax/None。
+
+> Strict
+
+`Strict`最为严格，完全禁止第三方 Cookie，跨站点时，任何情况下都不会发送 Cookie。换言之，只有当前网页的 URL 与请求目标一致，才会带上 Cookie。
+
+```html
+Set-Cookie: CookieName=CookieValue; SameSite=Strict;
+```
+
+这个规则过于严格，可能造成非常不好的用户体验。比如，当前网页有一个 GitHub 链接，用户点击跳转就不会带有 GitHub 的 Cookie，跳转过去总是未登陆状态。
+
+##### 跨域和跨站
+
+跨站和跨域不同。「同站（same-site）/跨站（cross-site）」和「第一方（first-party）/第三方（third-party）」等价。但与浏览器同源策略（SOP）中的「同源（same-origin）/跨域（cross-origin）」是完全不同的概念。
+
+同源策略的同源是指两个 URL 的协议 / 主机名 / 端口一致。同源策略作为浏览器的安全基石，其「同源」判断是比较严格的。而相对来说，Cookie 中的「同站」判断就比较宽松：**只要两个 URL 的 eTLD + 1 相同即可，不需要考虑协议和端口**。其中 eTLD 表示有效顶级域名，注册于 Mozilla 维护的公共后缀列表（Public Suffix List）中，例如：`.com` 、`.cn` 等等，eTLD + 1 表示**有效顶级域名 + 二级域名**，例如： `taobao.com` 等。
+
+举个例子，`www.baidu.com` 和 `www.taobao.com` 是跨站， `www.a.taobao.com` 和 `www.b.taobao.com` 是同站，
+
+> Lax
+
+`Lax`规则稍稍放宽，大多数情况也是不发送第三方 Cookie，但是导航到目标网址的 Get 请求除外。
+
+```markup
+Set-Cookie: CookieName=CookieValue; SameSite=Lax;
+```
+
+导航到目标网址的 GET 请求，只包括三种情况：**链接、预加载请求、GET 表单**。详见下表。
+
+| 请求类型  |                 示例                 |    正常情况 | Lax         |
+| :-------- | :----------------------------------: | ----------: | :---------- |
+| 链接      |         `<a href="..."></a>`         | 发送 Cookie | 发送 Cookie |
+| 预加载    | `<link rel="prerender" href="..."/>` | 发送 Cookie | 发送 Cookie |
+| GET 表单  |  `<form method="GET" action="...">`  | 发送 Cookie | 发送 Cookie |
+| POST 表单 | `<form method="POST" action="...">`  | 发送 Cookie | 不发送      |
+| iframe    |    `<iframe src="..."></iframe>`     | 发送 Cookie | 不发送      |
+| AJAX      |            `$.get("...")`            | 发送 Cookie | 不发送      |
+| Image     |          `<img src="...">`           | 发送 Cookie | 不发送      |
+
+设置了`Strict`或`Lax`以后，基本就杜绝了 CSRF 攻击。当然，前提是用户浏览器支持 SameSite 属性。
+
+> None
+
+之前默认是 `None`，Chorme80 之后默认是 `Lax`。这时，网站可以选择显式关闭`SameSite`属性，将其设为`None`。不过，前提是必须同时设置`Secure`属性（Cookie 只能通过 HTTPS 协议发送），否则无效。
+
+下面的设置无效。
+
+```bash
+Set-Cookie: widget_session=abc123; SameSite=None
+```
+
+下面的设置有效。
+
+```bash
+Set-Cookie: widget_session=abc123; SameSite=None; Secure
+```
 
 #### CSRF token
 

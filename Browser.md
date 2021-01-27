@@ -265,7 +265,14 @@ name=Mary&message=Yes%3F
 
 ![img](images/浏览器多进程.image)
 
-## defer async 区别
+## script 引入方式
+
+- html 静态`<script>`引入
+- js 动态插入`<script>`
+- `<script defer>`: 延迟加载,元素解析完成后执行
+- `<script async>`: 异步加载,但执行时会阻塞元素渲染
+
+### defer async 区别
 
 在 HTML 中会遇到以下三类 script：
 
@@ -275,7 +282,7 @@ name=Mary&message=Yes%3F
 <script src='xxx' defer></script>
 ```
 
-### script
+#### script
 
 浏览器在解析 HTML 的时候，如果遇到一个没有任何属性的 script 标签，就会暂停解析，先发送网络请求获取该 JS 脚本的代码内容，然后让 JS 引擎执行该代码，当代码执行完毕后恢复解析。整个过程如下图所示：
 
@@ -283,7 +290,7 @@ name=Mary&message=Yes%3F
 
 可以看到，script 阻塞了浏览器对 HTML 的解析，如果获取 JS 脚本的网络请求迟迟得不到响应，或者 JS 脚本执行时间过长，都会导致白屏，用户看不到页面内容。
 
-### async script
+#### async script
 
 async 表示异步。
 
@@ -299,7 +306,7 @@ async 表示异步。
 
 所以 async 是不可控的，因为执行时间不确定，你如果在异步 JS 脚本中获取某个 DOM 元素，有可能获取到也有可能获取不到。而且如果存在多个 async 的时候，它们之间的执行顺序也不确定，完全依赖于网络传输结果，谁先到执行谁。
 
-### defer script
+#### defer script
 
 defer 表示延迟，例如掘金的源码中就有大量的 defer 出现：
 
@@ -311,7 +318,7 @@ defer 表示延迟，例如掘金的源码中就有大量的 defer 出现：
 
 如果存在多个 defer script 标签，浏览器（IE9及以下除外）会保证它们按照在 HTML 中出现的顺序执行，不会破坏 JS 脚本之间的依赖关系。
 
-### 总结
+#### 总结
 
 | script 标签      | JS 执行顺序      | 是否阻塞解析 HTML                                            |
 | ---------------- | ---------------- | ------------------------------------------------------------ |
