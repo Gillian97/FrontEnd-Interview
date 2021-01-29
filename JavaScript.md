@@ -5230,7 +5230,7 @@ export 5;
               timeout = null;
           },  wait)
   
-          if (callNow) func.apply(context,  args)
+          if (callNow) func.apply(context, args)
       }
   }
   ```
@@ -5783,6 +5783,20 @@ console.log("文件读取完毕");
 ### cluster
 
 ### http
+
+
+
+# 手写函数
+
+## new
+
+## instanceof
+
+## 继承（es5/es6）
+
+## 防抖节流
+
+## promise
 
 
 
