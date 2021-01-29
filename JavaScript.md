@@ -5353,26 +5353,6 @@ function debounce(func, wait) {
         let context = this;
         let args = arguments;
 
-<<<<<<< HEAD
-  ```javascript
-  function debounce(func,  wait) {
-      let timeout;
-      return function () {
-          let context = this;
-          let args = arguments;
-  
-          if (timeout) clearTimeout(timeout);
-  
-          let callNow = !timeout;
-          timeout = setTimeout(() => {
-              timeout = null;
-          },  wait)
-  
-          if (callNow) func.apply(context, args)
-      }
-  }
-  ```
-=======
         if (timeout) clearTimeout(timeout);
         
         timeout = setTimeout(() => {
@@ -5381,7 +5361,6 @@ function debounce(func, wait) {
     }
 }
 ```
->>>>>>> 85f9a6202dc393ffd48628b52a8d3556aea9b76c
 
 立即执行版
 
