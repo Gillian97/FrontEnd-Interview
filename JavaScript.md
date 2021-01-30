@@ -2329,11 +2329,364 @@ console.log(data);
 
 接口与实现分离, 常称为**封装**. 常见在属性开头加上 `_` 表示是私有属性.
 
+参考:https://www.ruanyifeng.com/blog/2010/05/object-oriented_javascript_encapsulation.html
+
+### 原始模式
+
+原始模式生成的对象, 对象之间没有联系, 无法反应他们是同一个原型对象的实例.
+
+### 构造函数模式
+
+js 提供了构造函数模式, 构造函数是一个普通函数, 但是内部使用了 this 变量,对构造函数使用`new`运算符，就能生成实例，并且`this`变量会绑定在实例对象上。
+
+缺点: 浪费内存. 每次生成一个实例，都包含构造函数所有属性, 都有重复的内容，多占用一些内存。这样既不环保，也缺乏效率。
+
+### prototype 模式
+
+Javascript规定，每一个构造函数都有一个`prototype`属性，指向另一个对象。这个对象的所有属性和方法，都会被构造函数的实例继承。这意味着，可以把那些不变的属性和方法，直接定义在`prototype`对象上, 提高了运行效率。
+
+`isPrototype()`
+
+```javascript
+console.log(Cat.prototype.isPrototypeOf(cat1)) // true
+console.log(Cat.prototype.isPrototypeOf(cat2)) // true
+```
+
+`hasOwnProperty()`
+
+每个实例对象都有一个`hasOwnProperty()`方法，用来判断某一个属性到底是本地属性，还是继承自`prototype`对象的属性。
+
+```javascript
+console.log(cat1.hasOwnProperty("name")); // true
+// type 是原型对象的属性
+console.log(cat1.hasOwnProperty("type")); // false
+```
+
+`in`运算符
+
+可以用来判断，某个实例是否含有某个属性，不管是不是本地属性。
+
+```
+alert("name" in cat1); // true
+alert("type" in cat1); // true
+```
+
+`in` 运算符还可以用来遍历某个对象的所有属性。
+
+```javascript
+for(var prop in cat1) { alert("cat1["+prop+"]="+cat1[prop]); }
+```
+
+## 继承
+
+### 构造函数继承
+
+一个"动物"对象的构造函数。
+
+```javascript
+function Animal(){
+　　this.species = "动物";
+}
+```
+
+一个"猫"对象的构造函数。
+
+```javascript
+function Cat(name,color){
+　　this.name = name;
+　　this.color = color;
+}
+```
+
+怎样才能使"猫"继承"动物"呢？
+
+1. 构造函数绑定
+
+   使用call或apply方法，将父对象的构造函数绑定在子对象上，即在子对象构造函数中加一行：
+
+   ```javascript
+   function Cat (name, color) {
+     // 新生成的实例对象会调用 Animal 构造函数, 使自己具有 species 属性
+     Animal.apply(this, arguments);
+     this.name = name;
+     this.color = color;
+   }
+   
+   var cat1 = new Cat("大毛", "黄色");
+   alert(cat1.species); // 动物
+   ```
+
+2. prototype 模式
+
+   ```javascript
+   
+   function Animal(){
+     this.species = "动物"
+   }
+   
+   function Cat (name, color) {
+     this.name = name;
+     this.color = color;
+   }
+   
+   // 相当于完全删除了prototype 对象原先的值，然后赋予一个新值
+   Cat.prototype = new Animal();
+   // 这个构造函数的指向也要加上
+   // 由于上一句的存在, 这里 Cat.prototype.constructor 指向 Animal
+   // 但是 Cat 的原型对象的构造函数必须要指向 Cat 构造函数,否则会导致继承链的混乱
+   Cat.prototype.constructor  = Cat;
+   
+   var cat1 = new Cat("大毛", "黄色");
+   console.log(cat1.species); // 动物
+   ```
+
+   这是很重要的一点，编程时务必要遵守。下文都遵循这一点，即如果替换了prototype对象，
+
+   ```javascript
+   o.prototype = {};
+   ```
+
+   那么，下一步必然是为新的prototype对象加上constructor属性，并将这个属性指回原来的构造函数。
+
+   ```javascript
+   o.prototype.constructor = o;
+   ```
+
+3. 直接继承 prototype
+
+   第三种方法是对第二种方法的改进。由于Animal对象中，不变的属性都可以直接写入Animal.prototype。所以，我们也可以让Cat()跳过 Animal()，直接继承Animal.prototype。
+
+   现在，我们先将Animal对象改写：
+
+   ```javascript
+   function Animal(){ }
+   Animal.prototype.species = "动物";
+   ```
+
+   然后，将 Cat 的 prototype 对象，然后指向 Animal 的 prototype 对象，这样就完成了继承。
+
+   ```javascript
+   Cat.prototype = Animal.prototype;
+   Cat.prototype.constructor = Cat;
+   var cat1 = new Cat("大毛","黄色");
+   alert(cat1.species); // 动物
+   ```
+
+   与前一种方法相比，这样做的优点是效率比较高（不用执行和建立Animal的实例了），比较省内存。
+
+   缺点是 `Cat.prototype` 和 `Animal.prototype` 现在指向了同一个对象，那么任何对 `Cat.prototype` 的修改，都会反映到 `Animal.prototype`。
+
+   所以，上面这一段代码其实是有问题的。请看第二行
+
+   ```javascript
+   Cat.prototype.constructor = Cat;
+   ```
+
+   这一句实际上把 `Animal.prototype` 对象的 `constructor` 属性也改掉了！
+
+   ```javascript
+   alert(Animal.prototype.constructor); // Cat
+   ```
+
+4. 利用空对象做中介
+
+   ```javascript
+   function Animal () { }
+   Animal.prototype = {
+     species: "动物"
+   }
+   
+   function Cat (name, color) {
+     this.name = name;
+     this.color = color;
+   }
+   
+   function F () { }
+   F.prototype = Animal.prototype;
+   
+   // F是空对象，所以几乎不占内存。
+   // 这时，修改Cat的prototype对象，就不会影响到Animal的prototype对象。
+   Cat.prototype = new F();
+   Cat.prototype.constructor = Cat;
+   
+   var cat1 = new Cat("大毛", "黄色");
+   console.log(cat1.species, Cat.prototype); // 动物
+   ```
+
+   将上述方法封装为一个函数, 便于使用.
+
+   ```javascript
+   // 这个extend函数，就是YUI库如何实现继承的方法。
+   function extend (Child, Parent) {
+     function F () { }
+     F.prototype = Parent.prototype;
+     Child.prototype = new F();
+     Child.prototype.constructor = Child;
+     Child.uber = Parent.prototype;
+   }
+   ```
+
+   使用的时候，方法如下:
+
+   ```javascript
+   extend(Cat,Animal);
+   var cat1 = new Cat("大毛","黄色");
+   console.log(cat1.species); // 动物
+   ```
+
+   说明一点，函数体最后一行
+
+   ```javascript
+   Child.uber = Parent.prototype;
+   ```
+
+   意思是为子对象设一个uber属性，这个属性直接指向父对象的prototype属性。（uber是一个德语词，意思是"向上"、"上一层"。）这等于在子对象上打开一条通道，可以直接调用父对象的方法。这一行放在这里，只是为了实现继承的完备性，纯属备用性质。
+
+5. 拷贝继承
+
+   将父类的原型对象的所有属性全部拷贝进子类的原型对象中.
+
+   首先，还是把 Animal 的所有不变属性，都放到它的 prototype 对象上。
+
+   ```javascript
+   function Animal(){}
+   Animal.prototype.species = "动物";
+   ```
+
+   然后，再写一个函数，实现属性拷贝的目的。
+
+   ```javascript
+   function extend2 (Child, Parent) {
+     var p = Parent.prototype;
+     var c = Child.prototype;
+     for (var i in p) {
+       c[i] = p[i];
+     }
+     c.uber = p;
+   }
+   ```
+
+   将父对象的prototype对象中的属性，一一拷贝给Child对象的prototype对象。
+
+   使用的时候，方法如下：
+
+   ```javascript
+   extend2(Cat, Animal);
+   var cat1 = new Cat("大毛","黄色");
+   console.log(cat1.species); // 动物
+   ```
+
+### 非构造函数继承
+
+两个普通对象之间进行继承, 不能使用构造函数.
+
+```javascript
+var Chinese = {
+  nation: "中国"
+}
+
+var Doctor = {
+  career: "医生"
+}
+```
+
+1. Object 方法
+
+   ```javascript
+   var Chinese = {
+     nation: "中国"
+   }
+   
+   var Doctor = {
+     career: "医生"
+   }
+   
+   function object (parent) {
+     function F () { }
+     F.prototype = parent;
+     return new F();
+   }
+   
+   var doctor = object(Chinese);
+   doctor.career = "医生";
+   console.log(doctor.nation); // 中国
+   ```
+
+2. 浅拷贝
+
+   另一种思路：把父对象的属性，全部拷贝给子对象，也能实现继承。
+
+   ```javascript
+   var Chinese = {
+     nation: "中国",
+     birthPlaces: ["上海", "合肥", "天津"]
+   }
+   
+   var Doctor = {
+     career: "医生"
+   }
+   
+   function extendCopy (parent) {
+     let child = {};
+     for (let i in parent) {
+       child[i] = parent[i]
+     }
+     return child;
+   }
+   
+   let doctor = extendCopy(Chinese)
+   console.log(doctor.birthPlaces); // [ '上海', '合肥', '天津' ]
+   
+   doctor.birthPlaces.push("厦门")
+   console.log(doctor.birthPlaces, Chinese.birthPlaces);
+   // [ '上海', '合肥', '天津', '厦门' ] [ '上海', '合肥', '天津', '厦门' ]
+   ```
+
+   但是子对象对属性的更改可能会引起父对象的同步更新. extendCopy()只是拷贝**基本类型的数据**，我们把这种拷贝叫做"浅拷贝"。这是早期jQuery实现继承的方式。
+
+3. 深拷贝
+
+   所谓"深拷贝"，就是能够实现真正意义上的数组和对象的拷贝。它的实现并不难，只要递归调用"浅拷贝"就行了。
+
+   ```javascript
+   var Chinese = {
+     nation: "中国",
+     birthPlaces: ["上海", "合肥", "天津"]
+   }
+   
+   var Doctor = {
+     career: "医生"
+   }
+   
+   // 将 p 对象中的属性拷贝进 c
+   function deepCopy (p, child) {
+     var c = child || {};
+     for (let i in p) {
+       if (typeof p[i] === "object") {
+         // 进一步判断是数组还是对象
+         c[i] = Array.isArray(p[i]) ? [] : {};
+         deepCopy(p[i], c[i]);
+       } else {
+         c[i] = p[i];
+       }
+     }
+     return c;
+   }
+   
+   let doctor = deepCopy(Chinese);
+   doctor.birthPlaces.push("北京");
+   // 子类属性的修改不影响父类
+   console.log(Chinese.birthPlaces, doctor.birthPlaces);
+   // [ '上海', '合肥', '天津' ] [ '上海', '合肥', '天津', '北京' ]
+   ```
+
+   目前，jQuery库使用的就是这种继承方法。
+
 ## 创建对象
 
-创建一个对象, 定义属性和方法, 不需要 `Class`.
+创建一个对象, 定义属性和方法, 不需要 `Class`. 对象中的方法就是保存函数的那个属性.
 
-对象中的方法就是保存函数的属性.
+这里直接使用原始方式创建对象, 没有继承.
 
 ```javascript
 let animal = {
@@ -2806,8 +3159,6 @@ var inherit = (function (c, p) {
 
 // 或者使用 ES6 的语法糖 class/extends
 ```
-
-
 
 #### extends 创建子类
 
@@ -3399,6 +3750,8 @@ console.log(aa, bb); // 3 aaa
 
 
 #  关键字 this
+
+记住一条: 当 function 被作为 method 调用时，this指向调用对象。
 
 js中`this`随着执行环境的变化而变化, 是函数运行时, 在函数体内部自动生成的一个对象, 只能在函数体内部使用. 即, **this 是函数运行时所在的环境对象**. 注意: 箭头函数不绑定自己的 `this` .
 

@@ -384,11 +384,11 @@ render() {
 
 ### 三个阶段
 
-1. 初始渲染阶段 Mounting
+1. 初始渲染阶段 Mounting(第一次加载)
 
    这是组件即将开始其生命之旅并进入 DOM 的阶段。
 
-2. 更新阶段 Updating
+2. 更新阶段 Updating(更新渲染)
 
    一旦组件被添加到 DOM，它只有在 ==prop 或状态发生变化==时才可能更新和重新渲染。这些只发生在这个阶段。
 
@@ -401,6 +401,34 @@ render() {
 ### 七个生命周期方法
 
 原来 React 两个阶段对应的声明周期方法。
+
+根据组件加载过程:
+
+第一次渲染
+
+componentWillMount() [ React 16 建议使用 `getDerivedStateFromProps`]
+
+`<render>`
+
+componentDidMount()
+
+更新组件
+
+componentWillReceiveProps()  [ React 16 建议使用 `getDerivedStateFromProps`]
+
+shouldComponentUpdate()
+
+componentWillUpdate() [ React 16 建议使用 `getSnapshotBeforeUpdate` ]
+
+`<render>`
+
+componentDidUpdate()
+
+卸载组件
+
+componentWillUnmount()
+
+一种分类
 
 | 方法名称                     | 说明                                                         |
 | ---------------------------- | ------------------------------------------------------------ |
@@ -461,9 +489,9 @@ class Component extends React.Component {
 
 1. 在`constructor`初始化 state；
 
-2. 在`componentDidMount`中进行事件监听，并在`componentWillUnmount`中解绑事件；
+2. 在`componentDidMount`中进行**事件监听**，并在`componentWillUnmount`中解绑事件；
 
-3. 在`componentDidMount`中进行数据的请求，而不是在`componentWillMount`；
+3. 在`componentDidMount`中进行**数据的请求**，而不是在`componentWillMount`；
 
 4. 需要根据 props 更新 state 时，使用`getDerivedStateFromProps(nextProps, prevState)`；
 
