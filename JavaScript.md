@@ -924,7 +924,7 @@ console.log(arr0.concat(arr1), arr0, arr1);
 >
 > 将数组扁平化 
 
-flat 函数实现
+flat 函数实现, 返回新数组, 原数组不变.
 
 ```javascript
 Array.prototype.flat = function() {
@@ -1701,7 +1701,13 @@ bar(foo); // 1
 
 闭包在 JS 中就是一个以函数和以静态方式存储的父作用域的一个集合体。
 
+形成条件: 函数嵌套 + 内部函数引用外部函数的变量
+
 能够**读取函数局部变量的函数**就是闭包. 下面例子中, `func2`函数就是闭包.
+
+1. 可以读取父函数内部的变量
+2. 可以在父函数执行完之后还保留其内部变量
+3. 在定义时只取得变量的引用，在执行时才会实际取值
 
 ```javascript
 var func1 = () => {
@@ -1748,6 +1754,77 @@ func(); // a 1000
 1. 闭包会使函数中的局部变量在内存中, 因此会使得**内存占用过多**, 不能滥用。在退出函数前, 将不使用的局部变量全部删除。
 2. 闭包会在函数外部, 改变父函数内部变量的值, **注意不要随便改变**。
 
+##### 应用
+
+函数柯里化
+
+模块化
+
+定义私有变量
+
+```javascript
+function outer(){
+    var n = 1;
+    return {
+        get_n:function (){
+            return n;
+        },
+        set_n:function (s){
+            n = s;
+        }
+    }
+}
+var o = outer();
+console.log(o.get_n());// 1
+o.set_n(2);
+console.log(o.get_n());// 2
+```
+
+上面的代码，封装了一个“私有变量”n，在外部无法直接读写，但是可以通过get_n和set_n两个函数来读写
+
+注意:
+
+闭包内使用循环
+
+```javascript
+function outer(){
+    var result = [];
+    for(var i = 0;i < 3;i++){
+        result[i] = function (){
+            console.log(i);
+        }
+    }
+    return result;
+}
+var o = outer();
+o[0](); // 3
+o[1](); // 3
+o[2](); // 3
+```
+
+上述问题解决:
+
+将闭包修改为立即执行的函数, 传入当时的 i 值, 相当于把 i 复制了一份, 但是已经不是 outer 函数中的那个 i 了.
+
+```javascript
+function outer(){
+    var result = [];
+    for(var i = 0;i < 3;i++){
+        result[i] = (function (i){
+             return function (){
+               // 这里的 i 是对上层函数中变量 i 的引用
+                console.log(i);
+            }
+        })(i); // 调用函数 传入 i 当时的值
+    }
+    return result;
+}
+var o = outer();
+o[0]();
+o[1]();
+o[2]();
+```
+
 思考题:
 
 1. `this` 在函数中而不是方法中使用时, 指向全局对象
@@ -1765,8 +1842,7 @@ var object = {
   }
 };
 
-// 这里直接在 vscode 中执行, 所以打出来是 undefined, 可能原本是 The Window
-console.log(object.getNameFunc()()); // undefined
+console.log(object.getNameFunc()()); // 浏览器 The Window
 
 // this 打印出来如下
 /* 
@@ -2237,49 +2313,6 @@ obj.speak.bind(newObj, ['合肥', '上海'])(); // Cookie is 40 合肥, 上海*u
 >
 > call 传入参数的格式正是内部需要的格式, apply 内部多了对数组的解构(apply多了`CreateListFromArrayLike`的调用)
 
-### 手写三个函数
-
-call
-
-```javascript
-Function.prototype.call2 = function(newObj = window){
-  newObj.fn = this;
-  let args = [...arguments].slice(1);
-  let res = newObj.fn(...args);
-  delete newObj.fn;
-  return res;
-}
-```
-
-apply
-
-```javascript
-Function.prototype.apply2 = function (newObj = window) {
-  newObj.fn = this;
-  let res;
-  if (arguments[1]) res = newObj.fn(...arguments[1])
-  else res = newObj.fn()
-  delete newObj.fn;
-  return res;
-}
-```
-
-bind
-
-```javascript
-Function.prototype.bind2 = function (newObj = window) {
-  if (typeof this !== 'function') throw new Error('error')
-  let that = this;
-  let args = [...arguments].slice(1);
-  return function newFn () {
-    if (this instanceof newFn) return new that(...args, ...arguments)
-    return that.apply(newObj, args.concat(...arguments))
-  }
-}
-```
-
-
-
 # 对象 Object
 
 使用 `{}` 表示, 键必须是字符串或者 `Symbol` 类型。不是字符串的话会转换成字符串, 对象的话默认调用 toString 方法。
@@ -2378,6 +2411,8 @@ for(var prop in cat1) { alert("cat1["+prop+"]="+cat1[prop]); }
 ```
 
 ## 继承
+
+各种继承方式 https://juejin.cn/post/6914216540468576263#heading-4
 
 ### 构造函数继承
 
@@ -6288,26 +6323,6 @@ console.log("文件读取完毕");
 ### cluster
 
 ### http
-
-
-
-# 手写函数
-
-## new
-
-## instanceof
-
-## 继承（es5/es6）
-
-## 防抖节流
-
-## promise
-
-
-
-
-
-
 
 
 
