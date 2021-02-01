@@ -4890,7 +4890,7 @@ process.nextTick(function foo() {
 
 ## 浏览器中的 Event Loop
 
-
+https://mp.weixin.qq.com/s/QgfE5Km1xiEkQqADMLmj-Q
 
 # Proxy
 
