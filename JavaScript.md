@@ -1354,7 +1354,11 @@ console.log(map)                         // Map {1 => 1, 2 => 2, 3 => 3}
 
 一组不重复key的集合.ES6标准新增的数据类型.
 
-#### new/add/delete/has
+Set 在添加值时, 不会发生类型转换, 5 与 "5" 是不同的, 类似于 === 运算符, 但是不同的是, **这里 Set 在做判断时, NaN 是等于 NaN 的.**
+
+Set实例属性: constructor, size(元素个数)
+
+Set 实例方法: add/delete/has/clear(清空集合)
 
 ```javascript
 // 数组作为输入
@@ -4891,6 +4895,43 @@ process.nextTick(function foo() {
 ## 浏览器中的 Event Loop
 
 https://mp.weixin.qq.com/s/QgfE5Km1xiEkQqADMLmj-Q
+
+## 自我总结
+
+浏览器事件循环
+
+一个线程中, 事件循环是唯一的, 但是任务队列可以有多个.
+
+宏任务与微任务都在任务队列中, 都是异步任务完成后触发的事件. 执行宏任务与微任务其实是执行他们的回调.
+
+| 宏任务(macro-task tasks) | 微任务(micro-task jobs)     |
+| ------------------------ | --------------------------- |
+| script(整体代码)         | Process.nexttick            |
+| setTimeout               | Promise                     |
+| setInterval              | async/await                 |
+| setImmediate             | MutationObserver(H5 新特性) |
+| I/O                      |                             |
+| UI Render                |                             |
+
+流程
+
+![图片](images/浏览器事件循环.jpg)
+
+
+
+
+
+nodejs 事件循环
+
+| 宏任务(macro-task tasks) | 微任务(micro-task jobs) |
+| ------------------------ | ----------------------- |
+| script(整体代码)         | Process.nexttick        |
+| setTimeout               | Promise                 |
+| setInterval              |                         |
+| setImmediate             |                         |
+| I/O                      |                         |
+
+
 
 # Proxy
 
