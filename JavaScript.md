@@ -1382,7 +1382,7 @@ console.log(set.has('4'), set.has(4)); // false true
 
 
 
-### 函数 Function
+# 函数 Function
 
 函数定义是一个常规的绑定, 其中绑定的值是函数. 
 
@@ -1425,7 +1425,7 @@ console.log(func2()); // undefined
 
 每个局部作用域可以查看包含它的局部作用域, 所有局部作用域都能看见全局作用域.
 
-#### 声明表示法
+## 声明表示法
 
 函数的第二种表示法.
 
@@ -1437,7 +1437,7 @@ function square (x) {
 } // 不需要分号
 ```
 
-#### 箭头函数
+## 箭头函数
 
 函数的第三种表示法. 以较简明的方式编写小型函数表达式.
 
@@ -1450,7 +1450,7 @@ let square1 = (x) => {
 let square2 = x => x * x;
 ```
 
-##### 没有 this
+### 没有 this
 
 访问 this, 会从外部获取
 
@@ -1480,7 +1480,7 @@ let person = {
 
 
 
-##### 没有 arguments
+### 没有 arguments
 
 ```javascript
 function defer (f, ms) {
@@ -1528,19 +1528,19 @@ function defer (f, ms) {
 
 
 
-##### 不能使用 new
+### 不能使用 new
 
 因为没有 this, 就不能作为构造函数, 即不能使用 new.
 
-##### 没有 super
+### 没有 super
 
 需要知道箭头函数是如何获取 this 值的?
 
-#### 调用栈
+## 调用栈
 
 函数返回时必须跳回到调用它的位置, 所以计算机必须记住调用发生的上下文. 存储此上下文的位置是调用栈, 每次调用函数时, 当前上下文都存储在此栈的顶部.
 
-#### 可选参数
+## 可选参数
 
 多余参数自动忽略, 不足参数为 `undefined`.
 
@@ -1572,9 +1572,206 @@ console.log(square1(2, 7), square1(2));
 
 
 
-#### 执行上下文
+## 执行上下文
+
+当前 JavaScript 代码被解析和执行时所在环境的抽象概念, 即代码运行时才创建.
 
 函数在调用时在执行栈中产生的变量对象, 该对象不能直接访问, 但是可以访问其中的变量/this 对象等.
+
+### 三种类型
+
+执行上下文总共有三种类型
+
+* **全局执行上下文**：只有一个，浏览器的全局对象就是 window 对象，this 指向这个全局对象；
+* **函数执行上下文**：存在无数个，只有在函数被调用的时候才会被创建，每次调用函数都会创建一个新的执行上下文；
+* eval 函数执行上下文：指的是运行在 eval 函数中的代码，很少用且不建议使用。
+
+### 执行栈/调用栈
+
+一个先进后出的结构, 存储在代码执行期间创建的所有执行上下文。
+
+首次运行 JS 代码时，会创建一个 **全局执行上下文** 并推到当前执行栈中。每当发生**函数调用**时，引擎都会为该函数创建一个 **新的函数执行上下文** 并推到当前执行栈的栈顶。
+
+根据执行栈后进先出的规则，当栈顶函数完成后，其对应的函数执行上下文会从栈顶被推出，上下文控制权移交到当前执行栈的下一个执行上下文。
+
+代码执行过程:
+
+- 创建 **全局上下文** (global EC)
+- 全局执行上下文 (caller) 逐行 **自上而下** 执行。遇到函数时, **函数执行上下文** (callee) 被`push`到执行栈顶层
+- 函数执行上下文被激活, 成为 active EC, 开始执行函数中的代码, caller 被挂起
+- 函数执行完后, callee 被`pop`移除出执行栈, 控制权交还全局上下文 (caller), 继续执行
+
+### 执行上下文的创建
+
+#### **创建阶段**
+
+该对象包含三个部分:
+
+1. 确定 this 指向 - This Binding
+2. 确定词法环境(静态作用域/作用域链) - LexicalEnvironment 组件被创建；
+3. 确定变量环境 - VariableEnvironment 组件被创建。
+
+```javascript
+ExecutionContext = {  
+  ThisBinding = <this value>,     // 确定 this 指向
+  LexicalEnvironment = { ... },   // 词法环境
+  VariableEnvironment = { ... },  // 变量环境
+}
+```
+
+##### this 指向
+
+* **全局执行上下文中**，this 的值指向全局对象，在浏览器中 this 的值指向 window 对象，而在 nodejs 中指向这个文件的 module 对象；
+* **函数执行上下文中**，this 的值取决于函数的调用方式，具体有：默认绑定、隐式绑定、显式绑定、new 绑定、箭头函数。
+
+##### 词法环境
+
+词法环境的两个组成部分
+
+* **环境记录**：存储变量和函数声明的实际位置；
+* **对外部环境的引用**：可以访问其外部词法环境(闭包实质)。
+
+词法环境的两个类型
+
+* **全局环境**：是一个没有外部环境的词法环境，其外部环境引用为 null。拥有一个全局对象（window 对象）及其关联的方法和属性（例如数组方法）以及任何用户自定义的全局变量，this 的值指向这个全局对象；
+* **函数环境**：用户在函数中定义的变量被存储在函数环境中，包含了 arguments 对象。对外部环境的引用可以是全局环境，也可以是包含内部函数的外部函数环境。
+
+```javascript
+GlobalExectionContext = {  // 全局执行上下文
+    LexicalEnvironment: {    	// 词法环境
+        EnvironmentRecord: {   	  // 环境记录
+            Type: "Object",       // 全局环境
+        },
+        // 标识符绑定在这里 
+        outer: <null> 	      // 对外部环境的引用
+    }
+}
+
+
+FunctionExectionContext = { // 函数执行上下文
+    LexicalEnvironment: {  	   // 词法环境
+        EnvironmentRecord: {  		// 环境记录
+            Type: "Declarative",  	// 函数环境
+        },
+        // 标识符绑定在这里 	  // 对外部环境的引用
+        outer: <Global or outer function environment reference>
+    }
+}
+```
+
+##### 变量环境
+
+变量环境也是一个词法环境，因此它具有上面定义的词法环境的所有属性。
+
+在 ES6 中，词法环境和变量环境的区别在于前者用于存储函数声明和变量（let 和 const）绑定，而后者仅用于存储变量（var）绑定。
+
+使用例子进行介绍
+
+```javascript
+let a = 20;  
+const b = 30;  
+var c;
+
+function multiply(e, f) {  
+ var g = 20;  
+ return e * f * g;  
+}
+
+c = multiply(20, 30);
+```
+
+执行上下文如下所示:
+
+```javascript
+// 全局执行上下文
+GlobalExectionContext = {
+
+    ThisBinding: <Global Object>,
+
+    LexicalEnvironment: {
+        EnvironmentRecord: {
+            Type: "Object",
+            // 标识符绑定在这里  
+            a: <uninitialized >,
+            b: <uninitialized >,
+            multiply: <func >
+        },
+        outer: <null>
+    },
+
+    VariableEnvironment: {
+        EnvironmentRecord: {
+            Type: "Object",
+            // 标识符绑定在这里  
+            c: undefined, // 注意: var 这里是初始化了的
+        },
+        outer: <null>
+    }
+}  
+
+
+// 函数执行上下文
+FunctionExectionContext = {
+
+    ThisBinding: <Global Object>,
+
+    LexicalEnvironment: {
+        EnvironmentRecord: {
+            Type: "Declarative",
+            // 标识符绑定在这里  
+            Arguments: { 0: 20, 1: 30, length: 2 },
+        },
+        // 这里指向上一级词法环境(全局)
+        // 则可以使用到 a b c multiply
+        outer: <GlobalLexicalEnvironment>
+    },
+
+    VariableEnvironment: {
+        EnvironmentRecord: {
+            Type: "Declarative",
+            // 标识符绑定在这里  
+            g: undefined
+        },
+        outer: <GlobalLexicalEnvironment>
+    }
+}
+```
+
+**变量提升** 原因：在创建阶段，函数声明存储在词法环境中，而变量会被设置为 `undefined`（在 `var` 的情况下）或保持未初始化（在 `let` 和 `const` 的情况下）。所以这就是为什么可以在声明之前访问 `var` 定义的变量（尽管是 `undefined` ），但如果在声明之前访问 `let` 和 `const` 定义的变量就会提示引用错误的原因。这就是所谓的变量提升。
+
+执行上下文创建的时候, `var` 变量进行了初始化为 `undefined` , 而 `let` 和 `const` 变量没有进行初始化. 则在执行上下文执行到 `let` `const` 的声明语句之前, 访问 `let` `const` 变量, 就会报错, 而 var 变量就不会报错, 因为已经进行了初始化.
+
+```javascript
+console.log('b:', b)
+var b = 5;
+// b: undefined
+// 注意这里是 undefined
+// 运行到 var b = 5 时, 才是 5
+```
+
+注意: js 中全局 var 声明的为全局变量, 函数体内 var 声明为局部变量（函数外部访问不到）但是，函数体内未用 var 声明的为全局变量（函数外部可以使用）.
+
+```javascript
+var a, b
+(function () {
+    // 变量提升
+    console.log(a, b) // undefined undefined
+    var a = b = 3; // 等价于 var a = 3; b = 3; b 是全局变量
+    console.log(a, b); // 3 3
+    c = 5;
+})()
+// 均是全局变量
+console.log(a, b); // undefined 3
+console.log(c); // 5
+```
+
+
+
+#### **执行阶段**
+
+完成所有变量的分配, 最后执行代码. 如果 JavaScript 引擎在源代码中声明的实际位置找不到 let 变量的值，那么将为其分配 undefined 值。
+
+-----------------------
 
 作用域是在函数声明时就确定的变量访问的规则, 执行上下文是函数执行时才产生的变量的环境, **执行上下文基于作用域**进行变量的访问/函数引用等操作.
 
@@ -1595,29 +1792,13 @@ bar(10); // 2、进入bar函数上下文环境
 
 **函数调用栈**: 栈底永远是全局上下文, 栈顶是当前正在执行的上下文(活动对象), 白色是被挂起的变量对象(执行上下文)
 
-执行上下文可以简单理解为一个对象:
-
-- 它包含三个部分:
-  - 变量对象(VO)
-  - 作用域链(词法作用域)
-  - `this`指向
-- 它的类型:
-  - 全局执行上下文
-  - 函数执行上下文
-  - `eval`执行上下文
-- 代码执行过程:
-  - 创建 **全局上下文** (global EC)
-  - 全局执行上下文 (caller) 逐行 **自上而下** 执行。遇到函数时, **函数执行上下文** (callee) 被`push`到执行栈顶层
-  - 函数执行上下文被激活, 成为 active EC, 开始执行函数中的代码, caller 被挂起
-  - 函数执行完后, callee 被`pop`移除出执行栈, 控制权交还全局上下文 (caller), 继续执行
-
-##### 变量对象
+*变量对象*
 
 存储所在执行上下文中所有的变量与函数声明（不包含函数表达式）
 
 > 活动对象 (AO): 当变量对象所处的上下文为 active EC 时, 称为活动对象。
 
-##### 作用域
+*作用域*
 
 该上下文中声明的**变量与声明的作用范围**, 分为**块级作用域**与**函数作用域**。
 
@@ -1636,7 +1817,7 @@ let foo = function() { console.log(1) };
 // 结果打印：  ƒ foo() { foo = 10 ; console.log(foo) }
 ```
 
-##### 作用域链
+*作用域链*
 
 在执行上下文中访问到父级甚至全局的变量, 这便是作用域链的功劳。作用域链可以理解为一组对象列表, 包含 **父级和自身的变量对象**, 因此我们便能通过作用域链访问到父级里声明的变量或者函数。
 
