@@ -163,7 +163,7 @@ OK，经过了对 HTTP 里这三个名词的详细解释，就可以给出比「
 
 「**204 No Content**」也是常见的成功状态码，与 200 OK 基本相同，但响应头没有 body 数据。
 
-「**206 Partial Content**」是应用于 HTTP 分块下载或断电续传，表示响应返回的 body 数据并不是资源的全部，而是其中的一部分，也是服务器处理成功的状态。
+「**206 Partial Content**」是应用于 HTTP 分块下载或断点续传，表示响应返回的 body 数据并不是资源的全部，而是其中的一部分，也是服务器处理成功的状态。
 
 *3xx*
 
@@ -171,7 +171,7 @@ OK，经过了对 HTTP 里这三个名词的详细解释，就可以给出比「
 
 「**301 Moved Permanently**」表示永久重定向，说明请求的资源已经不存在了，需改用新的 URL 再次访问。
 
-「**302 Moved Permanently**」表示临时重定向，说明请求的资源还在，但暂时需要用另一个 URL 来访问。
+「**302 Found**」表示临时重定向，说明请求的资源还在，但暂时需要用另一个 URL 来访问。
 
 301 和 302 都会在响应头里使用字段 `Location`，指明后续要跳转的 URL，浏览器会自动重定向新的 URL。
 
@@ -187,6 +187,24 @@ OK，经过了对 HTTP 里这三个名词的详细解释，就可以给出比「
 
 「**404 Not Found**」表示请求的资源在服务器上不存在或未找到，所以无法提供给客户端。
 
+「**405 Method Not Allowed**」: 请求方法不被服务器端允许。
+
+「**406 Not Acceptable**」: 资源无法满足客户端的条件。
+
+**「408 Request Timeout**」: 服务器等待了太长时间。
+
+「**409 Conflict**」: 多个请求发生了冲突。
+
+**「413 Request Entity Too Large**」: 请求体的数据过大。
+
+**414 Request-URI Too Long**: 请求行里的 URI 太大。
+
+**416 Requested range not satisfiable**: 客户端请求的范围无效
+
+**429 Too Many Request**: 客户端发送的请求过多。
+
+**431 Request Header Fields Too Large**: 请求头的字段内容太大。
+
 *5xx*
 
 `5xx` 类状态码表示客户端请求报文正确，但是**服务器处理时内部发生了错误**，属于服务器端的错误码。
@@ -198,6 +216,71 @@ OK，经过了对 HTTP 里这三个名词的详细解释，就可以给出比「
 「**502 Bad Gateway**」通常是服务器作为网关或代理时返回的错误码，表示服务器自身工作正常，访问后端服务器发生了错误。
 
 「**503 Service Unavailable**」表示服务器当前很忙，暂时无法响应服务器，类似“网络服务正忙，请稍后重试”的意思。
+
+##### Accept 系列字段
+
+对于`Accept`系列字段的介绍分为四个部分: **数据格式**、**压缩方式**、**支持语言**和**字符集**。
+
+###### 数据格式
+
+上一节谈到 HTTP 灵活的特性，它支持非常多的数据格式，那么这么多格式的数据一起到达客户端，客户端怎么知道它的格式呢？
+
+当然，最低效的方式是直接猜，有没有更好的方式呢？直接指定可以吗？
+
+答案是肯定的。不过首先需要介绍一个标准——**MIME**(Multipurpose Internet Mail Extensions, **多用途互联网邮件扩展**)。它首先用在电子邮件系统中，让邮件可以发任意类型的数据，这对于 HTTP 来说也是通用的。
+
+因此，HTTP 从**MIME type**取了一部分来标记报文 body 部分的数据类型，这些类型体现在`Content-Type`这个字段，当然这是针对于发送端而言，接收端想要收到特定类型的数据，也可以用`Accept`字段。
+
+具体而言，这两个字段的取值可以分为下面几类:
+
+- text： text/html, text/plain, text/css 等
+- image: image/gif, image/jpeg, image/png 等
+- audio/video: audio/mpeg, video/mp4 等
+- application: application/json, application/javascript, application/pdf, application/octet-stream
+
+###### 压缩方式
+
+当然一般这些数据都是会进行编码压缩的，采取什么样的压缩方式就体现在了发送方的`Content-Encoding`字段上， 同样的，接收什么样的压缩方式体现在了接受方的`Accept-Encoding`字段上。这个字段的取值有下面几种：
+
+- gzip: 当今最流行的压缩格式
+- deflate: 另外一种著名的压缩格式
+- br: 一种专门为 HTTP 发明的压缩算法
+
+```
+// 发送端
+Content-Encoding: gzip
+// 接收端
+Accept-Encoding: gzip
+复制代码
+```
+
+###### 支持语言
+
+对于发送方而言，还有一个`Content-Language`字段，在需要实现国际化的方案当中，可以用来指定支持的语言，在接受方对应的字段为`Accept-Language`。如:
+
+```
+// 发送端
+Content-Language: zh-CN, zh, en
+// 接收端
+Accept-Language: zh-CN, zh, en
+复制代码
+```
+
+###### 字符集
+
+最后是一个比较特殊的字段, 在接收端对应为`Accept-Charset`，指定可以接受的字符集，而在发送端并没有对应的`Content-Charset`, 而是直接放在了`Content-Type`中，以**charset**属性指定。如:
+
+```
+// 发送端
+Content-Type: text/html; charset=utf-8
+// 接收端
+Accept-Charset: charset=utf-8
+复制代码
+```
+
+最后以一张图来总结一下吧:
+
+![img](images/Accept字段.jpg)
 
 ##### HTTP 常见字段
 
@@ -371,9 +454,11 @@ HTTP 协议里有优缺点一体的**双刃剑**，分别是「无状态、明�
 
 *2. 明文传输双刃剑*
 
+即协议里的报文(主要指的是头部)不使用二进制数据，而是文本形式。
+
 明文意味着在传输过程中的信息，是可方便阅读的，通过浏览器的 F12 控制台或 Wireshark 抓包都可以直接肉眼查看，为我们调试工作带了极大的便利性。
 
-但是这正是这样，HTTP 的所有信息都暴露在了光天化日下，相当于**信息裸奔**。在传输的漫长的过程中，信息的内容都毫无隐私可言，很容易就能被窃取，如果里面有你的账号密码信息，那**你号没了**。
+但同时也让 HTTP 的报文信息暴露给了外界，给攻击者也提供了便利。`WIFI陷阱`就是利用 HTTP 明文传输的缺点，诱导你连上热点，然后疯狂抓你所有的流量，从而拿到你的敏感信息。
 
 *3. 不安全*
 
@@ -439,7 +524,12 @@ HTTP/1.1 采用了长连接的方式，这使得管道（pipeline）网络传输
 
 因此，1.1版规定可以不使用`Content-Length`字段，而使用["分块传输编码"](https://zh.wikipedia.org/wiki/分块传输编码)（chunked transfer encoding）。只要请求或回应的头信息有`Transfer-Encoding`字段，就表明回应将由数量未定的数据块组成。
 
-```http
+设置这个字段后会自动产生两个效果:
+
+- Content-Length 字段会被忽略
+- 基于长连接持续推送动态内容
+
+```html
 Transfer-Encoding: chunked
 ```
 
@@ -463,7 +553,10 @@ con
 sequence
 
 0
+
 ```
+
+注意，`Transfer-Encoding: chunked` 及之前的为响应行和响应头，后面的内容为响应体，这两部分用换行符隔开(最后留有一个`空行`)。
 
 *5. 新增方法与 Host 字段*
 
