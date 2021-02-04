@@ -490,7 +490,11 @@ console.log(Number(null), 8 + null); // 0 8
 console.log(Object.getPrototypeOf(Object.prototype)); // null
 ```
 
+注意:
 
+**null 不是对象**。
+
+解释: 虽然 typeof null 会输出 object，但是这只是 JS 存在的一个悠久 Bug。在 JS 的最初版本中使用的是 32 位系统，为了性能考虑使用低位存储变量的类型信息，000 开头代表是对象然而 null 表示为全零，所以将它错误的判断为 object 。
 
 #### undefined
 
@@ -647,7 +651,14 @@ mixed.sort();
 
 ## 引用类型
 
-其实只有一种——Object 对象, 但是下面是又细分的几种常见的数据类型, 便于日常使用。
+引用数据类型: 对象Object
+
+- 普通对象-Object
+- 数组对象-Array
+- 正则对象-RegExp
+- 日期对象-Date
+- 数学函数-Math
+- 函数对象-Function
 
 ### 对象 Object
 
@@ -1819,6 +1830,8 @@ let foo = function() { console.log(1) };
 
 *作用域链*
 
+在ES5中只存在两种作用域————全局作用域和函数作用域, 当访问一个变量时，解释器会首先在当前作用域查找标示符，如果没有找到，就去父作用域找，直到找到该变量的标示符或者不在父作用域中，这就是作用域链. 值得注意的是，每一个子函数都会拷贝上级的作用域，形成一个作用域的链条。 
+
 在执行上下文中访问到父级甚至全局的变量, 这便是作用域链的功劳。作用域链可以理解为一组对象列表, 包含 **父级和自身的变量对象**, 因此我们便能通过作用域链访问到父级里声明的变量或者函数。
 
 - 由两部分组成:
@@ -1888,6 +1901,8 @@ bar(foo); // 1
 
 形成条件: 函数嵌套 + 内部函数引用外部函数的变量
 
+本质: 当前环境存在对父级作用域的引用.
+
 能够**读取函数局部变量的函数**就是闭包. 下面例子中, `func2`函数就是闭包.
 
 1. 可以读取父函数内部的变量
@@ -1897,6 +1912,7 @@ bar(foo); // 1
 ```javascript
 var func1 = () => {
   let a = 999;
+  // 内部变量存在父级作用域的引用
   var func2 = () => {
     return a;
   }
@@ -1909,6 +1925,7 @@ console.log(func()); // 999
 用途: 读取函数内部变量 / 让这些变量的值始终保持在内存中.
 
 ```javascript
+// 外面变量存在父级作用域的引用
 let nAdd;
 var func1 = () => {
   let a = 999;
@@ -1934,10 +1951,127 @@ func(); // a 1000
 
 这里 `nAdd` 也是一个匿名函数, 也是一个闭包, 相当于一个 `setter`, 可以在函数外部对函数内部局部变量进行操作。
 
-使用闭包的注意点:
+*使用闭包的注意点*:
 
 1. 闭包会使函数中的局部变量在内存中, 因此会使得**内存占用过多**, 不能滥用。在退出函数前, 将不使用的局部变量全部删除。
 2. 闭包会在函数外部, 改变父函数内部变量的值, **注意不要随便改变**。
+
+*闭包表现形式*:
+
+1. 返回一个函数。刚刚已经举例。
+2. 作为函数参数传递
+
+```js
+var a = 1;
+function foo(){
+  var a = 2;
+  function baz(){
+    console.log(a);
+  }
+  bar(baz);
+}
+function bar(fn){
+  // 这就是闭包
+  fn();
+}
+// 输出2，而不是1
+foo();
+```
+
+3. 在定时器、事件监听、Ajax请求、跨窗口通信、Web Workers或者任何异步中，只要使用了回调函数，实际上就是在使用闭包。
+
+   以下的闭包保存的仅仅是 `window` 和当前作用域。
+
+```js
+// 定时器
+setTimeout(function timeHandler(){
+  console.log('111');
+}，100)
+
+// 事件监听
+$('#app').click(function(){
+  console.log('DOM Listener');
+})
+```
+
+4. IIFE(立即执行函数表达式)创建闭包, 保存了`全局作用域 window`和`当前函数的作用域`，因此可以全局的变量。
+
+```js
+var a = 2;
+(function IIFE(){
+  // 输出2
+  console.log(a);
+})();
+```
+
+*解决循环输出问题*:
+
+```js
+for(var i = 1; i <= 5; i ++){
+  setTimeout(function timer(){
+    console.log(i)
+  }, 0)
+}
+```
+
+为什么会全部输出6？如何改进，让它输出1，2，3，4，5？(方法越多越好)
+
+因为setTimeout为宏任务，由于JS中单线程eventLoop机制，在主线程同步任务执行完后才去执行宏任务，因此循环结束后setTimeout中的回调才依次执行，但输出i的时候当前作用域没有，往上一级再找，发现了i,此时循环已经结束，i变成了6。因此会全部输出6。
+
+解决方法：
+
+1、利用IIFE(立即执行函数表达式)当每次for循环时，把此时的i变量传递到定时器中
+
+```js
+for(var i = 1;i <= 5;i++){
+  (function(j){
+    setTimeout(function timer(){
+      console.log(j)
+    }, 0)
+  })(i)
+}
+```
+
+2、给定时器传入第三个参数, 作为timer函数的第一个函数参数
+
+```js
+for(var i=1;i<=5;i++){
+  setTimeout(function timer(j){
+    console.log(j)
+  }, 0, i)
+}
+```
+
+3、使用ES6中的let
+
+```js
+for(let i = 1; i <= 5; i++){
+  setTimeout(function timer(){
+    console.log(i)
+  },0)
+}
+```
+
+let使JS发生革命性的变化，让JS由函数作用域变为了块级作用域，用 `let` 后作用域链不复存在。代码的作用域以块级为单位，以上面代码为例:
+
+```javascript
+// i = 1
+{
+  setTimeout(function timer(){
+    console.log(1)
+  },0)
+}
+// i = 2
+{
+  setTimeout(function timer(){
+    console.log(2)
+  },0)
+}
+// i = 3
+...
+```
+
+因此能输出正确的结果。
 
 ##### 应用
 
@@ -2125,33 +2259,64 @@ console.log(eval(new String(777))); // [String: '777']
 
 判断变量数据类型
 
-### 大致判断 
+### 使用 `typeof` 操作符判断基本类型
 
-使用 `typeof` 操作符
+原始类型显示正确类型(除了 null)
 
 ```javascript
-console.log(
-  // 通用数据类型
-	typeof 'jinling' + '\n' +  // string
-	typeof 23 + '\n' + // number
-	typeof true + '\n' +  // boolean
-	typeof [1, 2, 3] + '\n' + // object
-	typeof {k1:'v1', k2:'v2'} + '\n' // object
-  // 特殊字符类型
-  typeof null + '\n' + // object
-	typeof undefined + '\n' + // undefined
-	typeof NaN + '\n' // number
-)
+typeof 1 // 'number'
+typeof NaN // 'number'
+typeof '1' // 'string'
+typeof undefined // 'undefined'
+typeof true // 'boolean'
+typeof Symbol() // 'symbol'
+// 历史遗留原因
+typeof null // 'object'
+```
 
-// undefined与null值相同, 但类型不同
-console.log(undefined===null, undefined==null); // false true
+引用类型显示 object (函数显示 function)
+
+```javascript
+typeof [] // 'object'
+typeof {} // 'object'
+typeof console.log // 'function'
 
 // 判断数组可以用 Array.isArray
 console.log(Array.isArray([1, 2, 3])) // true
-console.log(Array.isArray({k1:'v1', k2:'v2'})) // false
 ```
 
-### 细分判断
+### 使用 instanceof 判断对象
+
+使用 typeof 无法判断对象数据类型, 使用 instanceof 更好, 在对象的原型链上查找函数的原型, 找到即为 true
+
+```javascript
+const Person = function() {}
+const p1 = new Person()
+p1 instanceof Person // true
+
+var str1 = 'hello world'
+str1 instanceof String // false
+
+var str2 = new String('hello world')
+str2 instanceof String // true
+```
+
+### 使用 instanceof 判断基本类型
+
+自定义instanceof行为的一种方式，这里将原有的instanceof方法重定义，换成了typeof，因此能够判断基本数据类型。
+
+看[MDN上关于hasInstance的解释](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/hasInstance)。
+
+```javascript
+class PrimitiveNumber {
+  static [Symbol.hasInstance](x) {
+    return typeof x === 'number'
+  }
+}
+console.log(111 instanceof PrimitiveNumber) // true
+```
+
+### 判断封装
 
 - 基本类型(`null`): 使用 `String(XXX)` 是否为 `null`, 因为 `String(null)=== 'null'`
 - 基本类型(`string / number / boolean / undefined`) + `function`: 直接使用 `typeof` 即可
@@ -2173,9 +2338,21 @@ function type(obj) {
 
 ## 类型转换
 
+类型转换只有三种:
+
+1. 转换为数字
+2. 转换为布尔值
+3. 转换为字符串
+
+相关规则:
+
+![img](images/类型转换.jpg)
+
+转换时机:
+
  JS 中在使用**运算符**或者**对比符**时, 会自带**隐式转换**, 规则如下:
 
-- -、*、/、% ：一律转换成数值后计算
+- -、*、/、%、== ：一律转换成数值后计算
 - +：
   - 数字 + 字符串 = 字符串, 运算顺序是从左到右
   - 数字 + 对象, 优先调用对象的`valueOf` -> `toString`
@@ -2184,6 +2361,52 @@ function type(obj) {
 - `[1].toString() === '1'`
 - `{}.toString() === '[object object]'`
 - `NaN` !== `NaN` 、`+undefined 为 NaN`
+- []==![] 两边均转为数字, 左边 [] 转为数字 0 , 右边 ![] 先转换为布尔值再为数字, []->true, ![]->false->0
+
+对象转原始类型:
+
+函数调用顺序如下, 有一个有返回值的则返回, 都没有返回值则抛错.
+
+1. 调用 [Symbol.toPrimitive]
+2. 调用 valueof()
+3. 调用 toString()
+
+```javascript
+var obj = {
+  value: 3,
+  valueOf() {
+    return 4;
+  },
+  toString() {
+    return '5'
+  },
+  [Symbol.toPrimitive]() {
+    return 6
+  }
+}
+console.log(obj + 1); // 输出7
+```
+
+应用:
+
+让 `if(a == 1 && a == 2)` 条件成立
+
+让变量为对象, 在与数字相比较的过程中, 对象会先隐式转换为字符串, 再与数字比较.
+
+这里重写 valueOf 方法, 使得每调用一次, value 就自增 1 .
+
+```javascript
+var a = {
+  value: 0,
+  valueOf: function() {
+    this.value++;
+    return this.value;
+  }
+};
+console.log(a == 1 && a == 2);//true
+```
+
+
 
 ## 比较运算符
 
@@ -2191,13 +2414,21 @@ function type(obj) {
 
 **相等操作符**，只会对比两个值是否相等，相等则会返回 true。在这种情况下，如果对比的值类型不同，则会自动将值隐式转换成一种常见的类型。
 
+== 转换规则如下:
+
+- 两边的类型是否相同，相同的话就比较值的大小，例如1==2，返回false
+- 判断的是否是null和undefined，是的话就返回true
+- 判断的类型是否是String和Number，是的话，把String类型转换成Number，再进行比较
+- 判断其中一方是否是Boolean，是的话就把Boolean转换成Number，再进行比较
+- 如果其中一方为Object，且另一方为String、Number或者Symbol，会将Object转换成字符串，再进行比较
+
 ```javascript
 console.log(1 == '1') // true
-console.log(true == 'true') // false
+console.log(true == 'true') // false true转为number
 console.log(NaN == 'NaN') // false
 console.log(NaN == NaN) // false
 console.log(-0 == 0) // true
-console.log(0 == '0') // true
+console.log(0 == '0') // true string转number
 console.log(undefined == undefined) // true
 console.log({ name: "Tom" } == { name: "Tom" }) // false
 
@@ -2242,6 +2473,23 @@ console.log({ name: "Tom" } === { name: "Tom" }) // false
 * 两个操作值如果引用同一个对象，返回 true，否则 false
 
 ### Object.is()（同值相等）
+
+Object在严格等于的基础上修复了一些特殊情况下的失误，具体来说就是+0和-0，NaN和NaN。
+
+源码:
+
+```javascript
+function is(x, y) {
+  if (x === y) {
+    //运行到1/x === 1/y的时候x和y都为0，但是1/+0 = +Infinity， 1/-0 = -Infinity, 是不一样的
+    return x !== 0 || y !== 0 || 1 / x === 1 / y;
+  } else {
+    //NaN===NaN是false,这是不对的，我们在这里做一个拦截，x !== x，那么一定是 NaN, y 同理
+    //两个都是NaN的时候返回true
+    return x !== x && y !== y;
+  }
+}
+```
 
 **同值相等**，是比较运算符中的一份子。在检查两个操作值是否相等时，用到了以下规则：
 
@@ -2636,10 +2884,13 @@ function Cat(name,color){
    alert(cat1.species); // 动物
    ```
 
-2. prototype 模式
+   优点: `Parent` 中的属性不会被子类共享, 不会出现实例改动父类属性而导致父类属性改变的情况.
+
+   缺点: 无法拿到 `Parent.prototype` 中的属性与方法
+
+2. `prototype` 模式(原型链)
 
    ```javascript
-   
    function Animal(){
      this.species = "动物"
    }
@@ -2671,6 +2922,108 @@ function Cat(name,color){
    ```javascript
    o.prototype.constructor = o;
    ```
+
+   优点: 拿到 Parent.prototype 中的属性与方法
+
+   缺点: Parent 中的属性被共享
+
+   
+
+   > 组合继承 (前面两种方法的组合版本)
+
+   ```javascript
+     function Parent3 () {
+       this.name = 'parent3';
+       this.play = [1, 2, 3];
+     }
+     function Child3() {
+       Parent3.call(this);
+       this.type = 'child3';
+     }
+     Child3.prototype = new Parent3();
+     var s3 = new Child3();
+     var s4 = new Child3();
+     s3.play.push(4);
+     console.log(s3.play, s4.play);
+   // [1,2,3,4] [1,2,3]
+   ```
+
+   优点: 父类属性不共享 + Parent.prototype 方法可用
+
+   缺点: Parent 的构造函数多执行了一次(`Child3.prototype = new Parent3();`)
+
+   > 组合继承的优化1
+
+   ```javascript
+     function Parent4 () {
+       this.name = 'parent4';
+       this.play = [1, 2, 3];
+     }
+     function Child4() {
+       Parent4.call(this);
+       this.type = 'child4';
+     }
+     // 这里不用多使用 new 构造父类实例来获取 Parent.prototype
+     // 而是直接指向 这样父类的构造函数只执行了一次
+     Child4.prototype = Parent4.prototype;
+     // 同时修改子类原型对象的构造函数指向
+     Child4.prototype.constructor = Child4;
+   ```
+
+   > 组合继承的优化2(最推荐, 也叫 **寄生组合继承**)
+
+   ```javascript
+     function Parent5 () {
+       this.name = 'parent5';
+       this.play = [1, 2, 3];
+     }
+     function Child5() {
+       Parent5.call(this);
+       this.type = 'child5';
+     }
+     Child5.prototype = Object.create(Parent5.prototype);
+     Child5.prototype.constructor = Child5;
+   ```
+
+   其中, `Object.create`的实现细节是:
+
+   ```javascript
+   function create(p){
+     // 利用空对象做中介 在 Child.prototype 和 Parent.prototype 中间加了一层 fn 实例
+     function fn(){}
+     fn.prototype = p;
+     return new fn();
+   }
+   ```
+
+   
+
+   *继承的问题*
+
+   继承的最大问题在于：无法决定继承哪些属性，所有属性都得继承。
+
+   当然你可能会说，可以再创建一个父类啊，把加油的方法给去掉，但是这也是有问题的，一方面父类是无法描述所有子类的细节情况的，为了不同的子类特性去增加不同的父类，`代码势必会大量重复`，另一方面一旦子类有所变动，父类也要进行相应的更新，`代码的耦合性太高`，维护性不好。
+
+   使用**组合**思想解决继承的问题
+
+   先设计一系列零件, 将零件进行拼装, 用来形成不同的实例或者类.
+
+   ```javascript
+   function drive(){
+     console.log("wuwuwu!");
+   }
+   function music(){
+     console.log("lalala!")
+   }
+   function addOil(){
+     console.log("哦哟！")
+   }
+   
+   let car = compose(drive, music, addOil);
+   let newEnergyCar = compose(drive, music);
+   ```
+
+   
 
 3. 直接继承 prototype
 

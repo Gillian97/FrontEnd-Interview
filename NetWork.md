@@ -1,8 +1,8 @@
 #  HTTP
 
-> HTTP 协议入门——阮一峰
+> [HTTP 协议入门——阮一峰](http://www.ruanyifeng.com/blog/2016/08/http.html)
 >
-> http://www.ruanyifeng.com/blog/2016/08/http.html
+> [神三元的博客](https://juejin.cn/post/6844904100035821575#heading-93)
 
 ## TLS/SSL
 
