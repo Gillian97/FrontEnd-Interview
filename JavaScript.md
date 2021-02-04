@@ -666,7 +666,7 @@ mixed.sort();
 
 ### 数组 Array
 
-#### 创建
+*创建*
 
 ```javascript
 let arr0 = []; // 字面
@@ -706,7 +706,7 @@ let res = range(1, 10, 3);
 console.log(res); // [ 1, 4, 7, 10 ]
 ```
 
-#### 属性
+*属性*
 
 `length`
 
@@ -732,9 +732,11 @@ if (test.constructor == Array){
 
 #### 方法
 
+高阶函数: `一个函数`就可以接收另一个函数作为参数或者返回值为一个函数，`这种函数`就称之为高阶函数。
+
 ##### 改变原数组
 
-**Array.sort()**
+**Array.sort()  [高阶]**
 
 > 对数组元素进行排序, 默认是字符串顺序, 即会将数组元素转变为字符串, 然后比较字符串中字符的 UTF-1编码顺序来进行排序.
 >
@@ -747,41 +749,39 @@ console.log(arr); // [ 'Bob', 'are', 'good', 'google', 'hi', 'you' ]
 ```
 
 > 添加比值函数, 使得能对**数字进行排序**.
->
+
+参数: 一个比值函数, 默认两个 参数分别代表两个比较的函数
+
+```javascript
+let nums = [2, 3, 1];
+//两个比较的元素分别为a, b
+nums.sort(function(a, b) {
+  if(a > b) return 1; // 大于 0, a 排在 b 后面
+  else if(a < b) return -1; // 小于 0, a 排在 b 前面
+  else if(a == b) return 0;
+})
+```
+
+示例:
 
 ```javascript
 // 不使用比值函数
 let arr = [3, 7, 9, 1, 0, 12, 34, 76, 91];
 arr.sort();
 console.log(arr); 
-/* 
-[
-  0, 1, 12, 3, 34, 
-  7, 76, 9, 91
-]
-*/
+/* [0, 1, 12, 3, 34, 7, 76, 9, 91 ] */
 
 // 使用比值函数 倒序
 let arr = [3, 7, 9, 1, 0, 12, 34, 76, 91];
 arr.sort((a, b) => b - a);
 console.log(arr);
-/*
-[
-  91, 76, 34, 12, 9, 
-   7, 3, 1, 0
-]
-*/
+/* [91, 76, 34, 12, 9, 7, 3, 1, 0] */
 
 // 使用比值函数 正序
 let arr = [3, 7, 9, 1, 0, 12, 34, 76, 91];
 arr.sort((a, b) => a - b);
 console.log(arr); 
-/*
-[
-   0, 1, 3, 7, 9, 
-  12, 34, 76, 91
-]
-*/
+/* [0, 1, 3, 7, 9, 12, 34, 76, 91] */
 ```
 
 **Array.pop()**
@@ -974,6 +974,66 @@ console.log(arr.flat(Infinity));
 ]*/
 ```
 
+> 其他数组扁平化的方法
+
+```javascript
+let ary = [1, [2, [3, [4, 5]]], 6];// -> [1, 2, 3, 4, 5, 6]
+let str = JSON.stringify(ary);
+```
+
+replace+split
+
+```javascript
+ary = str.replace(/(\[|\])/g,'').split(',')
+```
+
+Replace + JSON.parse
+
+```javascript
+str = str.replace(/(\[|\])/g, '');
+str = '[' + str + ']';
+ary = JSON.parse(str);
+```
+
+普通递归
+
+```js
+let result = [];
+let fn = function(ary) {
+  for(let i = 0; i < ary.length; i++) {
+    let item = ary[i];
+    if (Array.isArray(ary[i])){
+      fn(item);
+    } else {
+      result.push(item);
+    }
+  }
+}
+```
+
+利用reduce函数迭代
+
+```js
+function flatten(ary) {
+    return ary.reduce((pre, cur) => {
+        return pre.concat(Array.isArray(cur) ? flatten(cur) : cur);
+    }, []);
+}
+let ary = [1, 2, [3, 4], [5, [6, 7]]]
+console.log(flatten(ary))
+```
+
+扩展运算符
+
+```js
+//只要有一个元素有数组，那么循环继续
+while (ary.some(Array.isArray)) {
+  ary = [].concat(...ary);
+}
+```
+
+
+
 **Array.join()**  默认使用 `, ` 为分隔符
 
 > `toString` 所有 JavaScript 对象都拥有`toString()`方法
@@ -988,32 +1048,42 @@ console.log(arr0.join('*')); // 1*2*3*4
 console.log(arr0); // [ 1, 2, 3, 4 ]
 ```
 
-**Array.map()**
+**Array.map()  [高阶]**
 
-> 对数组的每个元素均执行函数, 对其做一些处理, 来生成新数组. **不改变原数组**.
+> 对数组的每个元素均执行函数, 对其做一些处理, 来**生成新数组.** **不改变原数组**.
+
+使用:
+
+map((val, index, arr)=>{}[, thisArg]) 
+
+thisArg: 回调函数的this值
 
 ```javascript
 let arr = [1, 2, 'ok', 'fine', 'you', 'bye']
 let arr2 = arr.map((val, index, array) => {
-  return val + '*' + index;
+  return val + '*' + index; // 注意这里的 return 返回新元素
 });
 // 原数组不变
 console.log(arr2, arr);
 // [ '1*0', '2*1', 'ok*2', 'fine*3', 'you*4', 'bye*5' ] [ 1, 2, 'ok', 'fine', 'you', 'bye' ]
 
 var arr = [1, 2, 3, 4, 5]
-let a = arr.map(c => c - 1);
+let a = arr.map(c => c - 1); // 返回新数组
 console.log(a); // [ 0, 1, 2, 3, 4 ]
 ```
 
-**Array.filter()**
+**Array.filter()  [高阶] **
+
+使用:
+
+一个函数
 
 > 对数组的每个元素均执行函数, 筛选符合条件的元素来生成新数组.**不改变原数组**.
 
 ```javascript
 let arr = [1, 2, 'ok', 'fine', 'you', 'bye']
 let arr2 = arr.filter((val, index, array) => {
-  return typeof val == 'string';
+  return typeof val == 'string'; // 返回符合条件的元素组成新数组
 });
 console.log(arr2, arr);
 // [ 'ok', 'fine', 'you', 'bye' ] [ 1, 2, 'ok', 'fine', 'you', 'bye' ]
@@ -1035,7 +1105,14 @@ arr.forEach((val, index, array) => {
 console.log(s); // 1/0 2/1 ok/2 fine/3 you/4 bye/5 
 ```
 
-**Array.reduce()**
+注意: 在 forEach 函数中使用 return 不会返回, 函数会继续执行
+
+中断方法:
+
+- try catch 中断地方抛出异常
+- 官方推荐方法（替换方法）：用every和some替代forEach函数。every在碰到return false的时候，中止循环。some在碰到return true的时候，中止循环
+
+**Array.reduce()  [高阶] **
 
 > 参数`total` 默认是数组的第一个元素, 可以设置初始值.
 
@@ -1043,7 +1120,7 @@ console.log(s); // 1/0 2/1 ok/2 fine/3 you/4 bye/5
 let arr = ['bye', 'hi', 'ok', 'fine', 'you', 'bye']
 let res = arr.reduce((total, val, index, array) => {
   console.log("total=", total, val, index); // 从index=1开始打印
-  return total + '*' + val;
+  return total + '*' + val; // 注意这里 return 结果, 作为下一次的初始结果
 });
 console.log(res, arr);
 /*
@@ -1259,7 +1336,53 @@ arr.sort(function () {
 });
 ```
 
+#### 判断数组中是否有某个元素
 
+1. **array.indexof**
+
+   > 此方法判断数组中是否存在某个值，如果存在，则返回数组元素的下标，否则返回-1。
+
+   ```js
+   var arr=[1,2,3,4];
+   var index=arr.indexOf(3);
+   console.log(index);
+   ```
+
+2. **array.includes(searcElement[,fromIndex])**
+
+   > 此方法判断数组中是否存在某个值，如果存在返回true，否则返回false
+
+   ```js
+   var arr=[1,2,3,4];
+   if(arr.includes(3))
+       console.log("存在");
+   else
+       console.log("不存在");
+   ```
+
+3. **array.find(callback[,thisArg])**
+
+   > 返回数组中满足条件的**第一个元素的值**，如果没有，返回undefined
+
+   ```js
+   var arr=[1,2,3,4];
+   var result = arr.find(item =>{
+       return item > 3
+   });
+   console.log(result);
+   ```
+
+4. **array.findeIndex(callback[,thisArg])**
+
+   > 返回数组中满足条件的第一个元素的下标，如果没有找到，返回`-1`
+
+   ```js
+   var arr=[1,2,3,4];
+   var result = arr.findIndex(item =>{
+       return item > 3
+   });
+   console.log(result);
+   ```
 
 #### 伪数组
 
@@ -2207,7 +2330,7 @@ console.log(object.getNameFunc()()); // My Object
 对应于传递给函数的参数的类数组对象, 是所有非箭头函数中可用的局部变量, 可以使用它来引用函数的参数.
 
 1. arguments 参数可以被设置
-2. 不是一个 Array, 只是类似, 类型是 object
+2. 不是一个 Array, 只是类似, 类型是 object, 类数组
 3. 只有  length 和索引元素功能
 4. 可以被转换为真正的数组
 
@@ -2219,20 +2342,24 @@ function unique (a, b, c, d, e) {
   arguments[4][0] = 'Mary';
   console.log(arguments[1], arguments[4]); // 3 [ 'Mary', 'hi', 'go' ]
 
-  // arguments转换为数组
+  // arguments转换为数组的几种方法
+  
+  // 方法一
   let args0 = Array.prototype.slice.call(arguments);
+  // 类似方法一
   let args1 = [].slice.call(arguments);
   // 对参数使用slice会阻止某些JavaScript引擎中的优化 (比如 V8 - 更多信息)
   // 注重性能 使用被忽视的Array构造函数作为一个函数
-  let args = (arguments.length === 1 ? [arguments[0]] : Array.apply(null, arguments));
-  console.log('ES6', args0, args1, '遍历对象构造数组', args);
-  // ES6 [ 1, 3, 3, 4, [ 'Mary', 'hi', 'go' ] ] [ 1, 3, 3, 4, [ 'Mary', 'hi', 'go' ] ] 遍历对象构造数组 [ 1, 3, 3, 4, [ 'Mary', 'hi', 'go' ] ]
+  
+  // 方法二
+  let args = (arguments.length === 1 ? [arguments[0]] : Array.prototype.concat.apply([], arguments));
   
   // ES6
+  // 方法三
   let args3 = Array.from(arguments);
+  
+  // 方法四
   let args4 = [...arguments];
-  console.log('ES5', args3, args4);
-  // ES6 [ 1, 3, 3, 4, [ 'Mary', 'hi', 'go' ] ] [ 1, 3, 3, 4, [ 'Mary', 'hi', 'go' ] ]
   
   console.log(typeof arguments); // object
 }
@@ -4328,7 +4455,26 @@ console.log(aa, bb); // 3 aaa
 
 js中`this`随着执行环境的变化而变化, 是函数运行时, 在函数体内部自动生成的一个对象, 只能在函数体内部使用. 即, **this 是函数运行时所在的环境对象**. 注意: 箭头函数不绑定自己的 `this` .
 
-## 单独使用
+显式绑定: call/apply/bind
+
+隐式绑定:
+
+- 全局上下文(默认绑定) : 全局对象(严格模式有无均指全局对象)
+- 直接调用函数: 全局对象(严格模式undefined)
+- 对象.方法的形式调用: 方法所在对象
+- DOM 事件绑定(特殊) 
+  - onclick和addEventerListener中 this 默认指向绑定事件的元素。
+  - IE比较奇异，使用attachEvent，里面的this默认指向window
+- new 构造函数绑定: new 之后生成的实例对象
+- 箭头函数:
+  - 没有this 不能绑定
+  - 里面 this 指向最近的非箭头函数的 this, 找不到就是 window(严格模式是 undefined)
+
+优先级:
+
+new > call/apply/bind > 对象.方法 > 直接调用
+
+## 单独使用(全局上下文)
 
 无论有无严格模式, `this`始终指向全局对象. 浏览器中, 全局对象为`[object Window]`
 
@@ -4338,6 +4484,8 @@ console.log(this); // {}
 ```
 
 ## 纯粹的函数调用
+
+**默认绑定**
 
 函数中, 默认`this`指向全局对象
 
@@ -5732,16 +5880,65 @@ console.log(Object.assign({ a: 1 }, undefined)); // { a: 1 }
 
 #### 浅拷贝：仅仅拷贝对象的引用
 
+注意: 浅拷贝只能拷贝一层对象, 如果有对象的嵌套则不能拷贝, 会指向同一处引用
+
+- 手动实现
+
+  ```javascript
+  const shallowClone = (target) => {
+    if (typeof target === 'object' && target !== null) {
+      const cloneTarget = Array.isArray(target) ? []: {};
+      for (let prop in target) {
+        if (target.hasOwnProperty(prop)) {
+            cloneTarget[prop] = target[prop];
+        }
+      }
+      return cloneTarget;
+    } else {
+      return target;
+    }
+  }
+  ```
+
 - 使用 Object.assign()
+
+  拷贝的是对象属性的引用, 而不是对象本身
 
   ```javascript
   let obj = { a: 1, b: 2 }
-  let newObj = Object.assign({}, obj)
-  console.log(newObj); // { a: 1, b: 2 }
+  let newObj = Object.assign({}, obj) // newObj { a: 1, b: 2 }
+  newObj.a = 5;
+  console.log(newObj); // { a: 5, b: 2 }
   console.log(newObj === obj); // false
+  
+  let obj = { name: 'sy', age: 18 };
+  const obj2 = Object.assign({}, obj, {name: 'sss'});
+  // 出现了属性值的覆盖
+  console.log(obj2);//{ name: 'sss', age: 18 }
+  ```
+
+- concat 浅拷贝数组
+
+  ```javascript
+  let arr = [1, 2, 3, 4]
+  let newArr = arr.concat();
+  newArr[1] = 100;
+  console.log(newArr, arr);
+  // [ 1, 100, 3, 4 ] [ 1, 2, 3, 4 ]
+  ```
+
+- slice 浅拷贝
+
+  ```javascript
+  let newArr = [1, 2, 3].slice();
   ```
 
 - 使用展开运算符(...)
+
+  ```javascript
+  let arr = [1, 2, 3];
+  let newArr = [...arr];//跟arr.slice()是一样的效果
+  ```
 
 #### 深拷贝: 完整拷贝对象, 是另一个新对象.
 
@@ -5769,10 +5966,20 @@ log(newObj, obj);
 
 **对象的深拷贝实现**
 
-- 使用 `JSON.parse` 与 `JSON.stringify` ：性能最快
+- `JSON.parse(JSON.stringify(obj))`：性能最快
 
   - 具有循环引用的对象时, 报错
-  - 当值为函数、undefined 或 symbol 时, 无法拷贝
+
+    ```javascript
+    const a = {val:2};
+    a.target = a;
+    ```
+
+    拷贝a会出现系统栈溢出，因为出现了`无限递归`的情况。
+
+  - 无法拷贝一些特殊的对象`，诸如 RegExp, Date, Set, Map, undefined 或 symbol 时, 无法拷贝
+
+  - 无法拷贝函数
 
   ```javascript
   const log = console.log;
@@ -5786,6 +5993,62 @@ log(newObj, obj);
   ```
 
 - 递归进行逐一赋值
+
+  ```javascript
+  const deepClone = (target) => {
+    if (typeof target === 'object' && target !== null) {
+      const cloneTarget = Array.isArray(target) ? []: {};
+      for (let prop in target) {
+        // 筛选出 target 的本地属性
+        if (target.hasOwnProperty(prop)) {
+            cloneTarget[prop] = deepClone(target[prop]);
+        }
+      }
+      return cloneTarget;
+    } else {
+      return target;
+    }
+  }
+```
+  
+  解决循环引用, 创建 map 记录已经拷贝过的对象
+  
+  ```javascript
+  const isObject = (target) => (typeof target === 'object' || typeof target === 'function') && target !== null;
+  
+  const deepClone = (target, map = new Map()) => { 
+    if(map.get(target))  
+      return target; 
+   
+   
+    if (isObject(target)) { 
+      map.set(target, true); 
+      const cloneTarget = Array.isArray(target) ? []: {}; 
+      for (let prop in target) { 
+        if (target.hasOwnProperty(prop)) { 
+            cloneTarget[prop] = deepClone(target[prop],map); 
+        } 
+      } 
+      return cloneTarget; 
+    } else { 
+      return target; 
+    } 
+  }
+  ```
+  
+  但是, map 上的 key 和 map 构成了`强引用关系`. 被弱引用的对象可以在`任何时候被回收`，而对于强引用来说，只要这个强引用还在，那么对象`无法被回收`。
+  
+  解决方法:
+  
+  让 map 的 key 和 map 构成`弱引用`即可。ES6给我们提供了这样的数据结构，它的名字叫`WeakMap`，它是一种特殊的Map, 其中的键是`弱引用`的。其键必须是对象，而值可以是任意的。
+  
+  ```javascript
+  const deepClone = (target, map = new WeakMap()) => {
+    //...
+  }
+  ```
+  
+  
 
 ## Object.defineProperty()
 

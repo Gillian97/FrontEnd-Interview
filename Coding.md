@@ -182,6 +182,7 @@ function wideTraversal (node) {
 
 ```javascript
 function New(fn, ...args) {
+  if(typeof fn !== "function") throw 'type error'
   const obj = Object.create(fn.prototype);
   const result = fn.apply(obj, args);
   if (result && (typeof result === "object" || typeof result === "function"))
@@ -588,9 +589,23 @@ Function.prototype.call2 = function(newObj = window){
   delete newObj.fn;
   return res;
 }
+
+Function.prototype.call = function (context, ...args) {
+  let context = context || window;
+  // 避免原本有个函数叫 fn, 最后给人家删除了
+  let fn = Symbol('fn');
+  context.fn = this;
+
+  let result = eval('context.fn(...args)');
+
+  delete context.fn
+  return result;
+}
 ```
 
 apply
+
+在 newObj 中新增一个属性, 并传参调用这个属性对应的函数, 返回结果
 
 ```javascript
 Function.prototype.apply2 = function (newObj = window) {
@@ -612,7 +627,9 @@ https://blog.csdn.net/jiaojsun/article/details/93411428
 // 需要找到目标函数的原型对象
 Function.prototype.bind2 = function (newObj = window, ...args1) {
   if (typeof this !== 'function') throw new Error('error')
+  // 保存 this 的值 代表调用 bind 的函数
   let that = this;
+  
   let newFunc = function(...args2){
     that.apply(newObj, [...args1, ...args2])
   }
