@@ -2,6 +2,63 @@
 
 ## 算法
 
+### 二分查找
+
+有序数组查找第一个大于等于目标值的元素下标(位置从1开始)
+
+```javascript
+/**
+ * 二分查找
+ * @param n int整型 数组长度
+ * @param v int整型 查找值
+ * @param a int整型一维数组 有序数组
+ * @return int整型
+ */
+function upper_bound_( n ,  v ,  a ) {
+    // 不存在目标元素
+    if(v>a[n-1]) return n+1;
+    let left = 0, right = n -1, mid;
+    // 最后只有一个值符合条件
+    // 注意修改二分查找的细微判断条件
+    while(left < right){
+        mid = left + Math.floor((right - left)/2);
+        if(a[mid] < v){
+            left = mid+ 1;
+        }else if(a[mid] >= v){
+            right = mid;
+        }
+    }
+    return left+1;
+}
+module.exports = {
+    upper_bound_ : upper_bound_
+};
+```
+
+最长无重复子串
+
+```javascript
+// 找到左右长度， 然后取最长
+function maxLength( arr ) {
+    // write code here
+    let n = arr.length;
+    let set = new Set() // 存储左右指针之间的不同元素集合
+    let right = 0;
+    let maxL = 0;
+    for(let i = 0;i<n;i++){
+        while(!set.has(arr[right])){
+            set.add(arr[right])
+            right++;
+        }
+        maxL = Math.max(maxL, set.size)
+        set.delete(arr[i])
+    }
+    return maxL
+}
+```
+
+
+
 ### 两数之和
 
 ```javascript
@@ -48,8 +105,6 @@ function zeroMove (arr) {
 
 
 ### 二叉树
-
-### 二分查找
 
 ### LRU
 
