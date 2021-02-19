@@ -1893,6 +1893,8 @@ function Home() {
 
 # diff 算法
 
+react 将 virtual dom 树转换为 actual dom 树的最少操作的过程称之为调和(reconciliation), diff 算法是调和的具体体现.
+
 通过 diff 算法计算 vdom 新旧的差异, 从而更新变化的部分到 dom 上.
 
 ## 传统的diff算法
@@ -1969,9 +1971,9 @@ React 是基于组件构建应用的, 组件的比较也是简洁高效.
 
    将该组件判断为 dirty component, 替换整个组件下的所有子节点
 
-如下图，当 component D 改变为 component G 时，即使这两个 component 结构相似，一旦 React 判断 D 和 G 是不同类型的组件，就**不会比较二者的结构**，而是直接删除 component D，重新创建 component G 以及其子节点。
+如下图，当 component D 改变为 component G 时，即使这两个 component 结构相似，一旦 **React 判断 D 和 G 是不同类型的组件，就不会比较二者的结构**，而是直接删除 component D，重新创建 component G 以及其子节点。
 
-虽然当两个 component 是不同类型但结构相似时，React diff 会影响性能，但正如 React 官方博客所言：不同类型的 component 是很少存在相似 DOM tree 的机会，因此这种极端因素很难在实现开发过程中造成重大影响的。
+虽然当两个 component 是不同类型但结构相似时，React diff 会影响性能，但正如 React 官方博客所言：不同类型的 component 是很少存在相似 DOM tree 的机会，因此这种极端因素很难在实现开发过程中造成重大影响。
 
 总结:
 
@@ -1997,7 +1999,8 @@ React 是基于组件构建应用的, 组件的比较也是简洁高效.
 
 3. 删除/**REMOVE_NODE**
 
-   老 component 类型, 在新集合里也有, 但对应的 element 不同则不能直接复用和更新, 需要执行删除操作,  或者老 component 不在新集合里, 也需要删除
+   - 老 component 类型, 在新集合里也有, 但对应的 element 不同则不能直接复用和更新, 需要执行删除操作
+   - 老 component 不在新集合里, 也需要删除
 
 ```javascript
 function enqueueInsertMarkup(parentInst, markup, toIndex) {
@@ -2050,6 +2053,121 @@ React 发现这类操作繁琐冗余，因为这些都是相同的节点，但�
 ![img](images/ele_diff2.jpg)
 
 ##### 高效 diff 运作机制
+
+1. 节点相同但是位置不同
+
+   child._mountIndex < lastIndex 满足该条件则移动节点
+
+2. 节点不同 涉及增删改查
+
+   ![](images/ele_diff3.png)
+
+   ```javascript
+   _updateChildren: function(nextNestedChildrenElements, transaction, context) {
+     var prevChildren = this._renderedChildren;
+     var nextChildren = this._reconcilerUpdateChildren(
+       prevChildren, nextNestedChildrenElements, transaction, context
+     );
+     if (!nextChildren && !prevChildren) {
+       return;
+     }
+     var name;
+     var lastIndex = 0;
+     var nextIndex = 0;
+     for (name in nextChildren) {
+       if (!nextChildren.hasOwnProperty(name)) {
+         continue;
+       }
+       var prevChild = prevChildren && prevChildren[name];
+       var nextChild = nextChildren[name];
+       if (prevChild === nextChild) {
+         // 移动节点
+         this.moveChild(prevChild, nextIndex, lastIndex);
+         lastIndex = Math.max(prevChild._mountIndex, lastIndex);
+         prevChild._mountIndex = nextIndex;
+       } else {
+         if (prevChild) {
+           lastIndex = Math.max(prevChild._mountIndex, lastIndex);
+           // 删除节点
+           this._unmountChild(prevChild);
+         }
+         // 初始化并创建节点
+         this._mountChildAtIndex(
+           nextChild, nextIndex, transaction, context
+         );
+       }
+       nextIndex++;
+     }
+     for (name in prevChildren) {
+       if (prevChildren.hasOwnProperty(name) &&
+           !(nextChildren && nextChildren.hasOwnProperty(name))) {
+         this._unmountChild(prevChildren[name]);
+       }
+     }
+     this._renderedChildren = nextChildren;
+   },
+   // 移动节点
+   moveChild: function(child, toIndex, lastIndex) {
+     if (child._mountIndex < lastIndex) {
+       this.prepareToManageChildren();
+       enqueueMove(this, child._mountIndex, toIndex);
+     }
+   },
+   // 创建节点
+   createChild: function(child, mountImage) {
+     this.prepareToManageChildren();
+     enqueueInsertMarkup(this, mountImage, child._mountIndex);
+   },
+   // 删除节点
+   removeChild: function(child) {
+     this.prepareToManageChildren();
+     enqueueRemove(this, child._mountIndex);
+   },
+   
+   _unmountChild: function(child) {
+     this.removeChild(child);
+     child._mountIndex = null;
+   },
+   
+   _mountChildAtIndex: function(
+     child,
+     index,
+     transaction,
+     context) {
+     var mountImage = ReactReconciler.mountComponent(
+       child,
+       transaction,
+       this,
+       this._nativeContainerInfo,
+       context
+     );
+     child._mountIndex = index;
+     this.createChild(child, mountImage);
+   },
+   ```
+
+
+
+当然，React diff 还是存在些许不足与待优化的地方，如下图所示，若新集合的节点更新为：D、A、B、C，与老集合对比只有 D 节点移动，而 A、B、C 仍然保持原有的顺序，理论上 diff 应该只需对 D 执行移动操作，然而由于 D 在老集合的位置是最大的，导致其他节点的 _mountIndex < lastIndex，造成 D 没有执行移动操作，而是 A、B、C 全部移动到 D 节点后面的现象。
+
+![](images/ele_diff4.png)
+
+**在此，读者们可以讨论思考：如何优化上述问题？**
+
+> 建议：在开发过程中，尽量减少类似将最后一个节点移动到列表首部的操作，当节点数量过大或更新操作过于频繁时，在一定程度上会影响 React 的渲染性能。
+
+## 总结
+
+- React 通过制定大胆的 diff 策略，将 O(n3) 复杂度的问题转换成 O(n) 复杂度的问题；
+- React 通过**分层求异**的策略，对 tree diff 进行算法优化；
+- React 通过**相同类生成相似树形结构，不同类生成不同树形结构**的策略，对 component diff 进行算法优化；
+- React 通过**设置唯一 key**的策略，对 element diff 进行算法优化；
+
+> 建议
+>
+> 在开发组件时，保持稳定的 DOM 结构会有助于性能的提升；
+>
+> 在开发过程中，尽量减少类似将最后一个节点移动到列表首部的操作，当节点数量过大或更新操作过于频繁时，在一定程度上会影响 React 的渲染性能。
 
 
 
