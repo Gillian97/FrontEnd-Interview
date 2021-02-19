@@ -1891,5 +1891,207 @@ function Home() {
 
        
 
-# shouldComponent
+# diff 算法
+
+通过 diff 算法计算 vdom 新旧的差异, 从而更新变化的部分到 dom 上.
+
+## 传统的diff算法
+
+计算一棵树转换为另一棵树的最少操作
+
+通过循环递归对节点进行依次对比, 效率低下, 算法时间复杂度为 O(3)
+
+时间复杂度太高, 不满足前端渲染的场景
+
+## React diff 算法
+
+指定大胆的策略, 将时间复杂度降低至 O(N)
+
+### diff 策略前提
+
+1. Web UI 中的节点**跨层级的移动操作**特别少, 可以忽略不计
+2. 拥有 相同类的两个组件 将会生成相似的树形结构, 拥有 不同类的两个组件 将会生成不同的树形结构
+3. 对于同一层级的一组子节点, 它们可以通过唯一 ID 进行区分
+
+基于上述三个策略前提, react进行了对应的算法优化
+
+### 算法优化
+
+#### tree diff
+
+基于策略一, 对树进行分层比较, 两棵树只会对同一层的节点进行比较
+
+通过 updateDepth 对 Virtual DOM 进行层级控制, 只会对相同颜色方框中的DOM节点进行比较, 即对同一父节点的子节点进行比较
+
+![img](images/tree_diff.jpg)
+
+```javascript
+updateChildren: function(nextNestedChildrenElements, transaction, context) {
+  updateDepth++;
+  var errorThrown = true;
+  try {
+    this._updateChildren(nextNestedChildrenElements, transaction, context);
+    errorThrown = false;
+  } finally {
+    updateDepth--;
+    if (!updateDepth) {
+      if (errorThrown) {
+        clearQueue();
+      } else {
+        processQueue();
+      }
+    }
+  }
+}
+```
+
+**如果出现了 DOM 节点跨层级的移动操作，React diff 比较时只会增加或者删除节点, 并不会移动节点.**
+
+如下图，A 节点（包括其子节点）整个被移动到 D 节点下，由于 React 只会简单的考虑同层级节点的位置变换，而**对于不同层级的节点，只有创建和删除操作**。当根节点发现子节点中 A 消失了，就会直接销毁 A；当 D 发现多了一个子节点 A，则会创建新的 A（包括子节点）作为其子节点。此时，React diff 的执行情况：**create A -> create B -> create C -> delete A**。
+
+由此可发现，当出现节点跨层级移动时，并不会出现想象中的移动操作，而是以 A 为根节点的树被整个重新创建，这是一种影响 React 性能的操作，因此 **React 官方建议不要进行 DOM 节点跨层级的操作**。
+
+> 注意：在开发组件时，保持稳定的 DOM 结构会有助于性能的提升。例如，可以通过 CSS 隐藏或显示节点，而不是真的移除或添加 DOM 节点。
+
+![img](images/tree_diff_1.jpg)
+
+#### component diff
+
+React 是基于组件构建应用的, 组件的比较也是简洁高效.
+
+1. 同类型组件
+
+   按照原策略继续比较 virtual DOM tree
+
+   对于同一类型的组件，有可能其 Virtual DOM 没有任何变化，如果能够确切的知道这点那可以节省大量的 diff 运算时间，因此 React 允许用户通过 shouldComponentUpdate() 来判断该组件是否需要进行 diff。
+
+2. 不同类型组件
+
+   将该组件判断为 dirty component, 替换整个组件下的所有子节点
+
+如下图，当 component D 改变为 component G 时，即使这两个 component 结构相似，一旦 React 判断 D 和 G 是不同类型的组件，就**不会比较二者的结构**，而是直接删除 component D，重新创建 component G 以及其子节点。
+
+虽然当两个 component 是不同类型但结构相似时，React diff 会影响性能，但正如 React 官方博客所言：不同类型的 component 是很少存在相似 DOM tree 的机会，因此这种极端因素很难在实现开发过程中造成重大影响的。
+
+总结:
+
+组件类型不同, 不会比较结构, 直接删除, 创建新的组件及其子节点.
+
+不同类型组件很少出现结构相似情况, 所以 react diff 操作有必要.
+
+![img](images/component_diff.jpg)
+
+
+
+#### element diff
+
+当节点处于同一层级时, react diff 提供了三种节点操作. 插入/移动/删除
+
+1. 插入/**INSERT_MARKUP**
+
+   新的 component 类型不在老集合里, 即是全新的节点, 需要对新节点执行插入操作
+
+2. 移动/**MOVE_EXISTING**
+
+   在老集合里有新 component 类型, 且 element 是可更新的类型，generateComponentChildren 已调用 receiveComponent，这种情况下 prevChild=nextChild，就需要做移动操作，可以复用以前的 DOM 节点。
+
+3. 删除/**REMOVE_NODE**
+
+   老 component 类型, 在新集合里也有, 但对应的 element 不同则不能直接复用和更新, 需要执行删除操作,  或者老 component 不在新集合里, 也需要删除
+
+```javascript
+function enqueueInsertMarkup(parentInst, markup, toIndex) {
+  updateQueue.push({
+    parentInst: parentInst,
+    parentNode: null,
+    type: ReactMultiChildUpdateTypes.INSERT_MARKUP,
+    markupIndex: markupQueue.push(markup) - 1,
+    content: null,
+    fromIndex: null,
+    toIndex: toIndex,
+  });
+}
+
+function enqueueMove(parentInst, fromIndex, toIndex) {
+  updateQueue.push({
+    parentInst: parentInst,
+    parentNode: null,
+    type: ReactMultiChildUpdateTypes.MOVE_EXISTING,
+    markupIndex: null,
+    content: null,
+    fromIndex: fromIndex,
+    toIndex: toIndex,
+  });
+}
+
+function enqueueRemove(parentInst, fromIndex) {
+  updateQueue.push({
+    parentInst: parentInst,
+    parentNode: null,
+    type: ReactMultiChildUpdateTypes.REMOVE_NODE,
+    markupIndex: null,
+    content: null,
+    fromIndex: fromIndex,
+    toIndex: null,
+  });
+}
+```
+
+如下图，老集合中包含节点：A、B、C、D，更新后的新集合中包含节点：B、A、D、C，此时新老集合进行 diff 差异化对比，发现 B != A，则创建并插入 B 至新集合，删除老集合 A；以此类推，创建并插入 A、D 和 C，删除 B、C 和 D。
+
+![img](images/ele_diff1.jpg)
+
+React 发现这类操作繁琐冗余，因为这些都是相同的节点，但由于位置发生变化，导致需要进行繁杂低效的删除、创建操作，其实只要对这些节点进行位置移动即可。
+
+针对这一现象，React 提出优化策略：允许开发者对同一层级的同组子节点，添加唯一 key 进行区分，虽然只是小小的改动，性能上却发生了翻天覆地的变化！
+
+新老集合所包含的节点，如下图所示，新老集合进行 diff 差异化对比，通过 key 发现新老集合中的节点都是相同的节点，因此无需进行节点删除和创建，只需要将老集合中节点的位置进行移动，更新为新集合中节点的位置，此时 React 给出的 diff 结果为：B、D 不做任何操作，A、C 进行移动操作，即可。
+
+![img](images/ele_diff2.jpg)
+
+##### 高效 diff 运作机制
+
+
+
+参考 [知乎](https://zhuanlan.zhihu.com/p/20346379)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
