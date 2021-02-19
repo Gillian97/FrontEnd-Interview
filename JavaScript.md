@@ -4,14 +4,11 @@ tags: '-JavaScript'
 abbrlink: 11485
 date: 2020-09-01 09:17:06
 ---
-
-
-
 # JavaScript 简介
 
 ## 诞生
 
-本名 ECMAScript，被创建的原因是在浏览器输入数据时需要进行验证, 而不是传到服务器才告知客户数据错误或者空白等, 于是被创建时诞生在 NetScape 浏览器中.  
+本名 ECMAScript，被创建的原因是在浏览器输入数据时需要进行验证, 而不是传到服务器才告知客户数据错误或者空白等, 于是被创建时诞生在 NetScape 浏览器中.
 
 ## 特点
 
@@ -43,16 +40,13 @@ JS 可以定位并操作 DOM 中的任意一个节点, 且不用刷新页面, �
 
 HTML 结构, CSS 展示, JS(AJAX JSON) 逻辑 = 前端, 可以在浏览器实现 `MVC`.
 
- 后来出现了多种框架, ExtJS/prototype/JQuery/AngularJS 将前端推向另一个高峰. 
-
-
+后来出现了多种框架, ExtJS/prototype/JQuery/AngularJS 将前端推向另一个高峰.
 
 ## JS 移动到服务器端
 
 需要满足下述两个要求:
 
 1. 引擎移动到服务器端, 需要执行地足够快. Chrome V8
-
 2. 绕开 JAVA 服务器的问题, 即线程遇到IO/数据库/网络这样的耗时操作, 不能等待, 换成异步处理.
 
 即后来出现的 node.js, 巨大优势就是: 前后端均使用JS开发.
@@ -74,8 +68,6 @@ HTML 结构, CSS 展示, JS(AJAX JSON) 逻辑 = 前端, 可以在浏览器实现
 ### 布尔值 Boolean
 
 true/false
-
-
 
 ### 字符串 String
 
@@ -122,17 +114,15 @@ let s = 'hello';
 console.log(s.constructor); // [Function: String]
 ```
 
-
-
 #### 方法
 
 ##### 处理
 
-`toUpperCase`  
+`toUpperCase`
 
 字符串变大写
 
-`toLowerCase `  
+`toLowerCase `
 
 字符串变小写
 
@@ -151,7 +141,7 @@ let str = "   hello   *   ";
 console.log(str.trim(), ', |' + str + '|'); // hello   * , |   hello   *   |
 ```
 
-`split` 
+`split`
 
 根据分隔符将字符串分割为数组
 
@@ -246,8 +236,6 @@ let s = 'helloWorld';
 console.log(s.substr(1, 4), s); // ello helloWorld
 ```
 
-
-
 ### 数字 Number
 
 数字可以是数字或者对象, Number 对象是原始数值的包装对象. JS只有一种数字类型.
@@ -287,8 +275,6 @@ console.log(typeof t, t); // object [Number: NaN]
 let a = 8;
 console.log(a.constructor); // [Function: Number]
 ```
-
-
 
 #### 方法
 
@@ -346,8 +332,6 @@ Number.isFinite(NaN) // false
 let a = NaN;
 console.log(isNaN(a), isNaN(8), isNaN("11")); // true false false
 ```
-
-
 
 ### Symbol (ES6)
 
@@ -455,8 +439,6 @@ let obj = {
 }
 ```
 
-
-
 ### null 与 undefined
 
 #### null
@@ -475,7 +457,7 @@ console.log(a); // 释放指向数组的引用
 console.log(typeof null); // object
 ```
 
-可以自动转为 0 
+可以自动转为 0
 
 ```javascript
 console.log(Number(null), 8 + null); // 0 8
@@ -533,8 +515,6 @@ console.log(obj.a); // undefined
 let test = () => { }
 console.log(test()); // undefined
 ```
-
-
 
 #### undefined 与 null 区别
 
@@ -666,6 +646,29 @@ mixed.sort();
 
 ### 数组 Array
 
+是一种`可迭代数据类型`。那什么是`可迭代数据类型`呢？
+
+> 原生具有[Symbol.iterator]属性数据类型为可迭代数据类型。如数组、类数组（如arguments、NodeList）、Set和Map。
+
+可迭代对象可以通过迭代器进行遍历。
+
+```js
+let arr = [4, 2, 1];
+// 这就是迭代器
+// 生成迭代器对象
+let iterator = arr[Symbol.iterator]();
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+
+
+// {value: 4, done: false}
+// {value: 2, done: false}
+// {value: 1, done: false}
+// {value: undefined, done: true}
+```
+
 *创建*
 
 ```javascript
@@ -720,7 +723,6 @@ console.log(arr0.length); // 4
 `constructor`
 
 > 返回创建该对象的函数的引用, 因为js的一切变量都是对象, 是对象就有其构造函数.
->
 
 ```javascript
 var test = new Array();
@@ -732,14 +734,13 @@ if (test.constructor == Array){
 
 #### 方法
 
-高阶函数: `一个函数`就可以接收另一个函数作为参数或者返回值为一个函数，`这种函数`就称之为高阶函数。
+**高阶函数**: `一个函数`就可以接收另一个函数作为参数或者返回值为一个函数，`这种函数`就称之为高阶函数。
 
 ##### 改变原数组
 
 **Array.sort()  [高阶]**
 
 > 对数组元素进行排序, 默认是字符串顺序, 即会将数组元素转变为字符串, 然后比较字符串中字符的 UTF-1编码顺序来进行排序.
->
 
 ```javascript
 // 按照字母顺序排序 默认
@@ -787,7 +788,6 @@ console.log(arr);
 **Array.pop()**
 
 > 删除数组的最后一个元素并返回该元素. 空数组返回`undefined`.
->
 
 ```javascript
 let arr0 = [1, 2, 3, 4];
@@ -802,7 +802,6 @@ console.log(arr1.pop(), arr1);
 **Array.shift()**
 
 > 删除并返回数组的第一个元素
->
 
 ```javascript
 let arr1 = [1, 2, 3];
@@ -813,7 +812,6 @@ console.log(arr1.shift(), arr1);
 **Array.unshift()**
 
 > 向数组的开头添加元素并**返回现有长度**
->
 
 ```javascript
 let arr1 = [1, 2, 3, 4, 5];
@@ -824,7 +822,6 @@ console.log(arr1.unshift(9), arr1);
 **Array.push()**
 
 > 向数组末尾添加元素并**返回数组现有长度**
->
 
 ```javascript
 let arr1 = [1, 2, 3];
@@ -835,7 +832,6 @@ console.log(arr1.push(4), arr1);
 **Array.reverse()**
 
 > 颠倒数组中元素顺序
->
 
 ```javascript
 let arr1 = [1, 2, 3];
@@ -843,12 +839,11 @@ console.log(arr1.reverse(), arr1);
 // output: [ 3, 2, 1 ] [ 3, 2, 1 ]
 ```
 
-**Array.splice(start, number, value...)** 
+**Array.splice(start, number, value...)**
 
 > 推荐使用该方法删除数组元素
 >
 > 注意: 删除的元素以数组形式返回。
->
 
 ```javascript
 let arr = [1, 2, 3, 4, 5]
@@ -862,7 +857,7 @@ console.log(arr.splice(3, 2)); // ['fine', 'you'] 注意这里是数组形式!
 console.log(arr); // [ 1, 2, 'ok', 'bye' ]
 ```
 
-**delete**  
+**delete**
 
 JS运算符
 
@@ -872,8 +867,6 @@ delete arr[0];
 console.log(arr[0], arr); // 留下了空洞
 // undefined [ <1 empty item>, 2, 'ok', 'fine', 'you', 'bye' ]
 ```
-
-
 
 ##### 不改变原数组
 
@@ -909,7 +902,6 @@ console.log(a);
 **Array.slice()**
 
 > 根据下标获取数组的一部分, 返回新数组.
->
 
 ```javascript
 let arr1 = [1, 2, 3, 4, 5];
@@ -920,7 +912,6 @@ console.log(arr1.slice(3), arr1.slice(2, 4), arr1);
 **Array.concat()**
 
 > 拼接数组成一个新数组, **浅拷贝**
->
 
 ```javascript
 let arr0 = [1, 2, 3, 4];
@@ -933,7 +924,7 @@ console.log(arr0.concat(arr1), arr0, arr1);
 
 > 按照指定的深度递归遍历数组, 将所有元素与遍历到的子数组中的元素合并为一个**新数组**返回.
 >
-> 将数组扁平化 
+> 将数组扁平化
 
 flat 函数实现, 返回新数组, 原数组不变.
 
@@ -1032,14 +1023,11 @@ while (ary.some(Array.isArray)) {
 }
 ```
 
-
-
 **Array.join()**  默认使用 `, ` 为分隔符
 
 > `toString` 所有 JavaScript 对象都拥有`toString()`方法
 >
 > 数组所有元素组成字符串, 可以指定分隔符.
->
 
 ```javascript
 let arr0 = [1, 2, 3, 4];
@@ -1054,7 +1042,7 @@ console.log(arr0); // [ 1, 2, 3, 4 ]
 
 使用:
 
-map((val, index, arr)=>{}[, thisArg]) 
+map((val, index, arr)=>{}[, thisArg])
 
 thisArg: 回调函数的this值
 
@@ -1267,8 +1255,6 @@ let res1 = arr.findIndex((val, index, array) => {
 console.log(res1); // 2
 ```
 
-
-
 #### 数组操作
 
 ##### 去重
@@ -1286,7 +1272,7 @@ console.log(res); // [ 1, 2, 3 ]
 [...new Set(arr)]
 ```
 
-双层循环法 
+双层循环法
 
 > splice去重(ES5 常用)
 
@@ -1341,16 +1327,17 @@ arr.sort(function () {
 1. **array.indexof**
 
    > 此方法判断数组中是否存在某个值，如果存在，则返回数组元素的下标，否则返回-1。
+   >
 
    ```js
    var arr=[1,2,3,4];
    var index=arr.indexOf(3);
    console.log(index);
    ```
-
 2. **array.includes(searcElement[,fromIndex])**
 
    > 此方法判断数组中是否存在某个值，如果存在返回true，否则返回false
+   >
 
    ```js
    var arr=[1,2,3,4];
@@ -1359,10 +1346,10 @@ arr.sort(function () {
    else
        console.log("不存在");
    ```
-
 3. **array.find(callback[,thisArg])**
 
    > 返回数组中满足条件的**第一个元素的值**，如果没有，返回undefined
+   >
 
    ```js
    var arr=[1,2,3,4];
@@ -1371,10 +1358,10 @@ arr.sort(function () {
    });
    console.log(result);
    ```
-
 4. **array.findeIndex(callback[,thisArg])**
 
    > 返回数组中满足条件的第一个元素的下标，如果没有找到，返回`-1`
+   >
 
    ```js
    var arr=[1,2,3,4];
@@ -1514,11 +1501,9 @@ console.log(set); // Set { 1, 2, 4 }
 console.log(set.has('4'), set.has(4)); // false true
 ```
 
-
-
 # 函数 Function
 
-函数定义是一个常规的绑定, 其中绑定的值是函数. 
+函数定义是一个常规的绑定, 其中绑定的值是函数.
 
 函数的第一种表示法.
 
@@ -1612,8 +1597,6 @@ let person = {
 }
 ```
 
-
-
 ### 没有 arguments
 
 ```javascript
@@ -1660,8 +1643,6 @@ function defer (f, ms) {
 }
 ```
 
-
-
 ### 不能使用 new
 
 因为没有 this, 就不能作为构造函数, 即不能使用 new.
@@ -1703,8 +1684,6 @@ console.log(square1(2, 7), square1(2));
 // 2 3
 // 14 6
 ```
-
-
 
 ## 执行上下文
 
@@ -1899,13 +1878,11 @@ console.log(a, b); // undefined 3
 console.log(c); // 5
 ```
 
-
-
 #### **执行阶段**
 
 完成所有变量的分配, 最后执行代码. 如果 JavaScript 引擎在源代码中声明的实际位置找不到 let 变量的值，那么将为其分配 undefined 值。
 
------------------------
+---
 
 作用域是在函数声明时就确定的变量访问的规则, 执行上下文是函数执行时才产生的变量的环境, **执行上下文基于作用域**进行变量的访问/函数引用等操作.
 
@@ -1953,7 +1930,7 @@ let foo = function() { console.log(1) };
 
 *作用域链*
 
-在ES5中只存在两种作用域————全局作用域和函数作用域, 当访问一个变量时，解释器会首先在当前作用域查找标示符，如果没有找到，就去父作用域找，直到找到该变量的标示符或者不在父作用域中，这就是作用域链. 值得注意的是，每一个子函数都会拷贝上级的作用域，形成一个作用域的链条。 
+在ES5中只存在两种作用域————全局作用域和函数作用域, 当访问一个变量时，解释器会首先在当前作用域查找标示符，如果没有找到，就去父作用域找，直到找到该变量的标示符或者不在父作用域中，这就是作用域链. 值得注意的是，每一个子函数都会拷贝上级的作用域，形成一个作用域的链条。
 
 在执行上下文中访问到父级甚至全局的变量, 这便是作用域链的功劳。作用域链可以理解为一组对象列表, 包含 **父级和自身的变量对象**, 因此我们便能通过作用域链访问到父级里声明的变量或者函数。
 
@@ -1962,8 +1939,6 @@ let foo = function() { console.log(1) };
   - AO: 自身活动对象
 
 如此 `[[scope]]`包含`[[scope]]`, 便自上而下形成一条 **链式作用域**。
-
-
 
 定义了一个函数激活执行的时候, 去哪里找变量的值.
 
@@ -2066,7 +2041,7 @@ nAdd();
 func(); // a 1000
 ```
 
-证明了 `func1` 的局部变量 `a` 一直在内存中, 并没有在 `func1` 被调用后被自动清除. 
+证明了 `func1` 的局部变量 `a` 一直在内存中, 并没有在 `func1` 被调用后被自动清除.
 
 因为 `func1 `是 `func2 `的父函数, 而 `func2` 被赋予了局部变量 `func`, 导致 `func2` 一直在内存中, 则 `func2` 依赖的 `func1` 也一直在内存中, 不会在调用结束后, 被垃圾回收机制回收.
 
@@ -2143,7 +2118,7 @@ for(var i = 1; i <= 5; i ++){
 
 解决方法：
 
-1、利用IIFE(立即执行函数表达式)当每次for循环时，把此时的i变量传递到定时器中
+1. 利用IIFE(立即执行函数表达式)当每次for循环时，把此时的i变量传递到定时器中
 
 ```js
 for(var i = 1;i <= 5;i++){
@@ -2155,7 +2130,7 @@ for(var i = 1;i <= 5;i++){
 }
 ```
 
-2、给定时器传入第三个参数, 作为timer函数的第一个函数参数
+2. 给定时器传入第三个参数, 作为timer函数的第一个函数参数
 
 ```js
 for(var i=1;i<=5;i++){
@@ -2165,7 +2140,7 @@ for(var i=1;i<=5;i++){
 }
 ```
 
-3、使用ES6中的let
+3. 使用ES6中的let
 
 ```js
 for(let i = 1; i <= 5; i++){
@@ -2323,8 +2298,6 @@ var object = {
 console.log(object.getNameFunc()()); // My Object
 ```
 
-
-
 #### arguments
 
 对应于传递给函数的参数的类数组对象, 是所有非箭头函数中可用的局部变量, 可以使用它来引用函数的参数.
@@ -2461,8 +2434,6 @@ function type(obj) {
 }
 ```
 
-
-
 ## 类型转换
 
 类型转换只有三种:
@@ -2477,7 +2448,7 @@ function type(obj) {
 
 转换时机:
 
- JS 中在使用**运算符**或者**对比符**时, 会自带**隐式转换**, 规则如下:
+JS 中在使用**运算符**或者**对比符**时, 会自带**隐式转换**, 规则如下:
 
 - -、*、/、%、== ：一律转换成数值后计算
 - +：
@@ -2533,8 +2504,6 @@ var a = {
 console.log(a == 1 && a == 2);//true
 ```
 
-
-
 ## 比较运算符
 
 ### ==（非严格相等）
@@ -2576,7 +2545,7 @@ console.log(a == b) // true
 
 ### ===（严格相等）
 
- **全等操作符**，和 `==` 很相似，区别在于 `===` 不执行隐式转换。当两个操作值的值和类型都相等的情况下，才会返回 `true`。
+**全等操作符**，和 `==` 很相似，区别在于 `===` 不执行隐式转换。当两个操作值的值和类型都相等的情况下，才会返回 `true`。
 
 ```javascript
 console.log(1 === '1') // false
@@ -2705,14 +2674,17 @@ console.log(a); // { '0': 1 }
 
 let const 和 var 的对比：
 
-| 内容     | let/const | var  |
-| -------- | --------- | ---- |
-| 变量提升 | 否        | 是   |
-| 重复声明 | 不可以    | 可以 |
-| 作用域   | 块级      | 全局 |
+
+| 内容 | let/const | var |
+| - | - | - |
+| 变量提升 | 否 | 是 |
+| 重复声明 | 不可以 | 可以 |
+| 作用域 | 块级 | 全局 |
 
 1. 在同一个作用域内，var 可以重复声明变量，let、const 不能重复声明同一个变量。
-  * ES5 是函数作用域，即一个函数内就是一个作用域，ES6 是块级作用域，花括号内就是一个作用域。
+
+* ES5 是函数作用域，即一个函数内就是一个作用域，ES6 是块级作用域，花括号内就是一个作用域。
+
 2. var 有变量提升，可以在变量声明前使用，let、const 不存在变量提升，在变量前使用会报错
 3. let、const 有**暂时性死区**，即父作用域中有 var 定义，在块作用域中又定义了 let、const，那再 let、const 之前使用就是死区
 4. const 必须在声明的时候赋值；const 声明的变量不能再修改
@@ -2786,8 +2758,6 @@ cars[0] = "Toyota";
 // 添加元素
 cars.push("Audi");
 ```
-
-
 
 # 内置对象 Function
 
@@ -2869,7 +2839,7 @@ obj.speak.bind(newObj, '合肥', '上海')(); // Cookie is 40 合肥*上海
 obj.speak.bind(newObj, ['合肥', '上海'])(); // Cookie is 40 合肥, 上海*undefined
 ```
 
-> **性能: call > apply** 
+> **性能: call > apply**
 >
 > call 传入参数的格式正是内部需要的格式, apply 内部多了对数组的解构(apply多了`CreateListFromArrayLike`的调用)
 
@@ -2889,6 +2859,16 @@ console.log(a[b]); // c
 `a.b.c.d` 比`a['b']['c']['d']`性能更高.
 
 因为前者只用考虑字符串的情况, 后者还需要考虑括号中是变量的情况. 从结果来看, 编译器解析前者更容易些, 因此前者更快.
+
+## toString 与 valueof 区别
+
+toString() 返回一个反映这个对象的字符串
+
+valueof() 返回对象相应的原始值, 调用 valueOf() 方法用来把对象转换成原始类型的值（数值、字符串和布尔值）
+
+默认情况下, valueOf() 会被每个对象Object继承。每一个内置对象都会覆盖这个方法为了返回一个合理的值，如果对象没有原始值，valueOf() 就会返回对象自身
+
+https://www.cnblogs.com/imwtr/p/4392041.html
 
 ## ES6
 
@@ -2913,8 +2893,6 @@ let data = {
 console.log(data);
 // { birth: '1997/09', name: 'Joe' }
 ```
-
-
 
 ## 封装
 
@@ -3006,7 +2984,7 @@ function Cat(name,color){
      this.name = name;
      this.color = color;
    }
-   
+
    var cat1 = new Cat("大毛", "黄色");
    alert(cat1.species); // 动物
    ```
@@ -3014,26 +2992,25 @@ function Cat(name,color){
    优点: `Parent` 中的属性不会被子类共享, 不会出现实例改动父类属性而导致父类属性改变的情况.
 
    缺点: 无法拿到 `Parent.prototype` 中的属性与方法
-
 2. `prototype` 模式(原型链)
 
    ```javascript
    function Animal(){
      this.species = "动物"
    }
-   
+
    function Cat (name, color) {
      this.name = name;
      this.color = color;
    }
-   
+
    // 相当于完全删除了prototype 对象原先的值，然后赋予一个新值
    Cat.prototype = new Animal();
    // 这个构造函数的指向也要加上
    // 由于上一句的存在, 这里 Cat.prototype.constructor 指向 Animal
    // 但是 Cat 的原型对象的构造函数必须要指向 Cat 构造函数,否则会导致继承链的混乱
    Cat.prototype.constructor  = Cat;
-   
+
    var cat1 = new Cat("大毛", "黄色");
    console.log(cat1.species); // 动物
    ```
@@ -3054,9 +3031,8 @@ function Cat(name,color){
 
    缺点: Parent 中的属性被共享
 
-   
-
    > 组合继承 (前面两种方法的组合版本)
+   >
 
    ```javascript
      function Parent3 () {
@@ -3080,6 +3056,7 @@ function Cat(name,color){
    缺点: Parent 的构造函数多执行了一次(`Child3.prototype = new Parent3();`)
 
    > 组合继承的优化1
+   >
 
    ```javascript
      function Parent4 () {
@@ -3098,6 +3075,7 @@ function Cat(name,color){
    ```
 
    > 组合继承的优化2(最推荐, 也叫 **寄生组合继承**)
+   >
 
    ```javascript
      function Parent5 () {
@@ -3123,8 +3101,6 @@ function Cat(name,color){
    }
    ```
 
-   
-
    *继承的问题*
 
    继承的最大问题在于：无法决定继承哪些属性，所有属性都得继承。
@@ -3145,13 +3121,10 @@ function Cat(name,color){
    function addOil(){
      console.log("哦哟！")
    }
-   
+
    let car = compose(drive, music, addOil);
    let newEnergyCar = compose(drive, music);
    ```
-
-   
-
 3. 直接继承 prototype
 
    第三种方法是对第二种方法的改进。由于Animal对象中，不变的属性都可以直接写入Animal.prototype。所以，我们也可以让Cat()跳过 Animal()，直接继承Animal.prototype。
@@ -3187,7 +3160,6 @@ function Cat(name,color){
    ```javascript
    alert(Animal.prototype.constructor); // Cat
    ```
-
 4. 利用空对象做中介
 
    ```javascript
@@ -3195,20 +3167,20 @@ function Cat(name,color){
    Animal.prototype = {
      species: "动物"
    }
-   
+
    function Cat (name, color) {
      this.name = name;
      this.color = color;
    }
-   
+
    function F () { }
    F.prototype = Animal.prototype;
-   
+
    // F是空对象，所以几乎不占内存。
    // 这时，修改Cat的prototype对象，就不会影响到Animal的prototype对象。
    Cat.prototype = new F();
    Cat.prototype.constructor = Cat;
-   
+
    var cat1 = new Cat("大毛", "黄色");
    console.log(cat1.species, Cat.prototype); // 动物
    ```
@@ -3241,7 +3213,6 @@ function Cat(name,color){
    ```
 
    意思是为子对象设一个uber属性，这个属性直接指向父对象的prototype属性。（uber是一个德语词，意思是"向上"、"上一层"。）这等于在子对象上打开一条通道，可以直接调用父对象的方法。这一行放在这里，只是为了实现继承的完备性，纯属备用性质。
-
 5. 拷贝继承
 
    将父类的原型对象的所有属性全部拷贝进子类的原型对象中.
@@ -3296,22 +3267,21 @@ var Doctor = {
    var Chinese = {
      nation: "中国"
    }
-   
+
    var Doctor = {
      career: "医生"
    }
-   
+
    function object (parent) {
      function F () { }
      F.prototype = parent;
      return new F();
    }
-   
+
    var doctor = object(Chinese);
    doctor.career = "医生";
    console.log(doctor.nation); // 中国
    ```
-
 2. 浅拷贝
 
    另一种思路：把父对象的属性，全部拷贝给子对象，也能实现继承。
@@ -3321,11 +3291,11 @@ var Doctor = {
      nation: "中国",
      birthPlaces: ["上海", "合肥", "天津"]
    }
-   
+
    var Doctor = {
      career: "医生"
    }
-   
+
    function extendCopy (parent) {
      let child = {};
      for (let i in parent) {
@@ -3333,17 +3303,16 @@ var Doctor = {
      }
      return child;
    }
-   
+
    let doctor = extendCopy(Chinese)
    console.log(doctor.birthPlaces); // [ '上海', '合肥', '天津' ]
-   
+
    doctor.birthPlaces.push("厦门")
    console.log(doctor.birthPlaces, Chinese.birthPlaces);
    // [ '上海', '合肥', '天津', '厦门' ] [ '上海', '合肥', '天津', '厦门' ]
    ```
 
    但是子对象对属性的更改可能会引起父对象的同步更新. extendCopy()只是拷贝**基本类型的数据**，我们把这种拷贝叫做"浅拷贝"。这是早期jQuery实现继承的方式。
-
 3. 深拷贝
 
    所谓"深拷贝"，就是能够实现真正意义上的数组和对象的拷贝。它的实现并不难，只要递归调用"浅拷贝"就行了。
@@ -3353,11 +3322,11 @@ var Doctor = {
      nation: "中国",
      birthPlaces: ["上海", "合肥", "天津"]
    }
-   
+
    var Doctor = {
      career: "医生"
    }
-   
+
    // 将 p 对象中的属性拷贝进 c
    function deepCopy (p, child) {
      var c = child || {};
@@ -3372,7 +3341,7 @@ var Doctor = {
      }
      return c;
    }
-   
+
    let doctor = deepCopy(Chinese);
    doctor.birthPlaces.push("北京");
    // 子类属性的修改不影响父类
@@ -3426,10 +3395,9 @@ animal.eat.call(obj, 'carrot'); // monkey eat carrot
 > 一个对象查看原型的方法
 >
 > 1. 任何对象都可以通过 `__proto__`属性查看自己的原型, 即 `obj.__proto__`。
+> 2. `Object.getPrototypeOf` 方法返回一个对象的原型。`Object.prototype` 提供在所有对象中显示的方法, 最根部原型。
 >
-> 2.  `Object.getPrototypeOf` 方法返回一个对象的原型。`Object.prototype` 提供在所有对象中显示的方法, 最根部原型。
->
->    函数派生自 `Function.prototype`, 数组派生自 `Array.prototype`, 他们具有不同的默认属性集。
+> 函数派生自 `Function.prototype`, 数组派生自 `Array.prototype`, 他们具有不同的默认属性集。
 
 ```javascript
 let obj = {}
@@ -3465,7 +3433,7 @@ dog.speak('hello'); // doggi is speaking hello
 
 ### `__proto__` 属性
 
-继承是让两个对象产生关联, 使用 `__proto__`, 这个属性每个对象都有. 
+继承是让两个对象产生关联, 使用 `__proto__`, 这个属性每个对象都有.
 
 ```javascript
 let animal = {
@@ -3627,7 +3595,6 @@ mary.sayHello(); // hello mary
 由原型对象组成, 每个对象都有 `__proto__` 属性, 指向创建该对象的构造函数的原型, `__proto__` 将对象连接起来组成了原型链, 是一个用来实现继承与属性共享的有限的对象链。
 
 - **属性查找机制**: 当查找对象的属性时, 如果实例对象自身不存在该属性, 则沿着原型链往上一级查找, 找到时则输出, 不存在时, 则继续沿着原型链往上一级查找, 直至最顶级的原型对象`Object.prototype`, 如还是没找到, 则输出 `undefined`；
-
 - **属性修改机制**: 只会修改实例对象本身的属性, 如果不存在, 则进行添加该属性, 如果需要修改原型的属性时, 则可以用: `b.prototype.x = 2`；但是这样会造成所有继承于该对象的实例的属性发生改变。
 
 ## 类 Class
@@ -3662,7 +3629,6 @@ class Animal {
      }
    }
    ```
-
 2. 类表达式 可以具名或者匿名
 
    ```javascript
@@ -3674,7 +3640,7 @@ class Animal {
      }
    }
    console.log(hello.name); // hello
-   
+
    // 具名类
    let hello = class hello2{
      constructor(height, width) {
@@ -3684,38 +3650,35 @@ class Animal {
    }
    console.log(hello.name); // hello2
    ```
-
 3. 传统的基于函数的类
 
    ```javascript
    function Animal(name){
      this.name = name;
    }
-   
+
    Animal.prototype.speak = function () {
      console.log(this.name + ' makes a noise.');
    }
-   
+
    class Dog extends Animal{
      speak(){
        super.speak();
        console.log(this.name + ' barks.');
      }
    }
-   
+
    let d = new Dog('cookie')
    d.speak(); 
    // cookie makes a noise.
    // cookie barks.
    ```
 
-
-
 ### 类体和方法定义
 
-`constructor` 
+`constructor`
 
-构造函数, 一种特殊方法, 创建和初始化一个由 `class` 创建的对象. 
+构造函数, 一种特殊方法, 创建和初始化一个由 `class` 创建的对象.
 
 构造函数可以使用`super`调用父类的构造函数
 
@@ -3781,11 +3744,9 @@ console.log(String(dog)); // This is dog
 
 **多态**: 多态代码可以支持不同类型的值, 只要这些值支持它指定的接口. 比如 toString 方法, 所有值都支持该接口, 则所有值都能使用该方法.
 
-
-
 ### 映射
 
-普通对象派生自 `Object.prototype` , 含有祖先原型的所有属性, 在一些实际场景下, 这些属性可能显得多余. 
+普通对象派生自 `Object.prototype` , 含有祖先原型的所有属性, 在一些实际场景下, 这些属性可能显得多余.
 
 → 可以创建没有原型的对象.
 
@@ -3809,9 +3770,7 @@ console.log(ages.has('Mary'), ages.has('toString')); // true false
 
 set get has 是 Map 对象接口的一部分.
 
-
-
-某种情况下, 如果确实需要使用普通对象来作为映射, 则 `Object.keys` 只返回一个**对象自己的键, ** 而不包括其原型中的那些属性. 
+某种情况下, 如果确实需要使用普通对象来作为映射, 则 `Object.keys` 只返回一个**对象自己的键, ** 而不包括其原型中的那些属性.
 
 ```javascript
 class Animal{
@@ -3864,7 +3823,7 @@ var inherit = (function (c, p) {
 
 子类的构造函数必须先使用 `super` 调用超类的构造函数, 因为子类需要具有超类的属性. 子类对象是其所有超类的实例.
 
-`extends` 关键字表示该类不是基于 `Object` 原型, 而是基于其他类. 
+`extends` 关键字表示该类不是基于 `Object` 原型, 而是基于其他类.
 
 基础类称为**超类**, 派生类是**子类**.
 
@@ -3940,8 +3899,6 @@ function myInstanceof(left, right) {
 myInstanceof(() => { }, Function); // true
 ```
 
-
-
 ## 静态方法
 
 > 部署在object对象自身的方法
@@ -3970,8 +3927,6 @@ console.log(Object.keys(obj)); // [ 'key1', 'key2', 'key3' ]
 console.log(Object.getOwnPropertyNames(obj)); // [ 'key1', 'key2', 'key3' ]
 ```
 
-
-
 ## 实例方法
 
 `Object.hasOwnProperty `判断对象是否拥有某项属性
@@ -3980,8 +3935,6 @@ console.log(Object.getOwnPropertyNames(obj)); // [ 'key1', 'key2', 'key3' ]
 let obj = {key1:'val1', key2:'val2', key3:'val3'}
 console.log(obj.hasOwnProperty('key2')); // true
 ```
-
-
 
 ## JSON
 
@@ -4082,7 +4035,6 @@ var b = sin(1);
 
   - `f(g(k(x)))`: 嵌套地狱, 可读性低, 当函数复杂后, 容易让人一脸懵逼；
   - 理想的做法: `xxx(f, g, k)(x)`
-
 - **结果传递**: 如果想实现上面的方式, 那也就是`xxx`函数要实现的便是: 执行结果在各个函数之间的执行传递；
 
   - 这时我们就能想到一个原生提供的数组方法: `reduce`, 它可以按数组的顺序依次执行, 传递执行结果；
@@ -4094,7 +4046,6 @@ var b = sin(1);
   // p: 初始参数；
   const pipe = (...fs) => p => fs.reduce((v, f) => f(v), p)
   ```
-
 - **使用**: 实现一个 驼峰命名 转 中划线命名 的功能:
 
   ```javascript
@@ -4103,16 +4054,15 @@ var b = sin(1);
   const toLowerCase = str => str.toLowerCase()
   const join = curry((str, arr) => arr.join(str))
   const split = curry((splitOn, str) => str.split(splitOn));
-  
+
   const toSlug = pipe(
-  	toLowerCase, 	
+  	toLowerCase, 
   	split(' '), 
   	join('_'), 
   	encodeURIComponent, 
   );
   console.log(toSlug('Guo DongDong'))
   ```
-
 - **好处**:
 
   - 隐藏中间参数, 不需要临时变量, 避免了这个环节的出错几率；
@@ -4125,9 +4075,9 @@ var b = sin(1);
   	console.log(`${ label }: ${ x }`);
   	return x;
   });
-  
+
   const toSlug = pipe(
-  	toLowerCase, 	
+  	toLowerCase, 
   	log('toLowerCase output'), 
   	split(' '), 
   	log('split output'), 
@@ -4171,9 +4121,6 @@ var b = sin(1);
 - 调用外部进程
 - 调用有副作用的函数
 
-
-
-
 ## 使用递归而非迭代
 
 使用尾递归, 保证不溢出。
@@ -4210,7 +4157,7 @@ console.log(sum(arr, 0)); // 10
 
 - 将逻辑行为进行 **隔离抽象**, 便于快速复用, 如处理数据, 兼容性等；
 - **函数组合**, 将一系列单元函数列表组合成功能更强大的函数；
-- **函数增强**, 快速地拓展函数功能, 
+- **函数增强**, 快速地拓展函数功能,
 
 ### 函数的柯里化
 
@@ -4238,8 +4185,6 @@ add1(2) === 3
 add1(20) === 21
 ```
 
-
-
 ### 函数组合
 
 包菜式代码  `h(g(f(x)))` => 更优雅 函数组合
@@ -4262,8 +4207,6 @@ var reverse = arr => arr.reverse();
 var last = compose(first, reverse);
 console.log(last([1, 2, 3, 4, 5])); // 5
 ```
-
-
 
 ## 惰性求值
 
@@ -4296,9 +4239,7 @@ var CEOs = companies.map(c => c.CEO);
 
 函数式编程一个优点就是声明式代码以及纯函数. 工作时专注于业务代码, 优化时专注于函数内部. 还有其他的特点, 比如高阶函数/函数没有side effect/只有值没有变量/用递归而不是用迭代等.
 
-
-
-# 遍历器与 for...of
+# 遍历器/迭代器与 for...of
 
 ## 遍历器概念
 
@@ -4308,12 +4249,13 @@ var CEOs = companies.map(c => c.CEO);
 
 数据结构有遍历器接口, 就称为该数据结构是可遍历的/可迭代的.
 
-## JS 默认遍历器接口 
+## JS 默认遍历器接口
 
 JS中默认的遍历器接口, 即数据结构的原型对象有 `Symbol.iterator` 属性, 该属性对应的函数返回一个遍历器对象, 调用对象的`next`方法, 即可返回数据结构的下一个数据..
 
 ```javascript
 let arr = [3, 4, 5];
+// 生成迭代器对象
 let it = arr[Symbol.iterator]();
 console.log(it.next(), it.next(), it.next(), it.next());
 // { value: 3, done: false } { value: 4, done: false } { value: 5, done: false } { value: undefined, done: true }
@@ -4323,17 +4265,11 @@ console.log(it.next(), it.next(), it.next(), it.next());
 原生具备 Iterator 接口的数据结构如下。
 
 - Array
-
 - Map
-
 - Set
-
 - String
-
 - TypedArray
-
 - 函数的 arguments 对象
-
 - NodeList 对象
 
 上述数据结构不用自己写遍历器函数, `for...of`循环会自动进行遍历.
@@ -4347,8 +4283,6 @@ for(let i of arr) console.log(i);
 ```
 
 没有遍历器函数的数据结构, 可以根据实际需求进行手动部署, 即在`Symbol.iterator`属性上手写遍历器对象生成函数.
-
-
 
 # 解构赋值
 
@@ -4396,11 +4330,7 @@ let [a = 3, b = a] = [1]; console.log(a, b); // 1 1
 let [a = 3, b = a] = [1, 9]; console.log(a, b); // 1 9
 ```
 
-
-
 ## 对象的解构
-
-
 
 ```javascript
 // 报错
@@ -4445,11 +4375,7 @@ let { hello: aa = 3, apple: bb = 5 } = { apple: 'aaa' };
 console.log(aa, bb); // 3 aaa
 ```
 
-
-
-
-
-#  关键字 this
+# 关键字 this
 
 记住一条: 当 function 被作为 method 调用时，this指向调用对象。
 
@@ -4462,7 +4388,7 @@ js中`this`随着执行环境的变化而变化, 是函数运行时, 在函数�
 - 全局上下文(默认绑定) : 全局对象(严格模式有无均指全局对象)
 - 直接调用函数: 全局对象(严格模式undefined)
 - 对象.方法的形式调用: 方法所在对象
-- DOM 事件绑定(特殊) 
+- DOM 事件绑定(特殊)
   - onclick和addEventerListener中 this 默认指向绑定事件的元素。
   - IE比较奇异，使用attachEvent，里面的this默认指向window
 - new 构造函数绑定: new 之后生成的实例对象
@@ -4589,8 +4515,6 @@ let cat = new Animal('cat');
 cat.eat(); // Animal { name: 'cat' }
 ```
 
-
-
 ## 函数作为构造函数
 
 构造函数就是, 通过这个函数, 能够生成一个新对象. 此时, `this` 指向这个新对象.
@@ -4638,22 +4562,331 @@ obj.method.apply(obj); // hi
 
 ## 总结
 
-| 场景             | 函数中的 `this` 指向                                  |
-| :--------------- | ----------------------------------------------------- |
-| 单独使用         | 全局对象                                              |
-| 纯函数调用       | 全局对象（严格模式是 `undefined`）                    |
-| 函数作为对象方法 | 方法所在的对象                                        |
-| 函数作为类中方法 | 构造函数生成的对象且与其行为一致                      |
-| 函数作为构造函数 | 构造函数生成的对象且与其行为一致                      |
-| `apply` 调用     | `apply(obj, [a, b, c, ...])` 调用时的第一个参数 `obj` |
 
-
+| 场景 | 函数中的`this` 指向 |
+| :- | - |
+| 单独使用 | 全局对象 |
+| 纯函数调用 | 全局对象（严格模式是`undefined`） |
+| 函数作为对象方法 | 方法所在的对象 |
+| 函数作为类中方法 | 构造函数生成的对象且与其行为一致 |
+| 函数作为构造函数 | 构造函数生成的对象且与其行为一致 |
+| `apply` 调用 | `apply(obj, [a, b, c, ...])` 调用时的第一个参数 `obj` |
 
 # 异步编程
 
-ES5 callback
+## ES5 callback
 
-## ES5 Promise
+缺点: 回调当中嵌套回调, 产生回调地狱
+
+```javascript
+fs.readFile('xxx', (err, data) => {
+...
+});
+```
+
+## ES6 Promise
+
+很好了解决了`回调地狱`的问题，同时了合并了错误处理。
+
+链式调用避免大量嵌套, 方便了异步编程.
+
+```javascript
+readFilePromise('1.json').then(data => {
+    return readFilePromise('2.json')
+}).then(data => {
+    return readFilePromise('3.json')
+}).then(data => {
+    return readFilePromise('4.json')
+});
+```
+
+### 相关面试题
+
+#### 如何解决回调地狱
+
+回调地狱
+
+1. 多层嵌套的问题。
+2. 每种任务的处理结果存在两种可能性（成功或失败），那么需要在每种任务执行结束后分别处理这两种可能性。
+
+解决方法:
+
+Promise 利用了三大技术手段来解决`回调地狱`:
+
+- **回调函数延迟绑定**。
+- **返回值穿透**(链式调用)。
+- **错误冒泡**(解决成功或者失败两种可能性)。
+
+举例:
+
+*回调函数延迟绑定*
+
+回调函数不是直接声明的，而是在通过后面的 then 方法传入的，即延迟传入。
+
+```javascript
+let readFilePromise = (filename) => {
+  fs.readFile(filename, (err, data) => {
+    if(err) {
+      reject(err);
+    }else {
+      resolve(data);
+    }
+  })
+}
+readFilePromise('1.json').then(data => {
+  return readFilePromise('2.json')
+});
+```
+
+*返回值穿透*
+
+x 是内部函数返回的 Promise 对象
+
+```javascript
+let x = readFilePromise('1.json').then(data => {
+  return readFilePromise('2.json')//这是返回的Promise
+});
+x.then(/* 内部逻辑省略 */)
+// 形成链式调用的效果
+```
+
+*错误冒泡*
+
+```javascript
+readFilePromise('1.json').then(data => {
+    return readFilePromise('2.json');
+}).then(data => {
+    return readFilePromise('3.json');
+}).then(data => {
+    return readFilePromise('4.json');
+}).catch(err => {
+  // xxx
+})
+```
+
+*解决效果*
+
+- 实现链式调用，解决多层嵌套问题
+- 实现错误冒泡后一站式处理，解决每次任务中判断错误、增加代码混乱度的问题
+
+#### Promise 引入微任务原因
+
+即 Promise 的回调函数为什么要加入微任务队列中, 或者说 为什么选择异步操作的方式执行回调函数.
+
+回到问题本身，其实就是**如何处理回调**的问题。总结起来有三种方式:
+
+1. 使用**同步回调**，直到异步任务进行完，再进行后面的任务。
+   - 导致整个脚本阻塞, 当前任务等待, 浪费 CPU
+   - 无法实现`延迟绑定`的效果
+2. 使用**异步回调**，将回调函数放在进行`宏任务队列`的队尾。
+   - 在所有宏任务非常长的情况下, 将迟迟无法执行回调函数, 造成应用卡顿
+3. 使用**异步回调**，将回调函数放到`当前宏任务中`的最后面(采用)。
+   - `引入微任务`, 即把 resolve(reject) 回调的执行放在当前宏任务的末尾。
+   - 采用**异步回调**替代同步回调解决了浪费 CPU 性能的问题。
+   - 放到**当前宏任务最后**执行，解决了回调执行的实时性问题。
+
+#### Promise 如何实现链式调用
+
+*简易版实现*
+
+```javascript
+//定义三种状态
+const PENDING = "pending";
+const FULFILLED = "fulfilled";
+const REJECTED = "rejected";
+
+function MyPromise(executor) {
+  let self = this; // 缓存当前promise实例
+  self.value = null;
+  self.error = null; 
+  self.status = PENDING;
+  self.onFulfilled = null; //成功的回调函数
+  self.onRejected = null; //失败的回调函数
+
+  const resolve = (value) => {
+    if(self.status !== PENDING) return;
+    setTimeout(() => {
+      self.status = FULFILLED;
+      self.value = value;
+      self.onFulfilled(self.value);// resolve 时执行成功回调
+    });
+  };
+
+  const reject = (error) => {
+    if(self.status !== PENDING) return;
+    setTimeout(() => {
+      self.status = REJECTED;
+      self.error = error;
+      self.onRejected(self.error);// reject 时执行成功回调
+    });
+  };
+  executor(resolve, reject);
+}
+MyPromise.prototype.then = function(onFulfilled, onRejected) {
+  if (this.status === PENDING) {
+    this.onFulfilled = onFulfilled;
+    this.onRejected = onRejected;
+  } else if (this.status === FULFILLED) {
+    //如果状态是fulfilled，直接执行成功回调，并将成功值传入
+    onFulfilled(this.value)
+  } else {
+    //如果状态是rejected，直接执行失败回调，并将失败原因传入
+    onRejected(this.error)
+  }
+  return this;
+}
+```
+
+可以看到，Promise 的本质是一个`有限状态机`，存在三种状态:
+
+- PENDING(等待)
+- FULFILLED(成功)
+- REJECTED(失败)
+
+*绑定多个回调函数*
+
+需要将 `onFulfilled ` 和 `onRejected` 改为数组，调用 resolve 时将其中的方法拿出来一一执行即可。
+
+```javascript
+self.onFulfilledCallbacks = [];
+self.onRejectedCallbacks = [];
+```
+
+```js
+MyPromise.prototype.then = function(onFulfilled, onRejected) {
+  if (this.status === PENDING) {
+    this.onFulfilledCallbacks.push(onFulfilled);
+    this.onRejectedCallbacks.push(onRejected);
+  } else if (this.status === FULFILLED) {
+    onFulfilled(this.value);
+  } else {
+    onRejected(this.error);
+  }
+  return this;
+}
+```
+
+接下来将 resolve 和 reject 方法中执行回调的部分进行修改：
+
+```js
+// resolve 中
+self.onFulfilledCallbacks.forEach((callback) => callback(self.value));
+//reject 中
+self.onRejectedCallbacks.forEach((callback) => callback(self.error));
+```
+
+#### 实现 Promise 的 resolve/reject/finally
+
+Promise.resolve
+
+实现 resolve 静态方法有三个要点:
+
+- 传参为一个 Promise, 则直接返回它。
+- 传参为一个 thenable 对象，返回的 Promise 会跟随这个对象，`采用它的最终状态`作为`自己的状态`。
+- 其他情况，直接返回以该值为成功状态的promise对象。
+
+具体实现如下:
+
+```js
+Promise.resolve = (param) => {
+  if(param instanceof Promise) return param;
+  return new Promise((resolve, reject) => {
+    if(param && param.then && typeof param.then === 'function') {
+      // param 状态变为成功会调用resolve，将新 Promise 的状态变为成功，反之亦然
+      param.then(resolve, reject);
+    }else {
+      resolve(param);
+    }
+  })
+}
+```
+
+Promise.reject
+
+传入的参数会作为一个 reason 原封不动地往下传, 实现如下:
+
+```js
+Promise.reject = function (reason) {
+    return new Promise((resolve, reject) => {
+        reject(reason);
+    });
+}
+```
+
+*实现 Promise.prototype.finally*
+
+无论当前 Promise 是成功还是失败，调用`finally`之后都会执行 finally 中传入的函数，并且将值原封不动的往下传。
+
+```js
+Promise.prototype.finally = function(callback) {
+  this.then(value => {
+    return Promise.resolve(callback()).then(() => {
+      return value;
+    })
+  }, error => {
+    return Promise.resolve(callback()).then(() => {
+      throw error;
+    })
+  })
+}
+```
+
+#### 实现 Promise的all/race
+
+对于 all 方法而言，需要完成下面的核心功能:
+
+1. 传入参数为一个空的可迭代对象，则`直接进行resolve`。
+2. 如果参数中`有一个`promise失败，那么Promise.all返回的promise对象失败。
+3. 在任何情况下，Promise.all 返回的 promise 的完成状态的结果都是一个`数组`
+
+具体实现如下:
+
+```js
+Promise.all = function(promises) {
+  return new Promise((resolve, reject) => {
+    let result = [];
+    let index = 0;
+    let len = promises.length;
+    if(len === 0) {
+      resolve(result);
+      return;
+    }
+   
+    for(let i = 0; i < len; i++) {
+      // 为什么不直接 promise[i].then, 因为promise[i]可能不是一个promise
+      Promise.resolve(promise[i]).then(data => {
+        result[i] = data;
+        index++;
+        if(index === len) resolve(result);
+      }).catch(err => {
+        reject(err);
+      })
+    }
+  })
+}
+```
+
+### 实现 Promise.race
+
+race 的实现相比之下就简单一些，只要有一个 promise 执行完，直接 resolve 并停止执行。
+
+```js
+Promise.race = function(promises) {
+  return new Promise((resolve, reject) => {
+    let len = promises.length;
+    if(len === 0) return;
+    for(let i = 0; i < len; i++) {
+      Promise.resolve(promise[i]).then(data => {
+        resolve(data);
+        return;
+      }).catch(err => {
+        reject(err);
+        return;
+      })
+    }
+  })
+}
+```
 
 ### 含义
 
@@ -4661,11 +4894,12 @@ ES5 callback
 
 操作执行的状态不受影响, 操作结束后状态不会改变. 后面我们默认 `resolved` 指 `fulfilled`, 不包括 `rejected`.
 
-| 三种状态       | 含义                                                         |
-| -------------- | ------------------------------------------------------------ |
-| pending        | 执行中                                                       |
-| fulfilled      | 已成功                                                       |
-| rejected       | 已失败                                                       |
+
+| 三种状态 | 含义 |
+| - | - |
+| pending | 执行中 |
+| fulfilled | 已成功 |
+| rejected | 已失败 |
 | 备注: resolved | 表示已定型(`pending->fulfilled` 或者 `pending->rejected`), 常指 `fulfilled`. |
 
 ### 用法
@@ -4724,11 +4958,9 @@ p.then((value) => {
 
 在异步操作结束以后, 会触发对象p对执行对象的处理, 即会触发调用对象p的`then`方法。处理成功情况, 传参是正常的值或者是`Promise`实例, 实现`then`第一个参数即成功回调函数, 处理失败情况, 传参是`Error`, 实现`then`第二个参数即失败回调函数。
 
-
-
 #### then方法执行顺序
 
-`Promise` 对象新建后, 是立即执行的, 首先输出 `hi`. 
+`Promise` 对象新建后, 是立即执行的, 首先输出 `hi`.
 
 `then`方法对应的回调函数会在当前脚本所有同步任务执行完才会执行, 所以`yes`最后输出.
 
@@ -4816,8 +5048,6 @@ p1 执行完毕
 */
 ```
 
-
-
 ### 方法
 
 #### Promise.prototype.then()
@@ -4892,8 +5122,6 @@ p.then((value) => {
 
 这样就可以采用链式写法, 按照一定次序执行一组回调函数.
 
-
-
 #### Promise.prototype.catch()
 
 是`.then(null, rejection)`的别名, 用于指定发生错误时的回调函数, 返回值是一个`Promise`对象, 后面还能再使用 `then` 方法.
@@ -4947,8 +5175,6 @@ hhh
 (node:12281) UnhandledPromiseRejectionWarning: ReferenceError: a is not defined
 */
 ```
-
-
 
 #### Promise.prototype.finally()
 
@@ -5085,8 +5311,6 @@ p.then(val => {
 // 最快状态改变： p1
 ```
 
-
-
 #### Promise.try()
 
 需求：需要同步函数同步执行, 异步函数异步执行。
@@ -5102,7 +5326,7 @@ p.then(val => {
    console.log('over');
    // func
    // over
-   
+
    /* f 异步函数 */
    const f = () => {
      setTimeout(() => {
@@ -5116,9 +5340,6 @@ p.then(val => {
    // over
    // val: undefined
    ```
-
-   
-
 2. 使用 new Promise
 
    ```javascript
@@ -5130,7 +5351,7 @@ p.then(val => {
    console.log('over');
    // func
    // over
-   
+
    /* f 异步函数 */
    const f = () => {
      setTimeout(() => {
@@ -5148,9 +5369,6 @@ p.then(val => {
    // val: undefined
    // func
    ```
-
-   
-
 3. Promise.try
 
    ```javascript
@@ -5167,11 +5385,53 @@ p.then(val => {
    // node 环境执行会出现 TypeError: Promise.try is not a function 报错
    ```
 
-   
+## ES6 Generator (生成器)函数 + co 库
 
-## ES6 Generator 函数
+利用协程完成 Generator 函数，用 co 库让代码依次执行完，同时以同步的方式书写，也**让异步操作按顺序执行**。
 
-这个函数生成一个遍历器对象, 代表函数内部的指针, 调用对象的`next`方法可以对函数内部的状态值进行遍历.
+```javascript
+co(function* () {
+  const r1 = yield readFilePromise('1.json');
+  const r2 = yield readFilePromise('2.json');
+  const r3 = yield readFilePromise('3.json');
+  const r4 = yield readFilePromise('4.json');
+})
+```
+
+### 生成器实现机制-协程
+
+#### 什么是协程？
+
+协程是一种比线程更加轻量级的存在，协程处在线程的环境中，`一个线程可以存在多个协程`，可以将协程理解为线程中的一个个任务。不像进程和线程，协程并不受操作系统的管理，而是被具体的应用程序代码所控制。
+
+#### 协程的运作过程
+
+那你可能要问了，JS 不是单线程执行的吗，开这么多协程难道可以一起执行吗？
+
+答案是：并不能。一个线程一次只能执行一个协程。比如当前执行 A 协程，另外还有一个 B 协程，如果想要执行 B 的任务，就必须在 A 协程中将` JS 线程的控制权转交给 B协程`，那么现在 B 执行，A 就相当于处于暂停的状态。
+
+```javascript
+function* A() {
+  console.log("我是A");
+  yield B(); // A停住，在这里转交线程执行权给B
+  console.log("结束了");
+}
+function B() {
+  console.log("我是B");
+  return 100;// 返回，并且将线程执行权还给A
+}
+let gen = A();
+gen.next();
+gen.next();
+
+// 我是A
+// 我是B
+// 结束了
+```
+
+### 函数简介
+
+这个函数生成一个遍历器/迭代器对象, 代表函数内部的指针, 调用对象的`next`方法可以对函数内部的状态值进行遍历.
 
 调用 `next` 方法, 会返回一个有 `value` 和 `done` 两个属性的对象, 其中 `value` 表示此时指向的状态, 状态值是 `yield` 表达式后面那个表达式的值, `done` 表示有没有遍历结束.
 
@@ -5191,7 +5451,7 @@ log(obj.next(), obj.next(), obj.next(), obj.next());
 // { value: 10, done: false } { value: 9, done: false } { value: 'over', done: true } { value: undefined, done: true }
 ```
 
-`Generator` 函数返回的遍历器对象, 只有调用 `next` 方法才会遍历下一个状态. 若函数没有 `return` 语句, 则执行直至函数结束, 返回值为 `undefined`. 
+`Generator` 函数返回的遍历器对象, 只有调用 `next` 方法才会遍历下一个状态. 若函数没有 `return` 语句, 则执行直至函数结束, 返回值为 `undefined`.
 
 注意: `yield` 后面的表达式, 只有调用 `next` 方法, 内部指针指到该语句时, 才会执行.
 
@@ -5209,7 +5469,7 @@ function* g () {
 
 ### yield 语句使用
 
-`Generator` 函数不用 `yield` 时, 是一个暂缓执行的函数, 调用时生成遍历器对象, 对象调用 `next` 方法时, 执行完毕, 不调用则不执行. `yield` 语句只能用在 `Generator` 函数中.
+`Generator` 函数不用 `yield` 时, 是一个暂缓执行的函数, 调用时**生成遍历器对象,** 对象调用 `next` 方法时, 执行完毕, **不调用则不执行**. `yield` 语句只能用在 `Generator` 函数中.
 
 `yield` 表达式在另一个表达式之中时, 需要用 `()` 括起来.
 
@@ -5248,14 +5508,14 @@ function* g (x) {
   try {
     var y = x + 1;
   } catch (err) {
-    log(err); // error!!! 被打印出来
+    log(err); // 打印实例对象抛出的错
   }
   return y;
 }
 
 let obj = g(1);
 log(obj.next()); // { value: 2, done: true }
-obj.throw('error!!!')
+obj.throw('error!!!') // error!!! 被打印出来
 ```
 
 封装异步任务
@@ -5267,7 +5527,7 @@ const log = console.log;
 const url = 'https://api.github.com/users/github';
 
 function* g () {
-  let result = yield fetch(url);
+  let result = yield fetch(url); // 这里 result 是 pending 状态的 Promise 对象
   return result;
 }
 
@@ -5284,9 +5544,55 @@ res.value.then((data) => {
 })
 ```
 
+## ES7 await async
+
+加上 async 关键字之后, 函数返回的是一个 Promise 实例. 获取 promise 完成时返回的值, 使用 then 方法.
+
+在异步函数之前加上 await 关键字, 他会暂停代码在该行上, 然后等待直到 promise 执行完成, 然后返回结果值.
+
+在暂停的同时, 其他正在等待执行的代码就有机会执行了.
+
+在任何返回 Promise 的函数之前加上 await.
+
+```javascript
+// 展示语法
+async function hello(){
+  return greeting = await Promise.resolve("hello")
+}
+
+hello().then(alert)
+```
+
+await 关键字使 js 运行时暂停于此行, 允许其他代码在此之间执行, 直到异步函数调用返回其结果. 一旦完成, 代码将从下一行继续执行.
+
+```javascript
+async function myFetch() {
+  // 解析器将在此行暂停, 直至服务器返回的响应可用, 即 fetch('coffee.jpg') 返回的 promise 状态变为 fulfilled, 返回的 response 赋值给 response 变量 
+  let response = await fetch('coffee.jpg');
+  // 赋值完成后, 解析器移动到下一行
+  return await response.blob();
+}
+
+myFetch().then((blob) => {
+  let objectURL = URL.createObjectURL(blob);
+  let image = document.createElement('img');
+  image.src = objectURL;
+  document.body.appendChild(image);
+});
+```
 
 
-## ES8 await async
+
+这是 ES7 中新增的关键字，凡是加上 `async` 的函数都默认返回一个 `Promise` 对象，而更重要的是 `async + await` 也能让异步代码以同步的方式来书写，而不需要借助第三方库的支持。
+
+```javascript
+const readFileAsync = async function () {
+  const f1 = await readFilePromise('1.json')
+  const f2 = await readFilePromise('2.json')
+  const f3 = await readFilePromise('3.json')
+  const f4 = await readFilePromise('4.json')
+}
+```
 
 `Generator` 函数的语法糖.
 
@@ -5306,7 +5612,7 @@ const readFile = function (fileName) {
 
 // Generator 函数
 const gen = function* () {
-  // f1 f2 均是 Promise 实例
+  // f1 f2 均是 pending 状态的 Promise 实例
   const f1 = yield readFile('./a.py');
   const f2 = yield readFile('./alipay.js');
   console.log(f1.toString());
@@ -5318,7 +5624,6 @@ const gen = function* () {
 const asyncFunc = async function () {
   // f1 f2 均是 Promise 实例执行完之后返回的数据
   // await 会等待 Promise 实例状态变为结束, 才将结果赋值给 f1/f2
-  // await 相当于 then 方法调用回调函数, 并返回接收到的数据
   const f1 = await readFile('./a.py');
   const f2 = await readFile('./alipay.js');
   console.log(f1.toString());
@@ -5333,15 +5638,12 @@ const asyncFunc = async function () {
    `Generator` 函数的执行依赖于执行器, 需要调用 `next` 方法或者 `co` 模块才能逐步执行, 得到结果.
 
    `async` 函数就像普通函数, 只需要一行 `asyncFunc();` , 就会自动执行, 输出最后结果
-
 2. 语义更清楚.
 
    `async` 表示函数中有异步操作, `await` 表示后面的表达式需要等待结果.
-
 3. 适用性更广.
 
    `co` 模块约定, `yield` 命令后面只能跟 `Promise` 对象或者 `Thunk` 函数, `await` 后面可以跟 `Promise` 对象以及原始类型的值(这时等同于同步操作).
-
 4. 返回值是 `Promise` 对象.
 
    `async` 函数返回值是 `Promise` 对象, 比起 `Generator` 函数返回的遍历器对象, 更加方便.
@@ -5365,7 +5667,7 @@ f2:
 */
 ```
 
-在 `Promise` 实例前面加上 `await`, 就相当于等待这个 `Promise` 实例中的异步操作执行结束.
+在 `Promise` 实例前面加上 `await`, 就相当于**等待这个 `Promise` 实例中的异步操作执行结束**.
 
 ```javascript
 const asyncFunc = async function () {
@@ -5429,7 +5731,7 @@ f2 over
 4. 主线程不断重复上面三步.
 ```
 
-注意: 
+注意:
 
 1. 主线程（调用堆栈）为空, 才会读取任务(消息/事件)队列.
 2. 执行异步任务就是执行其指定的回调函数, 异步任务必须指定回调函数
@@ -5550,28 +5852,21 @@ process.nextTick(function foo() {
 
 > 由于process.nextTick指定的回调函数是在本次"事件循环"触发, 而setImmediate指定的是在下次"事件循环"触发, 所以很显然, 前者总是比后者发生得早, 而且执行效率也高（因为不用检查"任务队列"）。
 
-
-
 ![Node事件循环](images/Node-Event-Loop.png)
 
 1. timer 阶段: 执行到期的`setTimeout / setInterval`队列回调
-
 2. I/O 阶段: 执行上轮循环残流的`callback`
-
 3. idle, prepare
-
 4. poll: 等待回调
 
    - 执行回调
-
    - 执行定时器
+
      - 如有到期的`setTimeout / setInterval`, 则返回 timer 阶段
      - 如有`setImmediate`, 则前往 check 阶段
-
 5. check
 
    - 执行`setImmediate`
-
 6. close callbacks
 
 ## 浏览器中的 Event Loop
@@ -5582,9 +5877,52 @@ https://mp.weixin.qq.com/s/QgfE5Km1xiEkQqADMLmj-Q
 
 1. 整个脚本作为第一个宏任务执行
 2. 执行所有同步代码, 并且中间遇到的 宏任务 进入宏任务队列, 微任务进入微任务队列
-3. 当前宏任务执行完毕出宏任务队列, 检查微任务队列, 如果有则依次执行完微任务队列中的所有微任务
+3. 当前宏任务执行完毕出宏任务队列, 检查微任务队列, 如果有则依次执行完微任务队列中的所有微任务, 直至微任务队列为空
+4. 执行浏览器 UI 线程的渲染工作
+5. 检查是否有 webworker 任务, 有则执行
+6. 执行队列首部的宏任务, 回到 2, 依次循环, 直到宏任务与微任务队列都为空
 
-## 自我总结
+练习题:
+
+```javascript
+Promise.resolve().then(()=>{
+  console.log('Promise1')  
+  setTimeout(()=>{
+    console.log('setTimeout2')
+  },0)
+});
+setTimeout(()=>{
+  console.log('setTimeout1')
+  Promise.resolve().then(()=>{
+    console.log('Promise2')    
+  })
+},0);
+console.log('start');
+
+// start
+// Promise1
+// setTimeout1
+// Promise2
+// setTimeout2
+```
+
+题目分析:
+
+两个空队列, 一个宏任务, 一个微任务.
+
+当前宏任务队列只有当前脚本这个宏任务, 执行当前脚本, Promise1 注册为微任务, setTimeout1 注册为宏任务, 打印 start, 当前宏任务(脚本)执行完毕
+
+接着执行这个宏任务(脚本)产生的微任务, 即当前的微任务队列里的所有任务 Promise1, 指向该微任务产生了一个宏任务 setTimeout2, 将该宏任务加入宏任务队列, 则微任务队列目前为空.
+
+接着执行宏任务队列中的第一个宏任务 setTimeout1, 该宏任务又产生了微任务 Promise2, 于是又去执行微任务队列输出 Promise2 , 微任务队列再次清空.
+
+再次回到宏任务队列执行队列首部的宏任务, 此时执行的是第一个微任务产生的宏任务 setTimeout2.
+
+因此总结下来, 打印顺序分别是 start(脚本) -> Promise1 -> setTimeout1 -> Promise2 -> setTimeout2
+
+
+
+**自我总结**
 
 浏览器事件循环
 
@@ -5592,34 +5930,30 @@ https://mp.weixin.qq.com/s/QgfE5Km1xiEkQqADMLmj-Q
 
 宏任务与微任务都在任务队列中, 都是异步任务完成后触发的事件. 执行宏任务与微任务其实是执行他们的回调.
 
-| 宏任务(macro-task tasks) | 微任务(micro-task jobs)     |
-| ------------------------ | --------------------------- |
-| script(整体代码)         | Process.nexttick            |
-| setTimeout               | Promise                     |
-| setInterval              | async/await                 |
-| setImmediate             | MutationObserver(H5 新特性) |
-| I/O                      |                             |
-| UI Render                |                             |
+
+| 宏任务(macro-task tasks) | 微任务(micro-task jobs) |
+| - | - |
+| script(整体代码) | Process.nexttick |
+| setTimeout | Promise |
+| setInterval | async/await |
+| setImmediate | MutationObserver(H5 新特性) |
+| I/O |   |
+| UI Render |   |
 
 流程
 
 ![图片](images/浏览器事件循环.jpg)
 
-
-
-
-
 nodejs 事件循环
 
+
 | 宏任务(macro-task tasks) | 微任务(micro-task jobs) |
-| ------------------------ | ----------------------- |
-| script(整体代码)         | Process.nexttick        |
-| setTimeout               | Promise                 |
-| setInterval              |                         |
-| setImmediate             |                         |
-| I/O                      |                         |
-
-
+| - | - |
+| script(整体代码) | Process.nexttick |
+| setTimeout | Promise |
+| setInterval |   |
+| setImmediate |   |
+| I/O |   |
 
 # Proxy
 
@@ -5674,7 +6008,7 @@ var obj = new Proxy({}, {
 console.log(obj.name, obj.time, obj.date); // 44 44 44
 ```
 
-**注意**: 如果要使 Proxy 起作用, 必须操作 Proxy 实例, 而不是操作目标对象. 如果配置对象为`{}`, 则对 Proxy 实例的操作相当于对`target`进行操作. 
+**注意**: 如果要使 Proxy 起作用, 必须操作 Proxy 实例, 而不是操作目标对象. 如果配置对象为`{}`, 则对 Proxy 实例的操作相当于对`target`进行操作.
 
 技巧: 可以将 `Proxy`实例作为`object`的一个属性进行调用.
 
@@ -5704,8 +6038,6 @@ console.log(obj.name, obj.age);
 ```
 
 一共有十三种拦截操作.
-
-
 
 # Object
 
@@ -5741,8 +6073,6 @@ Object.create(proto, [propertiesObject])
 `propertiesObject`: 可选, 需要传一个对象, 其自有可枚举属性将被添加到新创建对象中.
 
 使用 `propertiesObject` 属性.
-
-
 
 ```javascript
 var o;
@@ -5822,10 +6152,6 @@ let obj = Object.create({}, {
 })
 ```
 
-
-
-
-
 ## Object.keys()
 
 返回一个对象自己的**可枚举**属性组成的数组, , 不包括该对象原型链上的属性.
@@ -5834,8 +6160,6 @@ let obj = Object.create({}, {
 let obj = { 100: 'a', 2: 'b', 7: 'c' }
 console.log(Object.keys(obj)); // [ '2', '7', '100' ]
 ```
-
-
 
 ## Object.assign()
 
@@ -5905,7 +6229,6 @@ console.log(Object.assign({ a: 1 }, undefined)); // { a: 1 }
     }
   }
   ```
-
 - 使用 Object.assign()
 
   拷贝的是对象属性的引用, 而不是对象本身
@@ -5916,13 +6239,12 @@ console.log(Object.assign({ a: 1 }, undefined)); // { a: 1 }
   newObj.a = 5;
   console.log(newObj); // { a: 5, b: 2 }
   console.log(newObj === obj); // false
-  
+
   let obj = { name: 'sy', age: 18 };
   const obj2 = Object.assign({}, obj, {name: 'sss'});
   // 出现了属性值的覆盖
   console.log(obj2);//{ name: 'sss', age: 18 }
   ```
-
 - concat 浅拷贝数组
 
   ```javascript
@@ -5932,13 +6254,11 @@ console.log(Object.assign({ a: 1 }, undefined)); // { a: 1 }
   console.log(newArr, arr);
   // [ 1, 100, 3, 4 ] [ 1, 2, 3, 4 ]
   ```
-
 - slice 浅拷贝
 
   ```javascript
   let newArr = [1, 2, 3].slice();
   ```
-
 - 使用展开运算符(...)
 
   ```javascript
@@ -5982,22 +6302,19 @@ log(newObj, obj);
     ```
 
     拷贝a会出现系统栈溢出，因为出现了`无限递归`的情况。
-
   - 无法拷贝一些特殊的对象`，诸如 RegExp, Date, Set, Map, undefined 或 symbol 时, 无法拷贝
-
   - 无法拷贝函数
 
   ```javascript
   const log = console.log;
   let obj = { a: 0, b: 1, c: { d: 2 } }
-  
+
   let obj1 = JSON.parse(JSON.stringify(obj));
   obj.a = 55;
   obj.c.d = 88;
   log(obj, obj1);
   // { a: 55, b: 1, c: { d: 88 } } { a: 0, b: 1, c: { d: 2 } }
   ```
-
 - 递归进行逐一赋值
 
   ```javascript
@@ -6016,12 +6333,12 @@ log(newObj, obj);
     }
   }
   ```
-```
   
-  解决循环引用, 创建 map 记录已经拷贝过的对象
   
+    解决循环引用, 创建 map 记录已经拷贝过的对象
+
   ```javascript
-  const isObject = (target) => (typeof target === 'object' || typeof target === 'function') && target !== null;
+  const isObject = (target) => (typeof target === 'object' ||   typeof target === 'function') && target !== null;
   
   const deepClone = (target, map = new Map()) => { 
     if(map.get(target))  
@@ -6041,23 +6358,23 @@ log(newObj, obj);
       return target; 
     } 
   }
-```
-
-  但是, map 上的 key 和 map 构成了`强引用关系`. 被弱引用的对象可以在`任何时候被回收`，而对于强引用来说，只要这个强引用还在，那么对象`无法被回收`。
-
-  解决方法:
-
-  让 map 的 key 和 map 构成`弱引用`即可。ES6给我们提供了这样的数据结构，它的名字叫`WeakMap`，它是一种特殊的Map, 其中的键是`弱引用`的。其键必须是对象，而值可以是任意的。
-
-  ```javascript
-  const deepClone = (target, map = new WeakMap()) => {
-    //...
-  }
   ```
 
-  
+但是, map 上的 key 和 map 构成了`强引用关系`. 被弱引用的对象可以在`任何时候被回收`，而对于强引用来说，只要这个强引用还在，那么对象`无法被回收`。
+
+解决方法:
+
+让 map 的 key 和 map 构成`弱引用`即可。ES6给我们提供了这样的数据结构，它的名字叫`WeakMap`，它是一种特殊的Map, 其中的键是`弱引用`的。其键必须是对象，而值可以是任意的。
+
+```javascript
+const deepClone = (target, map = new WeakMap()) => {
+  //...
+}
+```
 
 ## Object.defineProperty()
+
+https://www.jianshu.com/p/8fe1382ba135
 
 直接在一个方法上定义一个新属性, 或者修改一个对象的现有属性, 并返回此对象.
 
@@ -6092,15 +6409,12 @@ Object.defineProperty(obj, prop, descriptor)
 
 描述符可拥有的键值以及默认值, 用来具体设置属性。
 
-| 描述符/属性 | configurable | enumerable | value     | writable | get       | set       |
-| ----------- | ------------ | ---------- | --------- | -------- | --------- | --------- |
-| 默认值      | false        | false      | undefined | false    | undefined | undefined |
-| 数据描述符  | 可以         | 可以       | 可以      | 可以     | 不可以    | 不可以    |
-| 存取描述符  | 可以         | 可以       | 不可以    | 不可以   | 可以      | 可以      |
 
-
-
-
+| 描述符/属性 | configurable | enumerable | value | writable | get | set |
+| - | - | - | - | - | - | - |
+| 默认值 | false | false | undefined | false | undefined | undefined |
+| 数据描述符 | 可以 | 可以 | 可以 | 可以 | 不可以 | 不可以 |
+| 存取描述符 | 可以 | 可以 | 不可以 | 不可以 | 可以 | 可以 |
 
 # 设计模式
 
@@ -6126,22 +6440,19 @@ let obj = {
 
 先判断某类的实例是否存在, 存在则返回实例, 不存在则新建实例。
 
-
-
 ## 观察者模式
-
-
 
 # 模块化
 
 ES6 引入模块化后, 通常**在浏览器中使用 ES6 的模块化支持, 在 Node 中使用 CommonJS 的模块化支持。**
 
 - *分类*
+
   - es6: `import / export`
   - commonjs: `require / module.exports / exports`
   - amd: `require / defined`
-
 - *`require` 与 `import `的区别*
+
   - `require`支持 **动态导入**, `import`不支持, 正在提案 (babel 下可支持)
   - `require`是 **同步** 导入, `import`属于 **异步** 导入
   - `require`是 **值拷贝**, 导出值变化不会影响导入值；`import`指向 **内存地址**, 导入值会随导出值而变化
@@ -6210,11 +6521,8 @@ require、defined
 #### 特点
 
 - 自动开启严格模式
-
 - 模块中可以导入导出各种类型的变量, 如函数/对象/字符串/布尔值/类等.
-
 - 每个模块都有自己的上下文, 模块内声明的变量都是局部变量.
-
 - 每个模块只加载一次, 再去加载该模块, 则直接从内存中读取.
 
 #### export 命令
@@ -6332,8 +6640,6 @@ let a = () => {
 }
 ```
 
-
-
 #### import 命令
 
 `import` 后面的路径可以是绝对/相对, `.js`可以省略, 如果只是模块名不带有路径, 则需要配置文件.
@@ -6406,8 +6712,6 @@ if (true) {
 // if 结构 error
 ```
 
-
-
 #### 模块的整体加载
 
 使用 `*` 号指定一个对象, 所有输出值加载在这个对象上.
@@ -6437,8 +6741,6 @@ console.log('圆周长：' + circle.circumference(14));
 circle.foo = 'hello';
 circle.area = function () {};
 ```
-
-
 
 #### export default 命令
 
@@ -6587,7 +6889,7 @@ function debounce(func, wait) {
         let args = arguments;
 
         if (timeout) clearTimeout(timeout);
-        
+      
         timeout = setTimeout(() => {
             func.apply(context, args)
         }, wait);
@@ -6684,45 +6986,41 @@ function throttle(func, wait) {
   }
 ```
 
+兼具版
 
-
-  兼具版
-
-  ```javascript
-  /**
-   * @desc 函数节流
-   * @param func 函数
-   * @param wait 延迟执行毫秒数
-   * @param type 1 表时间戳版, 2 表定时器版
-   */
-  function throttle(func, wait , type) {
-      if(type===1){
-          let previous = 0;
-      }else if(type===2){
-          let timeout;
-      }
-      return function() {
-          let context = this;
-          let args = arguments;
-          if(type===1){
-              let now = Date.now();
-              if (now - previous > wait) {
-                  func.apply(context, args);
-                  previous = now;
-              }
-          }else if(type===2){
-              if (!timeout) {
-                  timeout = setTimeout(() => {
-                      timeout = null;
-                      func.apply(context, args)
-                  }, wait)
-              }
-          }
-      }
-  }
-  ```
-
-  
+```javascript
+/**
+ * @desc 函数节流
+ * @param func 函数
+ * @param wait 延迟执行毫秒数
+ * @param type 1 表时间戳版, 2 表定时器版
+ */
+function throttle(func, wait , type) {
+    if(type===1){
+        let previous = 0;
+    }else if(type===2){
+        let timeout;
+    }
+    return function() {
+        let context = this;
+        let args = arguments;
+        if(type===1){
+            let now = Date.now();
+            if (now - previous > wait) {
+                func.apply(context, args);
+                previous = now;
+            }
+        }else if(type===2){
+            if (!timeout) {
+                timeout = setTimeout(() => {
+                    timeout = null;
+                    func.apply(context, args)
+                }, wait)
+            }
+        }
+    }
+}
+```
 
 # V8 垃圾回收 Garbage Collection
 
@@ -6765,12 +7063,12 @@ V8 将堆内存分成了两部分, 新生代(存活时间短)+老生代(存活�
 1. 标记-清除
 
    - 标记阶段
+
      - 遍历堆中的所有对象并对其做标记
      - 对代码环境中使用的变量以及强引用的变量取消标记
-
    - 清除阶段
-     - 清除所有被标记的对象
 
+     - 清除所有被标记的对象
 2. 整理内存碎片
 
    清除阶段结束后, 将所有存活的对象全部往一端靠拢, 由于移动对象, 速度不会很快, 比较耗时
@@ -6781,9 +7079,7 @@ V8 将堆内存分成了两部分, 新生代(存活时间短)+老生代(存活�
 
 经过增量标记之后，垃圾回收过程对JS应用的阻塞时间减少到原来了1 / 6
 
-------
-
-
+---
 
 ## 概念
 
@@ -6792,11 +7088,11 @@ V8 将堆内存分成了两部分, 新生代(存活时间短)+老生代(存活�
 如果有数据块变得不可达即不可访问, 则垃圾回收机制会将其删除。具有可达性的值是可访问的值, 被存储在内存中。
 
 1. 根/固有可达值, 无法被删除：
+
    - 本地函数的变量与参数
    - 当前嵌套调用链上的其他函数的变量与参数
    - 全局变量
    - 其他
-
 2. 从根开始沿着引用或者引用链能访问的值, 也具有可达性。
 
 ```javascript
@@ -6858,30 +7154,25 @@ JS 引擎做了下述优化：
 - 实现繁琐, 每个赋值操作都得更换成引用更新操作
 - 循环引用无法回收
 
-
-
 # 最佳实践
 
 1. 避免使用 全局变量 `new` `===` `eval()`
-
 2. 所有声明放在脚本或者函数的顶部, **顶部声明, 稍后使用**
 
    ```javascript
    // 在顶部声明
    var firstName, lastName, price, discount, fullPrice;
-   
+
    // 稍后使用
    firstName = "Bill";
    lastName = "Gates";
-   
+
    price = 19.90;
    discount = 0.10;
-   
+
    fullPrice = price * 100 / discount;
    ```
-
 3. 声明变量时同时初始化
-
 4. 将数值/字符串/布尔值声明为原始值而非对象, 否则会拖慢速度
 
    ```javascript
@@ -6889,18 +7180,18 @@ JS 引擎做了下述优化：
    let y = new String('bill') // 对象
    console.log(x===y); // false
    ```
-
 5. 请勿使用 new Object()
 
-|   推荐使用    |     不建议     |
-| :-----------: | :------------: |
-|      {}       |  new Object()  |
-|      []       |  new Array()   |
+
+| 推荐使用 | 不建议 |
+| :-: | :-: |
+| {} | new Object() |
+| [] | new Array() |
 | function (){} | new Function() |
-|      ""       |  new String()  |
-|       0       |  new Number()  |
-|     false     | new Boolean()  |
-|     /()/      |  new RegExp()  |
+| "" | new String() |
+| 0 | new Number() |
+| false | new Boolean() |
+| /()/ | new RegExp() |
 
 6. 意识到自动类型转换, 变量可以通过赋值改变其数据类型, 变量可包含不同的数据类型.
 
@@ -6909,12 +7200,8 @@ JS 引擎做了下述优化：
    a = 5;
    console.log(typeof a); // number
    ```
-
 7. 为函数中的参数设置默认值, `undefined` 会破坏代码
-
 8. 用 `default` 来结束 `switch`.
-
-
 
 # 缺陷与错误
 
@@ -6948,8 +7235,6 @@ test('1'); // is 1
 test(''); // is kong
 ```
 
-
-
 ## 调试
 
 > 操作
@@ -6962,13 +7247,11 @@ test(''); // is kong
 
 与在调试工具中设置断点效果一样.
 
-
-
 ## 严格模式
 
 > 原因
 
-`use strict` 
+`use strict`
 
 消除js语法的不合理之处, 保证代码安全; 增加编译效率;
 
@@ -6997,13 +7280,9 @@ test(''); // is kong
 
   - `let / const`: 块级作用域、不存在变量提升、暂时性死区、不允许重复声明
   - `const`: 声明常量, 无法修改
-
 - 解构赋值
-
 - `class / extend`: 类声明与继承
-
 - `Set / Map`: 新的数据结构
-
 - 异步解决方案:
 
   - `Promise`的使用与实现
@@ -7017,15 +7296,15 @@ test(''); // is kong
     yield 'world';
     return 'ending';
   }
-  
+
   const generator = helloWorld();
-  
+
   generator.next()  // { value: 'hello', done: false }
-  
+
   generator.next()  // { value: 'world', done: false }
-  
+
   generator.next()  // { value: 'ending', done: true }
-  
+
   generator.next()  // { value: undefined, done: true }
   ```
 
@@ -7036,7 +7315,7 @@ test(''); // is kong
      let user = await fetchUser();
      return user;
   }
-  
+
   const user = await getUserByAsync()
   console.log(user)
   ```
@@ -7070,6 +7349,116 @@ function square(n){
 
 # Node
 
+## 异步 I/O
+
+### I/O
+
+I/O 即Input/Output, 输入和输出的意思。
+
+在浏览器端，只有一种 I/O，那就是利用 Ajax 发送网络请求，然后读取返回的内容，这属于`网络I/O`。回到 nodejs 中，其实这种的 I/O 的场景就更加广泛了，主要分为两种:
+
+- 文件 I/O。比如用 fs 模块对文件进行读写操作。
+- 网络 I/O。比如 http 模块发起网络请求
+
+### 阻塞 I/O 非阻塞 I/O
+
+`阻塞`和`非阻塞` I/O 其实是针对**操作系统内核**而言的，而不是 nodejs 本身。阻塞 I/O 的特点就是一定要**等到操作系统完成所有操作后才表示调用结束**, 期间 nodejs 程序一直处于等待状态，什么也做不了. 而非阻塞 I/O 是调用后立马返回，不用等操作系统内核完成操作, 但是操作系统也在同时进行着 I/O, 这样就把等待的时间充分调用了起来。
+
+为了让 nodejs 知道操作系统已经做完 I/O 操作，需要重复地去操作系统那里判断一下是否完成，这种重复判断的方式就是`轮询`。
+
+对于轮询而言，有以下这么几种方案:
+
+1. 一直轮询检查I/O状态，直到 I/O 完成。
+   - 这是最原始的方式，也是性能最低的，会让 CPU 一直耗用在等待上面。其实跟阻塞 I/O 的效果是一样的。
+2. 遍历文件描述符(即 文件I/O 时操作系统和 nodejs 之间的文件凭证)的方式来确定 I/O 是否完成
+   - I/O完成则文件描述符的状态改变。但 CPU 轮询消耗还是很大。
+3. epoll模式
+   - 在进入轮询的时候如果I/O未完成CPU就休眠，完成之后唤醒CPU。
+
+总之，CPU要么重复检查I/O，要么重复检查文件描述符，要么休眠，都得不到很好的利用
+
+期待的是: nodejs 应用程序发起 I/O 调用后可以直接去执行别的逻辑，操作系统默默地做完 I/O 之后**给 nodejs 发一个完成信号**，nodejs 执行回调操作。这是理想效果, 也是异步 I/O 的效果.
+
+### 异步 I/O 本质
+
+Linux 原生存在这样的一种方式，即(AIO), 但两个致命的缺陷:
+
+1. 只有 Linux 下存在，在其他系统中没有异步 I/O 支持。
+2. 无法利用系统缓存。
+
+#### nodejs 的异步 io 方案
+
+**利用线程池实现**: 让一个进程进行计算操作，另外一些进行 I/O 调用，I/O 完成后把信号传给计算的线程，进而执行回调(基于操作系统支持)
+
+只不过在不同的系统下面表现会有所差异，在 Linux 下可以直接使用线程池来完成，在Window系统下则采用 IOCP 这个系统API(其内部还是用线程池完成的)。
+
+有了操作系统的支持，那 nodejs 如何来对接这些操作系统从而实现异步 I/O 呢？
+
+#### 执行流程
+
+分析文件 IO 执行流程
+
+```javascript
+let fs = require('fs');
+fs.readFile('/test.txt', function (err, data) {
+    console.log(data); 
+});
+```
+
+执行代码的过程中大概发生了这些事情:
+
+1. 首先，fs.readFile调用Node的核心模块fs.js ；(方法调用核心模块)
+2. 接下来，Node的核心模块调用内建模块node_file.cc，创建对应的文件I/O观察者对象(这个对象后面有大用！) ；(核心模块调用内建模块, 创建观察者对象)
+3. 最后，根据不同平台（Linux或者window），内建模块通过libuv中间层进行系统调用;(内建模块通过 libuv 进行系统调用)
+
+![img](images/文件IO过程.jpg)
+
+#### libuv 调用过程分析
+
+libuv 中是如何来进行进行系统调用的呢？也就是 uv_fs_open() 中做了些什么？
+
+##### 1. 创建请求对象
+
+以Windows系统为例来说，在这个函数的调用过程中，我们创建了一个文件I/O的**请求对象**，并往里面注入了回调函数。
+
+```cpp
+req_wrap->object_->Set(oncomplete_sym, callback);
+```
+
+req_wrap 便是这个请求对象，req_wrap 中 object_ 的 oncomplete_sym 属性对应的值便是我们 nodejs 应用程序代码中传入的回调函数。
+
+##### 2. 推入线程池，调用返回
+
+在这个对象包装完成后，QueueUserWorkItem() 方法将这个对象推进线程池中等待执行。
+
+好，至此现在js的调用就直接返回了，我们的 js 应用程序代码可以`继续往下执行`，当然，当前的 `I/O` 操作同时也在线程池中将被执行，完成了异步.
+
+接下来便是执行回调通知的环节。
+
+##### 3. 回调通知
+
+事实上现在线程池中的 I/O 无论是阻塞还是非阻塞都已经无所谓了，因为异步的目的已经达成。重要的是 I/O 完成后会发生什么。
+
+在介绍后续的故事之前，给大家介绍两个重要的方法: `GetQueuedCompletionStatus` 和 `PostQueuedCompletionStatus`。
+
+1. 还记得之前讲过的 eventLoop 吗？在每一个Tick当中会调用`GetQueuedCompletionStatus`检查线程池中是否有执行完的请求，如果有则表示时机已经成熟，可以执行回调了。
+2. `PostQueuedCompletionStatus`方法则是向 IOCP 提交状态，告诉它当前I/O完成了。
+
+名字比较长，先介绍是为了让大家混个脸熟，至少后面出来不会感到太突兀：）
+
+我们言归正传，把后面的过程串联起来。
+
+当对应线程中的 I/O 完成后，会将获得的结果`存储`起来，保存到`相应的请求对象`中，然后调用`PostQueuedCompletionStatus()`向 IOCP 提交执行完成的状态，并且将线程还给操作系统。一旦 EventLoop 的轮询操作中，调用`GetQueuedCompletionStatus`检测到了完成的状态，就会把`请求对象`塞给I/O观察者(之前埋下伏笔，如今终于闪亮登场)。
+
+I/O 观察者现在的行为就是取出`请求对象`的`存储结果`，同时也取出它的`oncomplete_sym`属性，即回调函数(不懂这个属性的回看第1步的操作)。将前者作为函数参数传入后者，并执行后者。 这里，回调函数就成功执行啦！
+
+总结 :
+
+1. `阻塞`和`非阻塞` I/O 其实是针对操作系统内核而言的。阻塞 I/O 的特点就是一定要**等到操作系统完成所有操作后才表示调用结束**，而非阻塞 I/O 是调用后立马返回，不用等操作系统内核完成操作。
+2. nodejs中的异步 I/O 采用多线程的方式，由 `EventLoop`、`I/O 观察者`，`请求对象`、`线程池`四大要素相互配合，共同实现。
+
+
+
 ## 支持高并发
 
 ### 单线程
@@ -7093,11 +7482,9 @@ function square(n){
    创建多进程：一台多核服务器创建多个进程, 处理好进程间通信
 
    细分实例：将物理机划分为多个单核虚拟机, 通过 pm2 等工具, 管理多台虚拟机形成集群架构, 处理好机器间通信。
-
 2. 时间片轮转
 
    在单线程模拟多线程, 适当减少阻塞感
-
 3. 负载均衡、坏点监控/隔离
 
    错误无法通过try/catch捕捉, 出错会导致应用退出。
@@ -7115,10 +7502,6 @@ function square(n){
 ### Node 分布式架构
 
 ![img](images/node分布式.jpg)
-
-
-
-
 
 ## npm 模块安装机制
 
@@ -7225,15 +7608,104 @@ console.log("文件读取完毕");
 // 异步读取： 家人朋友
 ```
 
-
-
 ### children_process
 
 ### cluster
 
 ### http
 
+##  Node 中回调函数的机制
 
+`回调函数`的方式其实内部利用了`发布-订阅`模式，在这里我们以模拟实现 node 中的 Event 模块为例来写实现回调函数的机制。
 
+```javascript
+function EventEmitter() {
+  this.events = new Map();
+}
+```
 
+需要实现 addListener/removeListener/once/removeListener/emit 等函数.
+
+addListener
+
+```javascript
+// once 参数表示是否只是触发一次
+const wrapCallback = (fn, once = false) => ({ callback: fn, once });
+
+EventEmitter.prototype.addListener = function (type, fn, once = false) {
+  let handler = this.events.get(type);
+  if (!handler) {
+    // 为 type 事件绑定回调
+    this.events.set(type, wrapCallback(fn, once));
+  } else if (handler && typeof handler.callback === 'function') {
+    // 目前 type 事件只有一个回调
+    this.events.set(type, [handler, wrapCallback(fn, once)]);
+  } else {
+    // 目前 type 事件回调数 >= 2
+    handler.push(wrapCallback(fn, once));
+  }
+}
+```
+
+removeListener
+
+```javascript
+EventEmitter.prototype.removeListener = function (type, listener) {
+  let handler = this.events.get(type);
+  if (!handler) return;
+  if (!Array.isArray(handler)) {
+    if (handler.callback === listener.callback) this.events.delete(type);
+    else return;
+  }
+  for (let i = 0; i < handler.length; i++) {
+    let item = handler[i];
+    if (item.callback === listener.callback) {
+      // 删除该回调，注意数组塌陷的问题，即后面的元素会往前挪一位。i 要 -- 
+      handler.splice(i, 1);
+      i--;
+      if (handler.length === 1) {
+        // 长度为 1 就不用数组存了
+        this.events.set(type, handler[0]);
+      }
+    }
+  }
+}
+```
+
+once
+
+加入的时候设置为 once:true, 执行完毕后删除该监听函数.
+
+```javascript
+EventEmitter.prototype.once = function (type, fn) {
+  this.addListener(type, fn, true);
+}
+
+EventEmitter.prototype.emit = function (type, ...args) {
+  let handler = this.events.get(type);
+  if (!handler) return;
+  if (Array.isArray(handler)) {
+    // 遍历列表，执行回调
+    handler.map(item => {
+      item.callback.apply(this, args);
+      // 标记的 once: true 的项直接移除
+      if (item.once) this.removeListener(type, item);
+    })
+  } else {
+    // 只有一个回调则直接执行
+    handler.callback.apply(this, args);
+  }
+  return true;
+}
+```
+
+removeAllListener
+
+```javascript
+EventEmitter.prototype.removeAllListener = function (type) {
+  let handler = this.events.get(type);
+  if (!handler) return;
+  else this.events.delete(type);
+}
+```
 
