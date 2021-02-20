@@ -330,6 +330,235 @@ defer 表示延迟，例如掘金的源码中就有大量的 defer 出现：
 
 一句话，`defer`是“渲染完再执行”，`async`是“下载完就执行”。另外，如果有多个`defer`脚本，会按照它们在页面出现的顺序加载，而多个`async`脚本是不能保证加载顺序的。
 
+### 动态引入
+
+通过操作 dom 动态创建 script 标签并添加到 DOM 中, 即可加载指定脚本. 默认 async 属性打开, 但是由于浏览器对该属性的支持程度不一致, 将其设置关闭, 脚本则为同步加载 .
+
+```js
+let script = document.createElement('script');
+script.src = 'hello.js';
+script.async = false;
+document.head.appendChild(script);
+```
+
+动态引入资源对预加载器不可见 -> 影响它们在资源获取队列中的优先级 -> 影响应用, 可能严重性能 -> 需要让预加载器知道这些动态请求文件的存在
+
+可以在文档头部显式声明脚本的存在:
+
+```html
+<link rel="preload" href="hello.js">
+```
+
+## 预加载
+
+ [`link`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/link) 元素的 `rel` 属性的属性值`preload`能够让你在你的HTML页面中 [`head`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/head)元素内部书写一些声明式的资源获取请求，可以指明哪些资源是在页面加载完成后即刻需要的。对于这种即刻需要的资源，你可能**希望在页面加载的生命周期的早期阶段就开始获取，在浏览器的主渲染机制介入前就进行预加载**。这一机制使得资源可以更早的得到加载并可用，且更不易阻塞页面的初步渲染，进而提升性能。
+
+***想实现: 需要的资源在页面渲染前就获取, 不影响页面初步渲染, 提升性能***.
+
+本文提供了一个如何有效使用`preload`机制的基本说明。
+
+### preload
+
+Preload 是一个新的控制特定资源如何被加载的新的 Web 标准，这是已经在 2016 年 1 月废弃的 subresource prefetch 的升级版。这个指令可以在 `<link>` 中使用，比如 `<link rel="preload">`。
+
+一般来说，最好使用 `preload` 来加载你最重要的资源，比如图像，CSS，JavaScript 和字体文件。
+
+这不要与浏览器预加载混淆，**浏览器预加载只预先加载在HTML中声明的资源**。preload 指令事实上克服了这个限制并且允许预加载在 CSS 和JavaScript 中定义的资源，并允许决定何时应用每个资源。
+
+即: 
+
+preload 可加载在 js 和 css 中声明的资源, 而浏览器预加载只能预加载html中声明的资源.
+
+preload 不会阻塞 `window` 的 `onload` 事件.
+
+> 将使用`preload`作为`rel`属性的属性值。这种做法将把`<link>` 元素塞入一个预加载器中，这个预加载器也将用于其他我们所需要的，各种各样的，任意类型的资源。
+>
+> 为了完成基本的配置，你还需要通过 `href`和`as` 属性指定需要被预加载资源的资源路径及其类型。
+
+#### 可加载的文件类型
+
+许多不同类型的内容都可以被预加载，一些主要可用的`as` 属性值列举如下：
+
+- `audio`: 音频文件。
+- `document`: 一个将要被嵌入到[``](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/frame)或[``](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/iframe)内部的HTML文档。
+- `embed`: 一个将要被嵌入到[``](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/embed)元素内部的资源。
+- `fetch`: 那些将要通过fetch和XHR请求来获取的资源，比如一个ArrayBuffer或JSON文件。
+- `font`: 字体文件。
+- `image`: 图片文件。
+- `object`: 一个将会被嵌入到[``](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/embed)元素内的文件。
+- `script`: JavaScript文件。
+- `style`: 样式表。
+- `track`: WebVTT文件。
+- `worker`: 一个JavaScript的web worker或shared worker。
+- `video`: 视频文件。
+
+#### 与 prefetch 的不同
+
+`preload` 专注于当前页面, 以高优先级同步加载资源, `prefetch` 专注于下一个页面将要加载的资源并以低优先级加载.
+
+#### 使用 preload 的好处
+
+使用 `as` 来指定将要预加载的内容的类型，将使得浏览器能够：
+
+- 允许浏览器来设定资源加载的优先级
+
+  允许前端开发者来优化指定资源的加载。
+
+- 匹配未来的加载需求，在适当的情况下，重复利用同一资源。
+
+- 浏览器可以通过指定 `as` 属性来决定这个请求是否符合 content security policy。
+
+- 浏览器可以基于资源的类型（比如 image/webp）来发送适当的 `accept` 头。
+
+**举例**
+
+预加载图像
+
+```javascript
+<link rel="preload" href="image.png">
+```
+
+预加载字体，记住：预加载需要 CORS 的跨域请求，要加上 `crossorigin` 属性。
+
+```javascript
+<link rel="preload" href="https://example.com/fonts/font.woff" as="font" crossorigin>
+```
+
+通过 HTML 和 JavaScript 预加载样式表：
+
+```javascript
+<!-- Via markup -->
+<link rel="preload" href="/css/mystyles.css" as="style">
+  
+<!-- Via JavaScript -->
+<script>
+  var res = document.createElement("link");
+  res.rel = "preload";
+  res.as = "style";
+  res.href = "css/mystyles.css";
+  document.head.appendChild(res);
+</script>
+```
+
+来自 filament group 的 Scott Jehl 也有了一些相关研究并写了 async loaded styles using markup 说明了 **preload 是不阻塞页面渲染**的！
+
+#### 包含 type 属性
+
+声明即将预加载的资源类型, 浏览器支持即去下载, 不支持跳过.
+
+> `<link>` 元素可以接受一个`type`属性。这一属性可以包含该元素所指向资源的MIME类型。在浏览器进行预加载的时候，这个属性值将会非常有用——浏览器将使用`type`属性来判断它是否支持这一资源，如果浏览器支持这一类型资源的预加载，下载将会开始，否则便对其加以忽略。
+
+```html
+<head>
+  <meta charset="utf-8">
+  <title>Video preload example</title>
+
+  <link rel="preload" href="sintel-short.mp4" as="video" type="video/mp4">
+</head>
+<body>
+  <video controls>
+    <source src="sintel-short.mp4" type="video/mp4">
+    <source src="sintel-short.webm" type="video/webm">
+    <p>Your browser doesn't support HTML5 video. Here is a <a href="sintel-short.mp4">link to the video</a> instead.</p>
+  </video>
+</body>
+```
+
+上述示例, 体现预加载的优势, 页面加载不卡顿带来良好体验.
+
+在这个实例中，**支持MP4格式的浏览器将仅预加载并使用MP4资源**，以使得视频播放器的表现尽可能的流畅，或者说，为用户提供更好的响应。而不支持MP4格式的浏览器仍然能够加载视频的WebM版本，但无法体验到预加载带来的良好体验。这个例子展示了预加载机制如何与渐进式增强的哲学进行有机的结合。
+
+#### 跨域请求资源
+
+预加载那些跨域资源，只需要你在`<link>`元素中设置好`crossorigin`属性即可。
+
+注: 字体文件非跨域的情况下，也需要应用这一属性, 且必须使用以匿名模式使用CORS.
+
+```html
+<link rel="preload" href="fonts/cicle_fina-webfont.eot" as="font" type="application/vnd.ms-fontobject" crossorigin="anonymous">
+<link rel="preload" href="fonts/cicle_fina-webfont.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+```
+
+#### 包含媒体
+
+`<link>`元素有一个很棒的特性是它们能够接受一个`media`属性。它们可以接受[媒体类型](https://developer.mozilla.org/en-US/docs/Web/CSS/@media#Media_types)或有效的[媒体查询](https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries)作为属性值，这将令你能够使用响应式的预加载！
+
+即: 根据设备情况, 针对性的加载对应资源.
+
+```html
+<head>
+  <meta charset="utf-8">
+  <title>Responsive preload example</title>
+
+  <link rel="preload" href="bg-image-narrow.png" as="image" media="(max-width: 600px)">
+  <link rel="preload" href="bg-image-wide.png" as="image" media="(min-width: 601px)">
+
+  <link rel="stylesheet" href="main.css">
+</head>
+<body>
+  <header>
+    <h1>My site</h1>
+  </header>
+
+  <script>
+    var mediaQueryList = window.matchMedia("(max-width: 600px)");
+    var header = document.querySelector('header');
+
+    if(mediaQueryList.matches) {
+      header.style.backgroundImage = 'url(bg-image-narrow.png)';
+    } else {
+      header.style.backgroundImage = 'url(bg-image-wide.png)';
+    }
+  </script>
+</body>
+```
+
+在`<link>`元素中包含了一个`media`属性，因此，当用户在使用较窄屏幕的设备时，较窄的图片将会被预加载，而在较宽的设备上，较宽的图片将被预加载。然后我们仍需要在header元素上附加合适的图片——通过[`Window.matchMedia`](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/matchMedia) / [`MediaQueryList`](https://developer.mozilla.org/zh-CN/docs/Web/API/MediaQueryList) 来加以实现.
+
+这一特性将使另一种情况成为可能——字体在随着页面渲染完成的时候即可使用，减少了FOUT (无样式字体闪烁，flash of unstyled text)问题。
+
+值得注意的是，这一特特性并不仅限于图片，或其他有着同样类型的文件，还有更多想象空间。比如，你可以在用户仅有较窄的屏幕，CPU和带宽资源较为有限的情况下预加载并展示一个简单的SVG图表，而在用户资源较为充裕的时候再去加载一系列复杂的JavaScript文件以显示一个有交互功能的3D模型。
+
+#### 脚本化预加载
+
+> 先预加载脚本 但不执行
+
+以脚本化的方式来执行这些预加载操作。例如，我们在这里创建一个[`HTMLLinkElement`](https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLLinkElement)实例，然后将他们附加到DOM上：
+
+```javascript
+var preloadLink = document.createElement("link");
+preloadLink.href = "myscript.js";
+preloadLink.rel = "preload";
+preloadLink.as = "script";
+document.head.appendChild(preloadLink);
+```
+
+这意味着浏览器将预加载这个JavaScript文件，但并不实际执行它。
+
+> 预加载后, 在需要的时候将脚本添加进 `body` 元素中执行
+
+如果要对其加以执行，在需要的时候，你可以执行：
+
+```javascript
+var preloadedScript = document.createElement("script");
+preloadedScript.src = "myscript.js";
+document.body.appendChild(preloadedScript);
+```
+
+当你需要预加载一个脚本，但需要推迟到需要的时候才令其执行时，这种方式会特别有用。
+
+
+
+### prefetch
+
+当前页面加载完毕后, 在浏览器空闲时提前加载下一个页面可能需要的资源. 当前页面有许多 prefetch hint,  空闲时加载这些 hint 需要的资源并存在浏览器缓存中. 当用户点击某一个 prefetched document 时, 直接返回资源.
+
+一个低优先级的资源提示，允许浏览器在后台（空闲时）获取将来可能用得到的资源，并且将他们存储在浏览器的缓存中。一旦一个页面加载完毕就会开始下载其他的资源，然后当用户点击了一个带有 prefetched 的连接，它将可以立刻从缓存中加载内容。有三种不同的 prefetch 的类型，link，DNS 和 prerendering，下面来详细分析。
+
+
+
+
+
 ## 渲染过程
 
 https://juejin.cn/post/6844904021308735502
