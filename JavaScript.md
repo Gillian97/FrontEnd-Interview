@@ -1760,7 +1760,6 @@ GlobalExectionContext = {  // 全局执行上下文
     }
 }
 
-
 FunctionExectionContext = { // 函数执行上下文
     LexicalEnvironment: {  	   // 词法环境
         EnvironmentRecord: {  		// 环境记录
@@ -6493,7 +6492,17 @@ ES6 引入了模块化, 在编译时就能确定模块的依赖关系 + 输入�
 import { stat, exists, readFile } from 'fs';
 ```
 
-从 `fs ` 模块加载 3 个方法, 其他方法不加载, called 编译时加载或者静态加载.
+从 `fs ` 模块加载 3 个方法, 其他方法不加载, called 编译时加载或者静态加载. 即 ES6 可以在编译时就完成模块加载，效率要比 CommonJS 模块的加载方式高。当然，这也导致了没法引用 ES6 模块本身，因为它不是对象。
+
+由于 ES6 模块是编译时加载，使得静态分析成为可能。有了它，就能进一步拓宽 JavaScript 的语法，比如引入宏（macro）和类型检验（type system）这些只能靠静态分析实现的功能。
+
+除了静态加载带来的各种好处，ES6 模块还有以下好处。
+
+- 不再需要`UMD`模块格式了，将来服务器和浏览器都会支持 ES6 模块格式。目前，通过各种工具库，其实已经做到了这一点。
+
+- 将来浏览器的新 API 就能用模块格式提供，不再必须做成全局变量或者`navigator`对象的属性。
+
+- 不再需要对象作为命名空间（比如`Math`对象），未来这些功能可以通过模块提供。
 
 ## 运行时加载
 
@@ -6516,7 +6525,7 @@ module.exports = moduleA.someFunc;
 
 缺点：
 
-- 代码无法直接在浏览器中运行, 必须通过工具转成标准的 ES5 。
+- 代码无法直接在浏览器中运行, 必须通过工具(babel)转成标准的 ES5 。
 
 ### AMD
 
@@ -6852,6 +6861,63 @@ export default 9;
 // error 没有指定对外接口
 export 5;
 ```
+
+#### ES6 模块加载
+
+如何在浏览器和 Node 之中加载 ES6 模块，以及实际开发中经常遇到的一些问题（比如循环加载）。
+
+
+
+
+
+详情可见[阮一峰](https://www.yuque.com/ostwind/es6/docs-module-loader)
+
+
+
+
+
+
+
+## CommonJS 实现原理
+
+`CommonJS`的核心思想
+**通过`rquire`方法来同步加载依赖的其他模块，通过`module.exports`导出需要暴露的接口。**
+
+```js
+// 导入
+const moduleA = require('./moduleA');
+
+// 导出
+module.exports = moduleA.someFunc;
+```
+
+## 浏览器加载 CommonJS 模块的原理与实现
+
+浏览器不兼容CommonJS的根本原因，在于缺少四个Node.js环境的变量。
+
+- module
+- exports
+- require
+- global
+
+只要能够提供这四个变量，浏览器就能加载 CommonJS 模块。
+
+下面是一个简单的示例。
+
+```javascript
+var module = {
+  exports: {}
+};
+
+(function(module, exports) {
+  exports.multiply = function (n) { return n * 1000 };
+}(module, module.exports))
+
+var f = module.exports.multiply;
+f(5) // 5000 
+```
+
+上面代码向一个立即执行函数提供 module 和 exports 两个外部变量，模块就放在这个立即执行函数里面。模块的输出值放在 module.exports 之中，这样就实现了模块的加载。
 
 # 防抖与节流
 
@@ -7663,7 +7729,7 @@ fs.readFile('sample.png', function (err, data) {
 });
 ```
 
-当读取二进制文件时，不传入文件编码时，回调函数的`data`参数将返回一个`Buffer`对象。在Node.js中，`Buffer`对象就是一个包含零个或任意个字节的数组（注意和Array不同）。
+当读取二进制文件时，不传入文件编码时，回调函数的`data`参数将返回一个`Buffer`对象。在Node.js 中，`Buffer`对象就是一个包含零个或任意个字节的数组（注意和Array不同）。
 
 `Buffer`对象可以和String作转换，例如，把一个`Buffer`对象转换成String：
 
@@ -8287,7 +8353,513 @@ crypto模块也可以处理数字证书。数字证书通常用在SSL连接，�
 
 ### children_process
 
-### cluster
+### cluster 集群
+
+单个 Node.js 实例运行在单个线程中, 为了充分利用多核系统, 有时需要启用一组 Node.js 进程(监听同个端口)去处理负载任务.
+
+cluster 模块可以创建共享服务器端口的子进程.
+
+Node.js默认单进程运行，对于32位系统最高可以使用512MB内存，对于64位最高可以使用1GB内存。对于多核CPU的计算机来说，这样做效率很低，因为只有一个核在运行，其他核都在闲置。cluster模块就是为了解决这个问题而提出的。
+
+cluster模块允许设立一个主进程和若干个worker进程，由主进程监控和协调worker进程的运行。worker之间采用进程间通信交换消息，cluster模块内置一个负载均衡器，采用Round-robin算法协调各个worker进程之间的负载。运行时，所有新建立的链接都由主进程完成，然后主进程再把TCP连接分配给指定的worker进程
+
+**本例共享 HTTP 服务器**
+
+```js
+import cluster from 'cluster';
+import http from 'http';
+import os from 'os';
+const numCPUs = os.cpus().length;
+
+// 当前进程是主进程
+if (cluster.isMaster) {
+    console.log('**', cluster.isMaster);
+    console.log(`主进程 ${process.pid} 正在运行`);
+
+    // 衍生工作进程。
+    // 按照 cpu 核数, 创建若干 worker 进程
+    for (let i = 0; i < numCPUs; i++) {
+        cluster.fork();
+    }
+
+    cluster.on('exit', (worker, code, signal) => {
+        console.log(`工作进程 ${worker.process.pid} 已退出`);
+    });
+} else { // 当前进程是 worker 进程 则创建一个 http 服务器
+    // 工作进程可以共享任何 TCP 连接。
+    // 在本例子中，共享的是 HTTP 服务器。
+    http.createServer((req, res) => {
+        res.writeHead(200);
+        res.end('你好世界\n');
+    }).listen(8000);
+
+    console.log(`工作进程 ${process.pid} 已启动`);
+}
+```
+
+上面代码先判断当前进程是否为主进程（cluster.isMaster），如果是的，就按照CPU的核数，新建若干个worker进程；如果不是，说明当前进程是worker进程，则在该进程启动一个服务器程序。
+
+运行代码，则工作进程会共享 8000 端口：
+
+```console
+$ node server.js
+主进程 3596 正在运行
+工作进程 4324 已启动
+工作进程 4520 已启动
+工作进程 6056 已启动
+工作进程 5644 已启动
+```
+
+在主进程部署online事件和exit事件的监听函数, 确保 worker 进程挂了或者上线, 主进程能够知道.
+
+```javascript
+var cluster = require('cluster');
+
+if(cluster.isMaster) {
+  var numWorkers = require('os').cpus().length;
+  console.log('Master cluster setting up ' + numWorkers + ' workers...');
+
+  for(var i = 0; i < numWorkers; i++) {
+    cluster.fork();
+  }
+
+  // 部署 online 事件
+  cluster.on('online', function(worker) {
+    console.log('Worker ' + worker.process.pid + ' is online');
+  });
+
+  // 部署 exit 事件
+  cluster.on('exit', function(worker, code, signal) {
+    console.log('Worker ' + worker.process.pid + ' died with code: ' + code + ', and signal: ' + signal);
+    console.log('Starting a new worker');
+    cluster.fork();
+  });
+}
+```
+
+上面代码中，主进程一旦监听到worker进程的exit事件，就会重启一个worker进程。worker进程一旦启动成功，可以正常运行了，就会发出online事件。
+
+#### worker 对象
+
+worker 对象是 cluster.fork() 的返回值, 代表一个worker进程.
+
+它的属性和方法如下。
+
+1. worker.id
+
+   worker.id返回当前worker的独一无二的进程编号。这个编号也是cluster.workers中指向当前进程的索引值。
+
+2. worker.process
+
+   所有的worker进程都是用child_process.fork()生成的。child_process.fork()返回的对象，就被保存在worker.process之中。通过这个属性，可以获取worker所在的进程对象。
+
+   worker.process 打印如下:
+
+   ```javascript
+   <ref *1> ChildProcess {
+     _events: [Object: null prototype] {
+       internalMessage: [ [Function (anonymous)], [Function: onInternalMessage] ],
+       error: [Function (anonymous)],
+       message: [Function (anonymous)],
+       exit: [Function: bound onceWrapper] { listener: [Function (anonymous)] },
+       disconnect: [Function: bound onceWrapper] { listener: [Function (anonymous)] }
+     },
+     _eventsCount: 5,
+     _maxListeners: undefined,
+     _closesNeeded: 2,
+     _closesGot: 0,
+     connected: true,
+     signalCode: null,
+     exitCode: null,
+     killed: false,
+     spawnfile: '/Users/jinlingzhang/.nvm/versions/node/v15.5.1/bin/node',
+     _handle: Process {
+       onexit: [Function (anonymous)],
+       pid: 95673,
+       [Symbol(owner_symbol)]: [Circular *1]
+     },
+     spawnargs: [
+       '/Users/jinlingzhang/.nvm/versions/node/v15.5.1/bin/node',
+       '/Users/jinlingzhang/Documents/personal/test/test2.js'
+     ],
+     pid: 95673,
+     stdin: null,
+     stdout: null,
+     stderr: null,
+     stdio: [ null, null, null, null ],
+     channel: Control {
+       _events: [Object: null prototype] {},
+       _eventsCount: 0,
+       _maxListeners: undefined,
+       [Symbol(kCapture)]: false
+     },
+     _handleQueue: null,
+     _pendingMessage: null,
+     send: [Function (anonymous)],
+     _send: [Function (anonymous)],
+     disconnect: [Function (anonymous)],
+     _disconnect: [Function (anonymous)],
+     [Symbol(kCapture)]: false,
+     [Symbol(kChannelHandle)]: Pipe {
+       pendingHandle: null,
+       sockets: { got: {}, send: {} },
+       [Symbol(kJSONBuffer)]: '',
+       [Symbol(kStringDecoder)]: undefined
+     }
+   }
+   ```
+
+3. worker.send()
+
+   该方法用于在主进程中，向子进程发送信息。
+
+   ```javascript
+   if (cluster.isMaster) {
+     var worker = cluster.fork();
+     worker.send('hi there');
+   } else if (cluster.isWorker) {
+     process.on('message', function(msg) {
+       process.send(msg);
+     });
+   }
+   ```
+
+   上面代码的作用是，worker进程对主进程发出的每个消息，都做回声。
+
+   在worker进程中，要向主进程发送消息，使用`process.send(message)`；要监听主进程发出的消息，使用下面的代码。
+
+   ```javascript
+   process.on('message', function(message) {
+     console.log(message);
+   });
+   ```
+
+   发出的消息可以字符串，也可以是JSON对象。下面是一个发送JSON对象的例子。
+
+   ```javascript
+   worker.send({
+     type: 'task 1',
+     from: 'master',
+     data: {
+       // the data that you want to transfer
+     }
+   });
+   ```
+
+   
+
+#### cluster.workers对象
+
+该对象只有主进程才有，包含了所有worker进程。每个成员的键值就是一个worker进程对象，键名就是该worker进程的worker.id属性。
+
+```jsx
+function eachWorker(callback) {
+  for (var id in cluster.workers) {
+    callback(cluster.workers[id]);
+  }
+}
+eachWorker(function(worker) {
+  worker.send('big announcement to all workers');
+});
+```
+
+上面代码用来遍历所有worker进程。
+
+当前socket的data事件，也可以用id属性识别worker进程。
+
+```jsx
+socket.on('data', function(id) {
+  var worker = cluster.workers[id];
+});
+```
+
+#### cluster模块的属性与方法
+
+##### isMaster，isWorker
+
+isMaster属性返回一个布尔值，表示当前进程是否为主进程。这个属性由process.env.NODE_UNIQUE_ID决定，如果process.env.NODE_UNIQUE_ID为未定义，就表示该进程是主进程。
+
+isWorker属性返回一个布尔值，表示当前进程是否为work进程。它与isMaster属性的值正好相反。
+
+##### fork()
+
+fork方法用于新建一个worker进程，上下文都复制主进程。只有主进程才能调用这个方法。
+
+该方法返回一个worker对象。
+
+##### kill()
+
+kill方法用于终止worker进程。它可以接受一个参数，表示系统信号。
+
+如果当前是主进程，就会终止与worker.process的联络，然后将系统信号法发向worker进程。如果当前是worker进程，就会终止与主进程的通信，然后退出，返回0。
+
+在以前的版本中，该方法也叫做 worker.destroy() 。
+
+##### listening事件
+
+worker进程调用listening方法以后，“listening”事件就传向该进程的服务器，然后传向主进程。
+
+该事件的回调函数接受两个参数，一个是当前worker对象，另一个是地址对象，包含网址、端口、地址类型（IPv4、IPv6、Unix socket、UDP）等信息。这对于那些服务多个网址的Node应用程序非常有用。
+
+```jsx
+cluster.on('listening', function (worker, address) {
+  console.log("A worker is now connected to " + address.address + ":" + address.port);
+});
+```
+
+
+
+#### 不中断地重启 Node 服务
+
+***思路***
+
+重启服务需要关闭后再启动，利用cluster模块，可以做到先启动一个worker进程，再把原有的所有work进程关闭。这样就能实现不中断地重启Node服务。(pm2 进行重启的方法)
+
+首先，主进程向worker进程发出重启信号。
+
+```css
+workers[wid].send({type: 'shutdown', from: 'master'});
+```
+
+worker进程监听message事件，一旦发现内容是shutdown，就退出。
+
+```php
+process.on('message', function(message) {
+  if(message.type === 'shutdown') {
+    process.exit(0);
+  }
+});
+```
+
+下面是一个关闭所有worker进程的函数。
+
+```javascript
+function restartWorkers() {
+  var wid, workerIds = [];
+  for(wid in cluster.workers) {
+    workerIds.push(wid);
+  }
+
+  workerIds.forEach(function(wid) {
+    cluster.workers[wid].send({
+      text: 'shutdown',
+      from: 'master'
+     });
+    setTimeout(function() {
+      if(cluster.workers[wid]) {
+        cluster.workers[wid].kill('SIGKILL');
+      }
+    }, 5000);
+  });
+};
+```
+
+***实例***
+
+下面是一个完整的实例，先是主进程的代码master.js。
+
+```js
+var cluster = require('cluster');
+
+console.log('started master with ' + process.pid);
+
+// 新建一个worker进程
+cluster.fork();
+
+process.on('SIGHUP', function () {
+  console.log('Reloading...');
+  var new_worker = cluster.fork();
+  new_worker.once('listening', function () {
+    // 关闭所有其他worker进程
+    for(var id in cluster.workers) {
+      if (id === new_worker.id.toString()) continue;
+      cluster.workers[id].kill('SIGTERM');
+    }
+  });
+});
+```
+
+上面代码中，主进程监听SIGHUP事件，如果发生该事件就关闭其他所有worker进程。之所以是SIGHUP事件，是因为nginx服务器监听到这个信号，会创造一个新的worker进程，重新加载配置文件。另外，关闭worker进程时，主进程发送SIGTERM信号，这是因为Node允许多个worker进程监听同一个端口。
+
+下面是worker进程的代码server.js。
+
+```jsx
+var cluster = require('cluster');
+
+if (cluster.isMaster) {
+  require('./master');
+  return;
+}
+
+var express = require('express');
+var http = require('http');
+var app = express();
+
+app.get('/', function (req, res) {
+  res.send('ha fsdgfds gfds gfd!');
+});
+
+http.createServer(app).listen(8080, function () {
+  console.log('http://localhost:8080');
+});
+```
+
+使用时代码如下。
+
+```dart
+$ node server.js
+started master with 10538
+http://localhost:8080
+```
+
+然后，向主进程连续发出两次SIGHUP信号。
+
+```bash
+$ kill -SIGHUP 10538
+$ kill -SIGHUP 10538
+```
+
+主进程会连续两次新建一个worker进程，然后关闭所有其他worker进程，显示如下。
+
+```cpp
+Reloading...
+http://localhost:8080
+Reloading...
+http://localhost:8080
+```
+
+最后，向主进程发出SIGTERM信号，关闭主进程。
+
+```bash
+$ kill 10538
+```
+
+##### PM2模块
+
+PM2模块是cluster模块的一个包装层。它的作用是尽量将cluster模块抽象掉，让用户像使用单进程一样，部署多进程Node应用。
+
+```jsx
+// app.js
+var http = require('http');
+
+http.createServer(function(req, res) {
+  res.writeHead(200);
+  res.end("hello world");
+}).listen(8080);
+```
+
+上面代码是标准的Node架设Web服务器的方式，然后用PM2从命令行启动这段代码。
+
+```ruby
+$ pm2 start app.js -i 4
+```
+
+上面代码的i参数告诉PM2，这段代码应该在cluster_mode启动，且新建worker进程的数量是4个。如果i参数的值是0，那么当前机器有几个CPU内核，PM2就会启动几个worker进程。
+
+如果一个worker进程由于某种原因挂掉了，会立刻重启该worker进程。
+
+```ruby
+# 重启所有worker进程
+$ pm2 reload all
+```
+
+每个worker进程都有一个id，可以用下面的命令查看单个worker进程的详情。
+
+```dart
+$ pm2 show <worker id>
+```
+
+正确情况下，PM2采用fork模式新建worker进程，即主进程fork自身，产生一个worker进程。`pm2 reload`命令则会用spawn方式启动，即一个接一个启动worker进程，一个新的worker启动成功，再杀死一个旧的worker进程。采用这种方式，重新部署新版本时，服务器就不会中断服务。
+
+```ruby
+$ pm2 reload <脚本文件名>
+```
+
+关闭worker进程的时候，可以部署下面的代码，让worker进程监听shutdown消息。一旦收到这个消息，进行完毕收尾清理工作再关闭。
+
+```javascript
+process.on('message', function(msg) {
+  if (msg === 'shutdown') {
+    close_all_connections();
+    delete_logs();
+    server.close();
+    process.exit(0);
+  }
+});
+```
+
+
+
+详细可见[该文章](https://www.jianshu.com/p/05bf26483f3a)
+
+## Puppeteer 无头浏览器
+
+### 简介
+
+Puppeteer 是一个 Node 库，它提供了高级的 API 并通过 DevTools 协议来控制 Chrome(或Chromium)。通俗来说就是一个 headless chrome 浏览器 (也可以配置成有 UI 的，默认是没有的)
+
+### 功能
+
+- 生成网页截图或者 PDF
+- 抓取单页应用(SPA)执行并渲染
+- 做表单的自动提交、UI的自动化测试、模拟键盘输入等
+- 用浏览器自带的一些调试工具和性能分析工具帮助我们分析问题
+- 在最新的无头浏览器环境里做测试、使用最新浏览器特性
+
+### 结构
+
+![img](images/puppeteer.jpg)
+
+\- Puppeteer 使用 DevTools 协议 与浏览器进行通信
+\- Browser 实例可以拥有浏览器上下文
+\- BrowserContext 实例定义了一个浏览会话并可拥有多个页面
+\- Page 至少有一个主框架(main frame)。 可能还有其他框架由 iframe 或 frame 创建
+\- frame 至少有一个执行上下文(默认的执行JavaScript的上下文)。框架可能有额外的与扩展关联的执行上下文
+\- Worker 具有单一执行上下文，以便于和 WebWorkers 交互
+
+### 举例
+
+```js
+const puppeteer = require('puppeteer');
+(async () => {
+  // 例子代码放在在这里
+})()
+```
+
+最简单的例子，打开百度并关闭
+
+```js
+const browser = await puppeteer.launch({
+  headless: false // 关闭无头模式
+})
+const page = await browser.newPage()
+await page.goto('http://www.baidu.com/')
+await browser.close()
+```
+
+打开百度，截图&生产PDF，然后关闭
+
+```js
+const browser = await puppeteer.launch()
+const page = await browser.newPage()
+await page.goto('http://www.baidu.com/')
+await page.screenshot({path: 'baidu.png'})
+// 目前只能在无头模式下生成pdf https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#pagepdfoptions
+await page.pdf({path: 'baidu.pdf'})
+await browser.close()
+```
+
+监听 `console`，你会看到熟悉的百度招聘的硬广
+
+```js
+const browser = await puppeteer.launch()
+const page = await browser.newPage()
+page.on('console', msg => console.log(msg.type(), msg.text()))
+await page.goto('https://www.baidu.com/')
+await browser.close()
+```
+
+更多参考 [知乎帖](https://zhuanlan.zhihu.com/p/40103840)
 
 ##  Node 中回调函数的机制
 
@@ -9056,9 +9628,73 @@ $ curl --form upload=@/path/to/file http://127.0.0.1:3000
 - [kick-off-koa](https://github.com/koajs/kick-off-koa)
 - [Koa Examples](https://github.com/koajs/examples)
 
+### 七、koa 原理
+
+- 洋葱模型
+
+  每一个 koa 中间件都是一层洋葱圈, 既可以掌管请求进入, 也可以掌管响应返回.  换句话说, 外层的中间件可以影响内层的请求与响应阶段, 内层的中间件只能影响外层的响应阶段.
+
+  ```javascript
+  async function middleware1() {
+    //...
+    await (async function middleware2() {
+      //...
+      await (async function middleware3() {
+        //...
+      });
+      //...
+    });
+    //...
+  }
+  ```
+
+  
+
+- dispatch(n)对应第 n 个中间件的执行，在使用中即第 n 个中间件可以通过await next()来“插入”执行下一个中间件，同时在最后一个中间件执行完成后，依然有恢复执行的能力。
+
+  即：通过洋葱模型，await next()控制调用后面的中间件，直到全局没有可执行的中间件且堆栈执行完毕，最终“原路返回”至第一个执行next的中间件。这种方式有个优点，特别是对于日志记录以及错误处理等全局功能需要非常友好。
+
+  > Koa1 的中间件实现利用了 Generator 函数 + co 库（一种基于 Promise 的 Generator 函数流程管理工具），来实现协程运行。本质上，Koa v1 中间件和 Koa v2 中间件思想是类似的，只不过 Koa v2 改用了 Async/Await 来替换 Generator 函数 + co 库，整体实现更加巧妙，代码更加优雅。—— from《狼书》
+
+  
+
 [koa 使用教程](http://www.ruanyifeng.com/blog/2017/08/koa.html)
 
 # express
+
+## 工作机制
+
+不同于 Koa，它继承了路由、静态服务器和模板引擎等功能，虽然比之Koa显得“臃肿”了许多，但看上去比 Koa 更像是一个框架。通过学习 Express 源码，笔者简单的总结了它的工作机制：
+
+1. 通过 app.use 方法注册中间件。
+2. 一个中间件可以理解为一个 Layer 对象，其中包含了当前路由匹配的正则信息以及 handle 方法。
+3. 所有中间件（Layer 对象）使用stack数组存储起来。
+4. 当一个请求过来时，会从 req 中获取请求 path，根据 path 从stack中找到匹配的 Layer，具体匹配过程由`router.handle`函数实现。
+5. `router.handle` 函数通过 `next()` 方法遍历每一个 layer 进行比对：
+   - `next()`方法通过闭包维持了对于 **Stack Index 游标**的引用，当调用`next()`方法时，就会从下一个中间件开始查找；
+   - 如果比对结果为 true，则调用`layer.handle_request`方法，`layer.handle_request`方法中会调用next()方法 ，实现中间件的执行。
+
+通过上述内容，我们可以看到，Express 其实是通过 `next()` 方法维护了遍历中间件列表的 Index 游标，中间件每次调用`next()`方法时，会通过增加 Index 游标的方式找到下一个中间件并执行。它的功能就像这样：
+
+```javascript
+((req, res) => {
+  console.log('第一个中间件');
+  ((req, res) => {
+    console.log('第二个中间件');
+    (async(req, res) => {
+      console.log('第三个中间件');
+      await sleep(2000)
+      res.status(200).send('hello')
+    })(req, res)
+    console.log('第二个中间件调用结束');
+  })(req, res)
+  console.log('第一个中间件调用结束')
+})(req, res)
+```
+
+如上代码，Express 中间件设计并不是一个洋葱模型，它是基于回调实现的线形模型，不利于组合，不利于互操，在设计上并不像 Koa 一样简单。而且业务代码有一定程度的侵扰，甚至会造成不同中间件间的耦合。
+
+
 
 [学习连接](https://zhuanlan.zhihu.com/p/56947560)
 
