@@ -1,6 +1,25 @@
-# 手写代码
+# J手写代码
 
 ## 算法
+
+### 不使用四则运算实现和
+
+异或运算看做是不进位和运算
+
+```javascript
+function sum (a, b) {
+  if (a == 0) return b
+  if (b == 0) return a
+  // 不进位相加结果
+  let newA = a ^ b
+  // 进位产生的数字
+  let newB = (a & b) << 1
+  // 再将两者进行相加
+  return sum(newA, newB)
+}
+```
+
+
 
 ### 二分查找
 
@@ -105,6 +124,360 @@ function zeroMove (arr) {
 
 
 ### 二叉树
+
+#### 最近公共祖先
+
+```javascript
+let tar = null;
+var lowestCommonAncestor = function (root, p, q) {
+    helper(root, p, q);
+    return tar;
+}
+var helper = function (root, p, q) {
+    // 即使是 root=p 也不能保证 q 就在 root 这棵树中 最多只能算找到一个
+    let mid = (root == p || root == q) ? 1 : 0;
+    if (!root) return 0;
+    let l = helper(root.left, p, q);
+    let r = helper(root.right, p, q);
+    if(l + r + mid>=2){
+        tar = root;
+    }
+    // 只返回是否找到 返回数字的话 就不是最近公共祖先了
+    return l + r + mid>0;
+};
+```
+
+#### 二叉树直径
+
+```javascript
+let max = 0;
+var diameterOfBinaryTree = (root) => {
+    helper(root)
+    return max;
+}
+
+var helper = function (root) {
+    if (!root) return 0;
+    // 左子树高度+右子树高度 的最大值
+    let l = helper(root.left)
+    let r = helper(root.right)
+    max = Math.max(l + r, max);
+    // 这棵树的高度是 较高的子树高度+1
+    return Math.max(l, r) + 1;
+}
+```
+
+#### 根到叶子节点数字之和
+
+```javascript
+// leetcode 129
+var sumNumbers = function(root) {
+    // 对二叉树的遍历
+    // 获取所有路径 回溯
+    let path = [], arr= [];
+    helper(path, arr, root)
+    let sum = 0;
+    for(let i of path){
+        sum += Number(i)
+    }
+    return sum;
+};
+
+var helper = (path, arr, root)=>{
+    if(!root) return;
+    if(!root.left && !root.right){
+        // leaf 
+        arr.push(root.val);
+        path.push(arr.slice().join(''));
+        arr.pop();
+        return ;
+    }
+    arr.push(root.val);
+    helper(path, arr, root.left);
+    helper(path, arr, root.right);
+    arr.pop();
+}
+```
+
+#### 二叉树是否对称
+
+```javascript
+// leetcode 101
+var isSymmetric = function (root) {
+    if (!root) return true;
+    return helper(root.left, root.right)
+}
+
+var helper = (l, r) => {
+    if (!l && !r) return true;
+    if (!l || !r) return false;
+    return l.val === r.val && helper(l.left, r.right) && helper(l.right, r.left)
+}
+```
+
+#### BST 是否合法
+
+```javascript
+// leetcode 98
+var isValidBST = function (root) {
+    return helper(root, null, null)
+};
+
+var helper = (root, max, min) => {
+    if (!root) return true;
+    if (max && root.val >= max.val || min && root.val <= min.val) return false;
+    return helper(root.left, root, min) && helper(root.right, max, root)
+}
+```
+
+#### 翻转二叉树
+
+调换左右子树
+
+```javascript
+// leetcode 226
+var invertTree = function(root) {
+   if(!root) return null;
+   let temp  = root.left;
+   root.left  =root.right;
+   root.right = temp;
+   invertTree(root.left);
+   invertTree(root.right);
+   return root;
+};
+```
+
+#### BST 变累加树
+
+反向中序遍历
+
+```javascript
+var convertBST = function (root) {
+    let arr = [0];
+    helper(root, arr);
+    return root;
+}
+
+var helper = (root, arr) => {
+    if (!root) return;
+    helper(root.right, arr)
+    root.val += arr[0];
+    arr[0] = root.val;
+    helper(root.left, arr)
+}
+```
+
+#### 合并二叉树
+
+一个子树覆盖另一棵子树, 返回新树
+
+```javascript
+// leetcode 617
+var mergeTrees = function (t1, t2) {
+    if (!t1 && !t2) return null;
+    if (!t1) return t2;
+    if (!t2) return t1;
+    let root = new TreeNode(0, null, null)
+    let val1 = t1.val;
+    let val2 = t2.val;
+    root.val = val1 + val2;
+    root.left = mergeTrees(t1.left, t2.left)
+    root.right = mergeTrees(t1.right, t2.right)
+    return root;
+};
+```
+
+#### 树的子结构
+
+```javascript
+// leetcode 剑指offer 26
+var isSubStructure = function (a, b) {
+    if (!a || !b) return false;
+    return isSame(a, b) || isSubStructure(a.left, b) || isSubStructure(a.right, b)
+}
+
+var isSame = (a, b) => {
+    if (!b) return true;
+    if (!a) return false;
+    if (a.val != b.val) return false;
+    return isSame(a.left, b.left) && isSame(a.right, b.right)
+}
+```
+
+#### 计算 BST 高度是否合法
+
+```javascript
+// leetcode 110
+var isBalanced = function (root) {
+    if (!root) return true;
+    if (Math.abs(dfs(root.left) - dfs(root.right)) > 1) return false;
+    return isBalanced(root.left) && isBalanced(root.right)
+};
+
+// 计算子树高度
+var dfs = (root) => {
+    if (!root) return 0;
+    return Math.max(dfs(root.left), dfs(root.right)) + 1
+}
+```
+
+#### 路径和
+
+```javascript
+// leetcode 112
+var hasPathSum = function (root, targetSum) {
+    if (!root) return false;
+    if (!root.left && !root.right) {
+        return root.val == targetSum ? true : false;
+    }
+    return hasPathSum(root.left, targetSum - root.val) || hasPathSum(root.right, targetSum - root.val)
+};
+```
+
+#### 路径总和 2
+
+```javascript
+// leetcode 113
+var pathSum = function (root, sum) {
+  let res = [];
+  dfs(root, sum, res, []);
+  return res;
+};
+
+var dfs = (root, sum, res, arr) => {
+  // 还有sum但是该节点已经为空 说明此路不通
+  if (!root) return;
+  /* 叶子节点 */
+  if (!root.left && !root.right) {
+    if (root.val == sum) {
+      arr.push(root.val);
+      res.push(arr.slice()); // 加入数组的深拷贝
+      arr.pop(); // 添加的子节点记得pop出来一下
+    }
+    return;
+  }
+  /* 非叶子节点 */
+  arr.push(root.val); // 将访问过的节点接入数组中
+  dfs(root.left, sum - root.val, res, arr); // sum 值传递
+  dfs(root.right, sum - root.val, res, arr); // sum 值传递
+  // 左右节点都访问过之后 将该节点pop出来 该节点下的路径已经访问完毕
+  arr.pop();
+}
+```
+
+#### 链表有无环
+
+```javascript
+// leetcode 141
+var hasCycle = function (head) {
+    if (!head || !head.next) return false;
+    let slow = head
+    let fast = head.next.next;
+    while (slow && fast && fast.next) {
+        if (slow == fast) return true;
+        slow = slow.next;
+        fast = fast.next.next;
+    }
+    return false;
+};
+```
+
+#### 环形链表 环的起始位置
+
+快慢指针
+
+```javascript
+// leetcode 142
+var detectCycle = function (head) {
+    if (!head || !head.next) return null;
+    let slow = head, fast = head;
+    while (slow) {
+        if (!fast || !fast.next) return null;
+        slow = slow.next;
+        fast = fast.next.next;
+        if (fast == slow) {
+            fast = head;
+            while (slow != fast) {
+                slow = slow.next;
+                fast = fast.next;
+            }
+            return fast;
+        }
+    }
+};
+```
+
+#### 找到两个单链表相交的起始节点
+
+```javascript
+// leetcode 160
+var getIntersectionNode = function (a, b) {
+    let curr1 = a, curr2 = b;
+    while (curr1 != curr2) {
+        curr1 = curr1 ? curr1.next : b;
+        curr2 = curr2 ? curr2.next : a;
+    }
+    return curr1;
+};
+```
+
+#### 合并有序链表
+
+```javascript
+// leetcode 21
+var mergeTwoLists = function (l1, l2) {
+  // 处理有链表为空的情况
+  if (l1 == null) {
+    return l2;
+  }
+  if (l2 == null) {
+    return l1
+  }
+  let res = new ListNode(null);
+  let curr = res;
+  // 网上的做法好简洁
+  while (l1 && l2) {
+    if (l1.val > l2.val) {
+      curr.next = l2;
+      l2 = l2.next;
+    } else {
+      curr.next = l1;
+      l1 = l1.next;
+    }
+    curr = curr.next;
+  }
+  curr.next = l1 == null ? l2 : l1;
+  return res.next;
+};
+```
+
+#### 复杂链表的拷贝
+
+```javascript
+// leetcode 138
+var copyRandomList = function (head) {
+  if (!head) return null;
+  // copy nodes
+  let curr = head;
+  let map = new Map(); // map的key可以是任何对象, 不限于字符串
+  while (curr) {
+    map.set(curr, new Node(curr.val));
+    curr = curr.next;
+  }
+  // copy links
+  curr = head;
+  let node = map.get(curr);
+  while (curr) {
+    node.next = curr.next ? map.get(curr.next) : null;
+    node.random = curr.random ? map.get(curr.random) : null;
+    curr = curr.next;
+    node = node.next;
+  }
+  return map.get(head);
+};
+```
+
+
 
 ### LRU
 
@@ -707,5 +1080,31 @@ jsonp({
   // 拿到数据进行处理
   console.log(data); // 数据包
 })
+```
+
+## 实现 const
+
+由于 ES5 环境没有 block 的概念，所以是无法百分百实现 const，只能是挂载到某个对象下，要么是全局的 window，要么就是自定义一个 object 来当容器
+
+```javascript
+var _const = function (key, val) {
+  var g = window;
+  // 要声明的变量名不可以是关键字
+  let key_arr = ['var', 'let', 'const', 'return', 'function'] // 自定义
+  if (!key || key_arr.indexOf(key) > -1) throw new Error(`${key}变量名不合法`);
+  if (g.hasOwnProperty(key)) throw new Error(`${key}已经被声明`);
+  g[key] = val;
+  Object.defineProperty(g, key, {
+    get: function () {
+      return val;
+    },
+    set: function () {
+      if (g.hasOwnProperty(key)) {
+        throw new Error(`${key}不能被赋值`);
+      }
+      return val;
+    }
+  })
+}
 ```
 

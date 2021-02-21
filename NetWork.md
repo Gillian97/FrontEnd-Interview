@@ -1497,7 +1497,7 @@ Content-Type: text/plain
 
 如果服务器否定了"预检"请求，会返回一个正常的HTTP回应，但是没有任何CORS相关的头信息字段，则触发一个错误，被`XMLHttpRequest`对象的`onerror`回调函数捕获.
 
-```
+```http
 // error 信息
 XMLHttpRequest cannot load http://api.alice.com.
 Origin http://api.bob.com is not allowed by Access-Control-Allow-Origin.

@@ -2662,6 +2662,10 @@ if(!Object.is) {
 
 ## let const var
 
+暂时性死区的本质是，只要一进入当前作用域，所要使用的变量就已经存在了，但是不可获取，只有等到声明变量的那一行代码出现，才可以获取和使用该变量。
+
+参考[阮一峰es6](https://www.yuque.com/ostwind/es6/docs-let)
+
 const 常量, 变量名与内存地址之间建立了不可变的绑定关系.
 
 ```javascript
