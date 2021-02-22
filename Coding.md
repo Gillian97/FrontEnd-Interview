@@ -1,8 +1,8 @@
-# J手写代码
+手写代码
 
-## 算法
+# 算法
 
-### 不使用四则运算实现和
+## 不使用四则运算实现和
 
 异或运算看做是不进位和运算
 
@@ -21,7 +21,7 @@ function sum (a, b) {
 
 
 
-### 二分查找
+## 二分查找
 
 有序数组查找第一个大于等于目标值的元素下标(位置从1开始)
 
@@ -78,7 +78,7 @@ function maxLength( arr ) {
 
 
 
-### 两数之和
+## 两数之和
 
 ```javascript
 // 答案唯一, 返回元素下标
@@ -95,7 +95,7 @@ function anwser (arr, target) {
 }
 ```
 
-数组扁平化/去重/排序
+## 数组扁平化/去重/排序
 
 ```javascript
 Array.from(new Set(arr.flat(Infinity))).sort((a,b)=> a-b )
@@ -103,7 +103,7 @@ Array.from(new Set(arr.flat(Infinity))).sort((a,b)=> a-b )
 
 
 
-### 移动零
+## 移动零
 
 ```javascript
 function zeroMove (arr) {
@@ -121,9 +121,186 @@ function zeroMove (arr) {
 }
 ```
 
+## 合法括号检查
+
+```javascript
+// leetcode 20
+var isValid = function (str) {
+    let stack = [];
+    let note = { "(": ")", "[": "]", "{": "}" }
+    for (let s of str) {
+        if (note.hasOwnProperty(s)) {
+            stack.push(s)
+        } else {
+            let ele = stack[stack.length - 1]
+            if (stack.length == 0 || note[ele] != s) return false;
+            stack.pop()
+        }
+    }
+    return stack.length == 0;
+};
+```
+
+## 回溯算法
+
+### 子集
+
+```javascript
+var subsets = function (nums) {
+    // 做选择 撤销选择
+    let path = [], res = []
+    helper(nums, path, res);
+    res.push([])
+    return res
+};
+
+var helper = (choice, path, res) => {
+    if (choice.length == 0) return;
+    for (let i = 0; i < choice.length; i++) {
+        path.push(choice[i])
+        res.push(path.slice())
+        helper(choice.slice(i + 1), path, res)
+        path.pop()
+    }
+}
+```
+
+### 全排列
+
+数组元素全排列
+
+```javascript
+var permute = function (nums) {
+    let path = [], res = [];
+    helper(nums, path, res)
+    return res;
+};
+
+var helper = (choice, path, res) => {
+    if (choice.length == 0) {
+        res.push(path.slice())
+        return;
+    }
+    for (let i = 0; i < choice.length; i++) {
+        path.push(choice[i])
+        let cp = choice.slice();
+        choice.splice(i, 1)
+        helper(choice, path, res)
+        path.pop();
+        choice = cp;
+    }
+}
+```
+
+### 组合总数
+
+元素相加==目标值的元素组合数目
+
+```javascript
+var combinationSum = function (nums, target) {
+    let path = [], res = [], obj = {}
+    helper(nums, path, res, target, obj)
+    return res;
+};
+
+var helper = (ch, path, res, s, obj) => {
+    if (s == 0) {
+        let arr = path.slice().sort((a, b) => a - b);
+        if (!obj.hasOwnProperty(arr.join(''))) {
+            res.push(arr);
+            obj[arr.join('')] = true;
+        }
+        return;
+    }
+    for (let i = 0; i < ch.length; i++) {
+        let t = s - ch[i];
+        if (t < 0) continue;
+        path.push(ch[i])
+        helper(ch, path, res, t, obj);
+        path.pop()
+    }
+}
+```
+
+### 单词搜索
+
+二维数组寻找单词
+
+```javascript
+// leetcode 79
+var exist = function (board, word) {
+    for (let i = 0; i < board.length; i++) {
+        for (let j = 0; j < board[0].length; j++) {
+            if (board[i][j] == word[0]) {
+                let res = helper(board, word, 0, i, j, {})
+                if (res) return true;
+            }
+        }
+    }
+    return false;
+};
+
+var helper = (board, word, w, i, j, obj) => {
+    let key = i + '*' + j;
+    if (i >= board.length || j >= board[0].length || i < 0 || j < 0 || obj[key] || board[i][j] != word[w])
+        return false;
+    obj[key] = true;
+    if (w + 1 === word.length) return true;
+
+    let r1 = helper(board, word, w + 1, i + 1, j, obj)
+    if (r1) return true;
+    let r2 = helper(board, word, w + 1, i - 1, j, obj)
+    if (r2) return true;
+    let r3 = helper(board, word, w + 1, i, j + 1, obj)
+    if (r3) return true;
+    let r4 = helper(board, word, w + 1, i, j - 1, obj)
+    if (r4) return true;
+
+    obj[key] = false;
+    return false;
+}
+```
+
+### 复原 IP 地址
+
+```javascript
+// leetcode 93
+var restoreIpAddresses = function (s) {
+    if (s.length > 12 || s.length < 4) return []
+    let path = [], res = [];
+    helper(s, path, res, 0)
+    return res;
+};
+
+var helper = (s, path, res, i) => {
+    if (path.length == 4) {
+        if (i == s.length) {
+            res.push(path.join('.'))
+            return;
+        }
+        if (i < s.length) {
+            return;
+        }
+    }
+    if (path.length < 4 && i >= s.length) return;
+    // 从起始位置开始 选择三个
+    for (let j = 1; j <= 3; j++) {
+        // 注意 > 才不合法
+        if (i + j > s.length) return;
+        // 数字不能为 0
+        if ((j == 2 || j == 3) && s[i] == 0) return;
+        let part = s.slice(i, i + j);
+        if (Number(part) > 255) return
+        path.push(part)
+        helper(s, path, res, i + j)
+        path.pop()
+    }
+}
+```
 
 
-### 二叉树
+
+## 二叉树
 
 #### 最近公共祖先
 
@@ -365,6 +542,8 @@ var dfs = (root, sum, res, arr) => {
 }
 ```
 
+## 链表
+
 #### 链表有无环
 
 ```javascript
@@ -453,6 +632,8 @@ var mergeTwoLists = function (l1, l2) {
 
 #### 复杂链表的拷贝
 
+使用 map
+
 ```javascript
 // leetcode 138
 var copyRandomList = function (head) {
@@ -477,13 +658,113 @@ var copyRandomList = function (head) {
 };
 ```
 
+#### 链表模拟两数相加
+
+从左往右的顺序
+
+```js
+// leetcode 2
+var addTwoNumbers = function (l1, l2) {
+    let carry = 0;
+    let val1 = 0, val2 = 0, res = 0;
+    let newNode = new ListNode();
+    let curr = newNode;
+    while (l1 || l2) {
+        val1 = l1 ? l1.val : 0;
+        val2 = l2 ? l2.val : 0;
+        res = val1 + val2 + carry;
+        if (res >= 10) {
+            carry = 1;
+            res = res % 10;
+        } else {
+            carry = 0;
+        }
+        curr.next = new ListNode(res);
+        curr = curr.next;
+        l1 = l1 ? l1.next : null;
+        l2 = l2 ? l2.next : null;
+    }
+    if (carry > 0) {
+        curr.next = new ListNode(carry);
+    }
+    return newNode.next;
+};
+```
+
+#### 链表模拟两数相加2
+
+```javascript
+var addTwoNumbers = function (l1, l2) {
+  // 将两个链表中的值分别存进两个栈中
+  let stack1 = [], stack2 = [];
+  while (l1) {
+    stack1.push(l1.val);
+    l1 = l1.next;
+  }
+  while (l2) {
+    stack2.push(l2.val);
+    l2 = l2.next;
+  }
+  // 初始化变量
+  let sum = 0, carry = 0, num = 0;
+  let res = new ListNode(null), rn;
+  let add1, add2;
+  // 当两个栈有至少一个不为空时, 都进行相加操作
+  // 为空的那个栈的加数为 0
+  while (stack1.length != 0 || stack2.length != 0) {
+    add1 = stack1.length == 0 ? 0 : stack1.pop();
+    add2 = stack2.length == 0 ? 0 : stack2.pop();
+    sum = add1 + add2 + carry;
+    // 商是进位 大于10为1,小于10为0
+    carry = Math.floor(sum / 10);
+    // 余数是相加之后结果中的数字
+    num = sum % 10;
+    // 将结果添加进结果列表中
+    rn = res.next;
+    res.next = new ListNode(num);
+    res.next.next = rn;
+  }
+  // 当两个链表均为空时, 看是否还有进位
+  // 有进位则添加进结果列表中
+  if (carry != 0) {
+    rn = res.next;
+    res.next = new ListNode(carry);
+    res.next.next = rn;
+  }
+  return res.next;
+};
+```
 
 
-### LRU
+
+#### 链表中两两交换节点
+
+```javascript
+// leetcode 24
+var swapPairs = function (head) {
+    let dummy = new ListNode(0, head);
+    let curr = head, temp, pre = dummy;
+    let i = 0;
+    while (curr) {
+        if (!curr.next) break;
+        temp = curr.next.next;
+        pre.next = curr.next;
+        curr.next.next = curr;
+        curr.next = temp;
+        pre = curr;
+        curr = temp;
+    }
+    return dummy.next;
+};
+```
+
+
+
+## LRU
 
 ![img](images/LRU.JPG)
 
-### 排序及时间复杂度
+## 排序及时间复杂度
 
 深度广度优先遍历
 
@@ -542,7 +823,9 @@ function wideTraversal (node) {
 }
 ```
 
-## 继承相关（es5/es6）
+# JS 相关功能
+
+## 继承关键字（es5/es6）
 
 ### new
 
@@ -1106,5 +1389,68 @@ var _const = function (key, val) {
     }
   })
 }
+```
+
+# CSS
+
+## 实现红绿灯效果
+
+使用 CSS 动画或者 JS 定时修改元素类别
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>red green light
+    </title>
+    <style type="text/css">
+        .hld {
+            width: 100px;
+            height: 100px;
+            background-color: red;
+            border-radius: 50%;
+            /* animation: hld 2s linear 1s infinite */
+        }
+
+        /* @keyframes hld {
+            0% {
+                background-color: red;
+            }
+
+            100% {
+                background-color: green;
+            }
+        } */
+
+        .red {
+            background-color: red;
+        }
+
+        .green {
+            background-color: green;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="hld" id="hld"></div>
+</body>
+
+</html>
+<script type="text/javascript">
+    var node = document.getElementById('hld');
+    let flag = true;
+
+    function turncolor() {
+        setInterval(() => {
+            if (flag) node.className = "hld red"
+            else node.className = "hld green"
+            flag = !flag;
+        }, 2000)
+    }
+    turncolor()
+</script>
 ```
 
