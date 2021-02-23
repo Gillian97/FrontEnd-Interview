@@ -8357,6 +8357,99 @@ crypto模块也可以处理数字证书。数字证书通常用在SSL连接，�
 
 ### children_process
 
+创建子进程
+
+child_process是Node.js的一个十分重要的模块，通过它可以实现创建多进程，以利用多核计算资源。
+
+> Node.js可以创建一个子进程执行密集的cpu计算任务（例如上面例子中的longComputation）来解决问题，而child_process模块正是用来创建子进程的。
+
+child_process 提供了几种创建子进程的方式
+
+异步方式：spawn、exec、execFile、fork
+同步方式：spawnSync、execSync、execFileSync
+
+spawn: shell 命令(分开)
+
+fork: 执行 nodejs 模块
+
+exec: shell 命令
+
+1. `child_process`模块提供了四个创建子进程的函数，分别是`spawn`，`exec`，`execFile`和`fork`。其中`spawn`是最原始的创建子进程的函数，其他三个都是对`spawn`不同程度的封装。
+
+`spawn`只能运行指定的程序，参数需要在列表中给出，相当于`execvp`系统函数，而`exec`可以直接运行复杂的命令。
+
+```javascript
+child_process.spawn(command, [args], [options])
+
+child_process.exec(command, [options], callback)
+```
+
+例如要运行`ls -lh /usr`，使用`spawn`需要写成`spawn('ls', ['-lh', '/usr'])`，而`exec`只需`exec('ls -lh /usr')`。
+
+`exec`的实现原理是**启动了一个系统shell**来解析参数，因此可以是非常复杂的命令，包括管道和重定向。
+
+此外，`exec`还可以直接接受一个回调函数作为参数，回调函数有三个参数，分别是`err`, `stdout` , `stderr`，非常方便直接使用，例如：
+
+```javascript
+require('child_process').exec( 'ls -lh /usr' , function(err, stdout , stderr ) {
+  console.log( stdout );
+});
+```
+
+如果使用`spawn`，则必须写成：
+
+2.`fork`函数用于直接运行Node.js模块，例如`fork('./child.js')`，相当于`spawn('node', ['./child.js'])`。
+
+与默认的`spawn`不同的是，`fork`会在父进程与子进程直接建立一个IPC管道，用于父子进程之间的通信。例如
+
+```javascript
+var n = require('child_process').fork( './child.js'); 
+n.on( 'message', function(m) { 
+  console.log( 'PARENT got message:', m);
+});
+n.send({ hello: 'world' });
+```
+
+child.js的内容
+
+```javascript
+process. on ( 'message', function(m) { 
+  console. log ( 'CHILD got message:', m);
+});
+process.send({ foo: 'bar' });
+```
+
+结果：
+
+结果是:
+
+```
+PARENT got message: { foo: 'bar' }
+CHILD got message: { hello: 'world' }
+```
+
+3.`fork`函数有一个问题，就是它只能运行JavaScript代码，如果你喜欢用CoffeeScript（或者其他任何编译到js的语言），是无法通过`fork`调用的。
+
+一个简单的方法是把代码编译到JavaScript再运行，但是很不方便，有没有什么办法呢？答案是可以的，
+
+```javascript
+child_process.spawn(command, [args], [options])
+```
+
+通过把`options`参数的`stdio`设为`['ipc']`，
+
+即可在父子进程之间建立IPC管道。例如子进程使用CoffeeScript：
+
+```javascript
+child_process = require ('child_process');
+options ={stdio: ['ipc'] };
+child = child_process.spawn('coffee', ['./child.coffee'], options);
+```
+
+其中只要把`spawn`的第一个参数设置为运行对应脚本的解释器，即可运行，例如使用 Continuation.js，
+
+只需`child = child_process.spawn('continuation', ['./child.coffee'], options)`。
+
 ### cluster 集群
 
 单个 Node.js 实例运行在单个线程中, 为了充分利用多核系统, 有时需要启用一组 Node.js 进程(监听同个端口)去处理负载任务.
@@ -8522,24 +8615,25 @@ worker 对象是 cluster.fork() 的返回值, 代表一个worker进程.
      var worker = cluster.fork();
      worker.send('hi there');
    } else if (cluster.isWorker) {
+     // 监听主进程发的消息
      process.on('message', function(msg) {
        process.send(msg);
      });
    }
-   ```
-
-   上面代码的作用是，worker进程对主进程发出的每个消息，都做回声。
-
-   在worker进程中，要向主进程发送消息，使用`process.send(message)`；要监听主进程发出的消息，使用下面的代码。
-
+```
+   
+上面代码的作用是，worker进程对主进程发出的每个消息，都做回声。
+   
+在worker进程中，要向主进程发送消息，使用`process.send(message)`；要监听主进程发出的消息，使用下面的代码。
+   
    ```javascript
    process.on('message', function(message) {
      console.log(message);
    });
-   ```
-
-   发出的消息可以字符串，也可以是JSON对象。下面是一个发送JSON对象的例子。
-
+```
+   
+发出的消息可以字符串，也可以是JSON对象。下面是一个发送JSON对象的例子。
+   
    ```javascript
    worker.send({
      type: 'task 1',
@@ -8548,8 +8642,8 @@ worker 对象是 cluster.fork() 的返回值, 代表一个worker进程.
        // the data that you want to transfer
      }
    });
-   ```
-
+```
+   
    
 
 #### cluster.workers对象
@@ -8589,7 +8683,7 @@ isWorker属性返回一个布尔值，表示当前进程是否为work进程。�
 
 fork方法用于新建一个worker进程，上下文都复制主进程。只有主进程才能调用这个方法。
 
-该方法返回一个worker对象。
+cluster.fork() 该方法返回一个worker对象。
 
 ##### kill()
 
@@ -8877,7 +8971,7 @@ function EventEmitter() {
 
 需要实现 addListener/removeListener/once/removeListener/emit 等函数.
 
-addListener
+### addListener
 
 ```javascript
 // once 参数表示是否只是触发一次
@@ -8898,7 +8992,7 @@ EventEmitter.prototype.addListener = function (type, fn, once = false) {
 }
 ```
 
-removeListener
+### removeListener
 
 ```javascript
 EventEmitter.prototype.removeListener = function (type, listener) {
@@ -8923,7 +9017,7 @@ EventEmitter.prototype.removeListener = function (type, listener) {
 }
 ```
 
-once
+### once
 
 加入的时候设置为 once:true, 执行完毕后删除该监听函数.
 
@@ -8931,7 +9025,11 @@ once
 EventEmitter.prototype.once = function (type, fn) {
   this.addListener(type, fn, true);
 }
+```
 
+### emit
+
+```javascript
 EventEmitter.prototype.emit = function (type, ...args) {
   let handler = this.events.get(type);
   if (!handler) return;
@@ -8950,7 +9048,7 @@ EventEmitter.prototype.emit = function (type, ...args) {
 }
 ```
 
-removeAllListener
+### removeAllListener
 
 ```javascript
 EventEmitter.prototype.removeAllListener = function (type) {
@@ -9696,7 +9794,7 @@ $ curl --form upload=@/path/to/file http://127.0.0.1:3000
 })(req, res)
 ```
 
-如上代码，Express 中间件设计并不是一个洋葱模型，它是基于回调实现的线形模型，不利于组合，不利于互操，在设计上并不像 Koa 一样简单。而且业务代码有一定程度的侵扰，甚至会造成不同中间件间的耦合。
+如上代码，Express 中间件设计并不是一个洋葱模型，它是**基于回调实现的线形模型**，不利于组合，不利于互操，在设计上并不像 Koa 一样简单。而且业务代码有一定程度的侵扰，甚至会造成不同中间件间的耦合。
 
 
 

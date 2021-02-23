@@ -154,8 +154,7 @@ class MyComponent extends React.Component{
 
 class Header extends React.Component{
     render(){
-        return
-            <h1>Header Component</h1>   
+        return <h1>Header Component</h1>   
    };
 }
 
@@ -234,13 +233,13 @@ ReactDOM.render(
 
 **语法**：
 
-```
+```javascript
 setState(updater, [callback])
 ```
 
 - 第一个参数 updater 是 function
 
-  ```
+  ```javascript
   (state, props) => stateChange
   ```
 
@@ -404,7 +403,7 @@ render() {
 
 根据组件加载过程:
 
-第一次渲染
+**第一次渲染**
 
 componentWillMount() [ React 16 建议使用 `getDerivedStateFromProps`]
 
@@ -412,19 +411,21 @@ componentWillMount() [ React 16 建议使用 `getDerivedStateFromProps`]
 
 componentDidMount()
 
-更新组件
+**更新组件**
 
 componentWillReceiveProps()  [ React 16 建议使用 `getDerivedStateFromProps`]
 
 shouldComponentUpdate()
 
-componentWillUpdate() [ React 16 建议使用 `getSnapshotBeforeUpdate` ]
+[React 16 `<render>` ]
+
+componentWillUpdate() [ React 16 建议使用 `getSnapshotBeforeUpdate`  调用在 render 之后]
 
 `<render>`
 
 componentDidUpdate()
 
-卸载组件
+**卸载组件**
 
 componentWillUnmount()
 

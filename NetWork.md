@@ -1350,7 +1350,7 @@ UDP 协议真的非常简单，头部只有 `8` 个字节（ 64 位），UDP 的
 
 但是现实中部分场景需要规避同源政策带来的限制，实现某些数据的读取以及进行一些操作。
 
-**一级域名相同的网页共享 Cookie**
+## document.domain
 
 两个网页一级域名相同，二级域名不同，设置相同的 document.domain，可实现 `Cookie`共享。
 
@@ -1359,6 +1359,8 @@ A 网页（http://test1.example.com/a.html）设置 `document.domain="example.co
 B 网页（http://test2.example.com/b.html）设置 `document.domain="example.com"`
 
 A 网页设置 `document.cookie = "hello"`，B 网页可进行读取 `let cookie = document.cookie`。
+
+## window.name
 
 ## CORS
 
