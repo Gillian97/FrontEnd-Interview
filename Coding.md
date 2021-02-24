@@ -896,232 +896,434 @@ Child.prototype.constructor = Child;
 
 ## 防抖节流
 
-## promise
+## Promise
+
+一个包装异步操作的容器
+
+### 基本使用
 
 ```javascript
-class Promise {
-  /**
-   * 终值
-   * @type {*}
-   */
-  value = null;
-  /**
-   * 据因
-   * @type {string}
-   */
-  reason;
-  /**
-   * 状态
-   * @type {"pending"|"fulfilled"|"rejected"}
-   */
-  state = "pending";
-  /**
-   * 异步成功回调
-   * @type {Function[]}
-   */
-  onFulfilledCallback = [];
-  /**
-   * 异步失败回调
-   * @type {Function[]}
-   */
-  onRejectedCallback = [];
-
-  constructor(executor) {
-    this.init();
-    try {
-      executor(this.resolve, this.reject);
-    } catch (e) {
-      this.reject(e);
+const p = new Promise((resolve, reject) => {
+    // some code
+    if (/* 异步操作成功 */) {
+        resolve(val)
+    } else {
+        reject(err)
     }
-  }
+})
 
-  static resolve(value) {
-    if (value instanceof Promise) return value;
-    return new Promise(function (resolve, reject) {
-      if (value && value.then && typeof value.then === "function") {
-        setTimeout(function () {
-          value.then(resolve, reject);
-        });
-      } else {
-        resolve(value);
-      }
-    });
-  }
-
-  static reject(reason) {
-    return new Promise(function (resolve, reject) {
-      if (reason && reason.then && typeof reason.then === "function") {
-        setTimeout(function () {
-          reason.then(resolve, reject);
-        });
-      } else {
-        reject(reason);
-      }
-    });
-  }
-
-  static all(promises) {
-    if (!promises || typeof promises[Symbol.iterator] !== "function")
-      throw TypeError(
-        `${typeof promises} is not iterable (cannot read property Symbol(Symbol.iterator))`
-      );
-    let index = 0;
-    const result = [];
-    return new Promise(function (resolve, reject) {
-      if (!promises.length) resolve(promises);
-      else {
-        function processValue(value, i) {
-          result[i] = value;
-          if (++index === promises.length) {
-            resolve(result);
-          }
-        }
-
-        for (let i = 0; i < promises.length; i++) {
-          Promise.resolve(promises[i]).then(
-            function (value) {
-              processValue(value, i);
-            },
-            function (reason) {
-              reject(reason);
-            }
-          );
-        }
-      }
-    });
-  }
-
-  static race(promises) {
-    if (!promises || typeof promises[Symbol.iterator] !== "function")
-      throw TypeError(
-        `${typeof promises} is not iterable (cannot read property Symbol(Symbol.iterator))`
-      );
-    return new Promise(function (resolve, reject) {
-      if (!promises.length) {
-        resolve();
-        return;
-      }
-      for (const promise of promises) {
-        Promise.resolve(promise).then(
-          function (value) {
-            resolve(value);
-          },
-          function (reason) {
-            reject(reason);
-          }
-        );
-      }
-    });
-  }
-
-  init() {
-    this.resolve = this.resolve.bind(this);
-    this.reject = this.reject.bind(this);
-  }
-
-  /**
-   * 成功函数
-   * @param value {*}
-   */
-  resolve(value) {
-    if (this.state === "pending") {
-      this.state = "fulfilled";
-      this.value = value;
-
-      this.onFulfilledCallback.forEach((fn) => {
-        fn(this.value);
-      });
-    }
-  }
-
-  /**
-   * 失败函数
-   * @param reason {string}
-   */
-  reject(reason) {
-    if (this.state === "pending") {
-      this.state = "rejected";
-      this.reason = reason;
-
-      this.onRejectedCallback.forEach((fn) => {
-        fn(this.reason);
-      });
-    }
-  }
-
-  then(onFulfilled, onRejected) {
-    onFulfilled =
-      typeof onFulfilled === "function"
-        ? onFulfilled
-        : function (value) {
-          return value;
-        };
-    onRejected =
-      typeof onRejected === "function"
-        ? onRejected
-        : function (reason) {
-          throw reason;
-        };
-
-    return new Promise((resolve, reject) => {
-      if (this.state === "fulfilled") {
-        try {
-          const result = onFulfilled(this.value);
-          resolvePromise(result, resolve, reject);
-        } catch (e) {
-          reject(e);
-        }
-      }
-
-      if (this.state === "rejected") {
-        try {
-          const result = onRejected(this.reason);
-          resolvePromise(result, resolve, reject);
-        } catch (e) {
-          reject(e);
-        }
-      }
-
-      if (this.state === "pending") {
-        this.onFulfilledCallback.push((value) => {
-          try {
-            const result = onFulfilled(value);
-            resolvePromise(result, resolve, reject);
-          } catch (e) {
-            reject(e);
-          }
-        });
-
-        this.onRejectedCallback.push((reason) => {
-          try {
-            const result = onRejected(reason);
-            resolvePromise(result, resolve, reject);
-          } catch (e) {
-            reject(e);
-          }
-        });
-      }
-    });
-  }
-
-  finally(callback) {
-    return this.then(
-      () => Promise.resolve(callback()),
-      () => Promise.reject(callback())
-    );
-  }
-}
-
-function resolvePromise(promise, resolve, reject) {
-  if (promise instanceof Promise) {
-    promise.then(resolve, reject);
-  } else {
-    resolve(promise);
-  }
-}
+// 建议处理错误采用 方式2(catch)
+p.then((val) => {
+    // 成功的回调
+}, (err) => {
+    // 失败回调 1
+}).catch((err) => {
+    // 失败回调 2
+})
 ```
 
+### 封装
 
+#### 封装 timeout
+
+```javascript
+function timeout(delay) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve(1)
+        }, delay)
+    })
+}
+
+timeout(4000).then((val) => {
+    console.log(val);
+})
+
+// 4s 之后打印 1
+```
+
+#### 封装加载图片(浏览器执行)
+
+```javascript
+function loadPic(url) {
+    return new Promise((resolve, reject) => {
+        let img = new Image();
+        img.onload = () => {
+            resolve(img)
+        }
+        img.onerror = () => {
+            reject(new Error("load err" + url))
+        }
+        img.src = url
+    })
+}
+
+loadPic("https://th.bing.com/th/id/R1fdf3a183158c62b91e690d8beee6ebe?rik=mHL6yEiXiMAK9Q&riu=http%3a%2f%2fwww.shijuepi.com%2fuploads%2fallimg%2f200918%2f1-20091Q10417.jpg&ehk=wzkrRqNZfU1InC6bUzefYssPjoFNJBZZ7qSj6P7WHPI%3d&risl=&pid=ImgRaw").then((val) => {
+    console.log("图片在这里：", val);
+}).catch((error)=>{
+    console.log(error);
+})
+
+// 浏览器控制台显示结果
+// 可见抛出了一个图片标签
+Promise {<pending>}
+图片在这里： <img src=​"https:​/​/​th.bing.com/​th/​id/​R1fdf3a183158c62b91e690d8beee6ebe?rik=mHL6yEiXiMAK9Q&riu=http%3a%2f%2fwww.shijuepi.com%2fuploads%2fallimg%2f200918%2f1-20091Q10417.jpg&ehk=wzkrRqNZfU1InC6bUzefYssPjoFNJBZZ7qSj6P7WHPI%3d&risl=&pid=ImgRaw">​
+```
+
+#### 封装 AJAX
+
+```javascript
+function getJSON(url) {
+    return new Promise((resolve, reject) => {
+        function handler() {
+            if (this.readyState != "4") return;
+            if (this.status === 200) {
+                resolve(this.response)
+            } else {
+                reject(new Error(this.status + this.statusText))
+            }
+        }
+        let xhr = new XMLHttpRequest();
+        xhr.open("GET", url);
+        xhr.onreadystatechange = handler;
+        // xhr.responseType = "json";
+        // xhr.setRequestHeader("Accept", "Application/json")
+        xhr.send();
+    })
+}
+// 一段时间后打印 baidu 首页的 html 页面
+getJSON("https://www.baidu.com/").then((val) => {
+    console.log("Contents:" + val);
+}).catch((error) => {
+    console.log(error);
+})
+```
+
+### resolve 返回另一个异步操作(Promise)
+
+p1 的状态决定了 p2 的状态, 当 p1 状态改变时, p2 的回调函数才会调用. 最终以 resolve 的也就是 p1 的状态为准.
+
+```javascript
+// 情况 1
+let p1 = new Promise((resolve, reject) => {
+    setTimeout(() => {
+        resolve("hello")
+    }, 3000)
+})
+
+let p2 = new Promise((resolve, reject) => {
+    setTimeout(() => {
+        resolve(p1)
+    }, 1000)
+})
+
+// 3s 之后打印 hello
+p2.then((val) => {
+    console.log(val);
+}).catch((error) => {
+    console.log(error);
+})
+
+/*-----------------------------------------------*/
+
+// 情况 2
+let p1 = new Promise((resolve, reject) => {
+    setTimeout(() => {
+        resolve("hello")
+    }, 1000)
+})
+
+let p2 = new Promise((resolve, reject) => {
+    setTimeout(() => {
+        resolve(p1)
+    }, 4000)
+})
+
+// 4s 之后打印 hello
+p2.then((val) => {
+    console.log(val);
+}).catch((error) => {
+    console.log(error);
+})
+```
+
+### 多个 then 链式调用
+
+then 方法返回的一定是一个 Promise 实例(不是原来那个实例)
+
+有异步操作就是异步操作的实例,  没有异步操作就是被转换的 Promise 实例(可通过 return 设置返回值)
+
+`then` 里使用 `return` 语句
+
+```javascript
+let p1 = new Promise((resolve, reject) => {
+    setTimeout(() => {
+        resolve("hello world")
+    }, 2000)
+})
+
+let p = p1.then((val) => {
+    console.log("第一个 then");
+    // 可以理解为 没有封装异步操作但有返回值 的 Promise 实例
+    return val;
+})
+
+p.then((val) => {
+    console.log(p, "第二个 then");
+    console.log(val);
+}).catch((error) => {
+    console.log(error);
+})
+
+// 打印结果
+第一个 then
+Promise { 'hello world' } 第二个 then
+hello world
+```
+
+`then` 里使用异步操作
+
+```javascript
+let p1 = new Promise((resolve, reject) => {
+    setTimeout(() => {
+        resolve("hello world")
+    }, 2000)
+})
+
+let p = p1.then((val) => {
+    console.log('1', val);
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve("又一个异步操作")
+        }, 2000)
+    })
+})
+
+p.then((val) => {
+    console.log(p, "第二个 then");
+    console.log('2', val);
+}).catch((error) => {
+    console.log(error);
+})
+
+// 打印结果
+// 2s 后打印
+1 hello world
+// 2s 后打印
+Promise { '又一个异步操作' } 第二个 then
+2 又一个异步操作
+```
+
+### catch 使用
+
+等同于 `.then(null, func)`, 建议使用 `catch` 捕获错误, 而不是 `then` 中的第二个参数.
+
+返回的仍然是一个 `Promise` 实例, 后面可以接着跟 `then` 方法.
+
+```javascript
+p.then((val) => console.log('fulfilled:', val))
+  .catch((err) => console.log('rejected', err));
+
+// 等同于
+p.then((val) => console.log('fulfilled:', val))
+  .then(null, (err) => console.log("rejected:", err));
+
+// 使用示例
+
+// 可以捕获哪些错误
+getJSON('/posts.json').then(function(posts) {
+  // ...
+}).catch(function(error) {
+  // 处理 getJSON 和 前一个回调函数运行时发生的错误
+  console.log('发生错误！', error);
+});
+
+// 只处理状态为 rejected 的 Promise 实例的错误
+const promise = new Promise(function(resolve, reject) {
+  resolve('ok'); // 状态已经为 resolved, 再抛错捕获被捕获
+  throw new Error('test');
+});
+promise
+  .then(function(value) { console.log(value) })
+  .catch(function(error) { console.log(error) });
+// ok
+```
+
+#### 三种抛出错误的方式
+
+通过 throw 或者 reject 的方式
+
+```javascript
+// 写法一
+const promise = new Promise(function(resolve, reject) {
+  throw new Error('test');
+});
+promise.catch(function(error) {
+  console.log(error);
+});
+// Error: test
+
+// 写法二
+const promise = new Promise(function(resolve, reject) {
+  try {
+    throw new Error('test');
+  } catch(e) {
+    reject(e);
+  }
+});
+promise.catch(function(error) {
+  console.log(error);
+});
+
+// 写法三
+const promise = new Promise(function(resolve, reject) {
+  reject(new Error('test'));
+});
+promise.catch(function(error) {
+  console.log(error);
+});
+```
+
+#### 内部错误不影响外部代码
+
+通俗的说法就是“Promise 会吃掉错误”。
+
+> 浏览器执行按照如下所述, 但是在 node 中执行, 不会打印 hello, 即错误被监听到并且直接终止了进程
+
+```javascript
+let p = new Promise((resolve, reject) => {
+    // x 未定义报错
+    // 但是没有 catch 等错误捕获机制
+    // 错误未能处理
+    resolve(x)
+})
+
+p.then((val) => {
+    console.log(val);
+})
+
+// 上面报错不影响下面代码的执行
+setTimeout(() => {
+    console.log('hello');
+}, 1000)
+// 1s 之后正常打印出 hello
+```
+
+#### catch 只能捕获当前事件循环中所在 Promise 实例的错误
+
+```javascript
+const promise = new Promise(function (resolve, reject) {
+  resolve('ok');
+  // 在下一轮事件循环中抛出错误
+  setTimeout(function () { throw new Error('test') }, 0)
+});
+promise.then(function (value) { console.log(value) });
+// ok
+// Uncaught Error: test
+```
+
+#### 后面跟 then 方法
+
+即 `catch` 只能捕获它之前的错误
+
+```javascript
+// ****没有报错则跳过 catch
+Promise.resolve()
+.catch(function(error) {
+  console.log('oh no', error);
+})
+.then(function() {
+  // 有报错与前面的 catch 无关
+  console.log('carry on');
+});
+// carry on
+
+// ****有报错
+const someAsyncThing = function () {
+    return new Promise(function (resolve, reject) {
+        // 下面一行会报错，因为x没有声明
+        resolve(x + 2);
+    });
+};
+
+someAsyncThing()
+    .catch(function (error) {
+        console.log('oh no', error);
+    }) // 此处 catch 返回的是一个 Promise { undefined }
+    .then(function () {
+        console.log('carry on');
+    });
+// oh no [ReferenceError: x is not defined]
+// carry on
+
+// catch 中也可以抛出错误
+// 则需要在 catch 后再跟 catch 方法
+someAsyncThing().then(function() {
+  return someOtherAsyncThing();
+}).catch(function(error) {
+  console.log('oh no', error);
+  // 下面一行会报错，因为 y 没有声明
+  y + 2;
+}).then(function() {
+  console.log('carry on');
+});
+// oh no [ReferenceError: x is not defined]
+```
+
+### finally 使用
+
+不论 `Promise` 最后状态如何, 在执行完 `then` 或者 `catch` 指定的回调函数之后, 都会执行 `finally` 中的回调函数.
+
+本质是 then 方法的特例.
+
+```javascript
+// 使用
+promise
+.then(result => {···})
+.catch(error => {···})
+.finally(() => {···}); // 注意这里的 callback 不接受任何参数
+
+// 等同于最后的有两个回调的 then 方法
+promise
+.finally(() => {
+  // 语句
+});
+
+// 等同于
+promise
+.then(
+  result => {
+    // 语句
+    return result;
+  },
+  error => {
+    // 语句
+    throw error;
+  }
+);
+```
+
+#### 实现
+
+```javascript
+Promise.prototype.finally = function (callback) {
+  let P = this.constructor;
+  return this.then(
+    value  => P.resolve(callback()).then(() => value),
+    reason => P.resolve(callback()).then(() => { throw reason })
+  );
+};
+```
+
+### all
+
+多个 Promise 实例, 包装成一个新的 Promise 实例. 
+
+### race
+
+### resolve
+
+### reject
 
 ## 事件绑定/观察者(EventEmitter)
 
