@@ -1499,139 +1499,178 @@ p.then(val => {
 
 ### 相关手写实现
 
+#### Promise 基本实现
+
+实现链式调用
+
 ```javascript
 const checkPromise = (res, x, resolve, reject) => {
-    if (res === x) reject(new Error("promise 递归调用错误")); // promise 的值永远出不来
-    // 需要对返回值类型进行分类讨论
-    // 对象/函数 & 普通值
-    if ((typeof x === 'object') && x !== null || typeof x === 'function') {
-        // 如果 x 是一个 Promise 对象, 则 res 的状态依赖于 x 的状态
-        // 判断 x 的状态, 调用过 resolve 就获取其值, 调用过 reject 就获取其 err, 总之是获取其返回值
-        // 如果其返回值也是一个 Promise 对象, 则需要继续判断该对象的状态及返回值
-        // 执行该 x 的 then 方法并获取其返回值
-        
-    } else {
+  if (res === x) reject(new Error("promise 递归调用错误")); // promise 的值永远出不来
+  // 需要对返回值类型进行分类讨论
+  // 对象/函数 & 普通值
+  let called = false;
+  if ((typeof x === 'object') && x !== null || typeof x === 'function') {
+    // 如果 x 是一个 Promise 对象, 则 res 的状态依赖于 x 的状态
+    // 判断 x 的状态, 调用过 resolve 就获取其值, 调用过 reject 就获取其 err, 总之是获取其返回值
+    // 如果其返回值也是一个 Promise 对象, 则需要继续判断该对象的状态及返回值
+    // 执行该 x 的 then 方法并获取其返回值
+    try {
+      let then = x.then;
+      if (typeof then === 'function') {
+        then.call(x, val => {
+          if (called) return;
+          called = true;
+          checkPromise(res, val, resolve, reject);
+        }, err => {
+          if (called) return;
+          called = true;
+          reject(err);
+        })
+      } else {
+        // 普通对象
         resolve(x);
+      }
+    } catch (err) {
+      if (called) return;
+      called = true;
+      reject(err)
     }
+  } else {
+    // 普通值
+    resolve(x);
+  }
 }
-
-
 
 const PENDING = "pending", RESOLVED = "fulfilled", REJECTED = "rejected"
 
+// 根据规定 then 中执行的操作是微任务
+// 因此 then 返回的 Promise 是立即执行的 需要将其包装为微任务
 
-class MyPromise {
-    constructor(executor) {
-        this.val = undefined;
-        this.reason = undefined;
-        this.status = PENDING;
-        this.onResolvedCallbacks = [];
-        this.onRejectedCallbacks = [];
+class Promise {
+  constructor(executor) {
+    this.val = undefined;
+    this.reason = undefined;
+    this.status = PENDING;
+    this.onResolvedCallbacks = [];
+    this.onRejectedCallbacks = [];
 
-        // 异步操作的回调在 resolve 和 reject 中调用
-        let resolve = (val) => {
-            if (this.status === PENDING) {
-                this.status = RESOLVED;
-                this.val = val;
-                this.onResolvedCallbacks.map(fn => {
-                    console.log('***', this);
-                    fn()
-                })
-            }
-        }
-
-        let reject = (reason) => {
-            if (this.status === PENDING) {
-                this.status = REJECTED;
-                this.reason = reason;
-                this.onRejectedCallbacks.map(fn => fn())
-            }
-        }
-
-        try {
-            executor(resolve, reject);
-        } catch (err) {
-            reject(err);
-        }
+    // 异步操作的回调在 resolve 和 reject 中调用
+    let resolve = (val) => {
+      if (this.status === PENDING) {
+        this.status = RESOLVED;
+        this.val = val;
+        this.onResolvedCallbacks.map(fn => fn())
+      }
     }
-    // 实现 then 的链式调用和值穿透
-    // then 创建新实例 并且将当前 then 的结果 传递给新建实例的then方法
-    then(onResolvedCallback, onRejectedCallback) {
-        if (arguments.length === 0)
-            return new MyPromise((resolve, reject) => resolve(this.val))
-        if (onResolvedCallback && typeof onResolvedCallback !== "function")
-            return new MyPromise((resolve, reject) => resolve(this.val))
 
-        if (onRejectedCallback && typeof onRejectedCallback !== "function")
-            return new MyPromise((resolve, reject) => resolve(this.val))
+    let reject = (reason) => {
+      if (this.status === PENDING) {
+        this.status = REJECTED;
+        this.reason = reason;
+        this.onRejectedCallbacks.map(fn => fn())
+      }
+    }
 
+    try {
+      executor(resolve, reject);
+    } catch (err) {
+      reject(err);
+    }
+  }
+  // 实现 then 的链式调用和值穿透
+  // then 创建新实例 并且将当前 then 的结果 传递给新建实例的then方法
+  then (onResolvedCallback, onRejectedCallback) {
+    // 解决两者不是函数的问题, 不是函数要变成函数
+    onResolvedCallback = typeof onResolvedCallback === "function" ? onResolvedCallback : v => v;
+    onRejectedCallback = typeof onRejectedCallback === "function" ? onRejectedCallback : err => { throw err };
 
-
-        let res = new MyPromise((resolve, reject) => {
-            if (this.status === RESOLVED) {
-                try {
-                    let temp = onResolvedCallback(this.val)
-                    // resolve(temp ? temp : this.val)
-                    checkPromise(res, temp, resolve, reject);
-                } catch (err) {
-                    reject(err)
-                }
+    let res = new Promise((resolve, reject) => {
+      if (this.status === RESOLVED) {
+        // then 参数中的操作都是微任务, 这里使用 setTimeout 模拟微任务
+        setTimeout(() => {
+          try {
+            let temp = onResolvedCallback(this.val)
+            // 根据 temp 的类型判断是直接抛出还是做相关处理
+            checkPromise(res, temp, resolve, reject);
+          } catch (err) {
+            reject(err)
+          }
+        }, 0)
+      }
+      if (this.status === REJECTED) {
+        setTimeout(() => {
+          try {
+            let temp = onRejectedCallback(this.reason)
+            checkPromise(res, temp, resolve, reject);
+          } catch (err) {
+            reject(err)
+          }
+        }, 0)
+      }
+      // 保存回调函数
+      // 即使后面依次执行函数时, 也是把每个操作放进微任务队列中, 并不会立即执行
+      if (this.status === PENDING) {
+        this.onResolvedCallbacks.push(() => {
+          // 函数执行时 才会去获取 this.val 的值
+          // 此时添加时 不会去获取
+          // console.log('==', this.val);
+          setTimeout(() => {
+            try {
+              let temp = onResolvedCallback(this.val);
+              checkPromise(res, temp, resolve, reject);
+            } catch (err) {
+              reject(err)
             }
-            if (this.status === REJECTED) {
-                try {
-                    let temp = onRejectedCallback(this.reason)
-                    resolve(temp ? temp : undefined)
-                } catch (err) {
-                    reject(err)
-                }
-            }
-            // 保存回调函数
-            if (this.status === PENDING) {
-                this.onResolvedCallbacks.push(() => {
-                    // 函数执行时 才会去获取 this.val 的值
-                    // 此时添加时 不会去获取
-                    // console.log('==', this.val);
-                    try {
-                        let temp = onResolvedCallback(this.val);
-                        resolve(temp ? temp : this.val)
-                    } catch (err) {
-                        reject(err)
-                    }
-                })
-                this.onRejectedCallbacks.push(() => {
-                    try {
-                        let temp = onRejectedCallback(this.reason)
-                        resolve(temp ? temp : undefined)
-                    } catch (err) {
-                        reject(err)
-                    }
-                })
-            }
+          }, 0)
         })
-        return res;
-    }
+        this.onRejectedCallbacks.push(() => {
+          setTimeout(() => {
+            try {
+              let temp = onRejectedCallback(this.reason)
+              checkPromise(res, temp, resolve, reject);
+            } catch (err) {
+              reject(err)
+            }
+          }, 0)
+        })
+      }
+    })
+    return res;
+  }
+  
+  catch (onRejectedCallback) {
+    return this.then(null, onRejectedCallback);
+  }
+  
 }
-
-let p = new MyPromise((resolve, reject) => {
-    // setTimeout(() => {
-    //     resolve("hello");
-    // }, 2000)
-    resolve("hello");
-})
-console.log(p);
-// 整个都是直接执行下来的 不会等到 即then方法也直接执行完了 没有等到异步操作去改变状态后
-let p1 = p.then((val) => {
-    console.log(val);
-    // return 'ok'
-    throw new Error('!!')
-})
-console.log('p1', p1);
-p1.then(val => console.log(val), err => {
-    console.log('this is' + err);
-}).then(val => {
-    console.log('is undefined?' + val);
-})
 ```
+
+#### Promise.resolve 基本实现
+
+```javascript
+static resolve(data) {
+  if (data instanceof Promise) return data;
+  return new Promise((resolve, reject) => {
+    resolve(data);
+  })
+}
+```
+
+#### Promise.reject 基本实现
+
+```javascript
+static reject(reason) {
+  return new Promise((resolve, reject) => {
+    reject(reason);
+  })
+}
+```
+
+#### Promise.all 基本实现
+
+
+
+#### Promise.race 基本实现
 
 
 
