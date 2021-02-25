@@ -900,6 +900,12 @@ Child.prototype.constructor = Child;
 
 一个包装异步操作的容器
 
+- 解决了回调地狱(主要是异步请求之间存在依赖关系, 一个请求的输出是另一个请求的输入)
+
+  链式调用
+
+- 提高代码可读性
+
 ### 基本使用
 
 ```javascript
@@ -1319,11 +1325,181 @@ Promise.prototype.finally = function (callback) {
 
 多个 Promise 实例, 包装成一个新的 Promise 实例. 
 
+1. 有一个实例返回为 rejected, 则整个状态为 rejected, 且返回最先 rejected 的实例的返回值
+2. 都为 resolved 则返回所有实例返回值的数组.
+
+然后将返回值传给回调函数.
+
+```javascript
+const p = Promise.all([p1, p2, p3]);
+```
+
+参数中的每一个 Promise 实例, 都是其最终执行状态
+
+```javascript
+let p1 = new Promise((resolve, reject) => {
+  resolve('hello')
+}).then(val => {
+  console.log(val);
+  return "world"
+})
+
+let p2 = new Promise((resolve, reject) => {
+  reject('error')
+}).then(val => {
+  console.log(val);
+}).catch(err => { // 自带 catch, all 的 catch 不会捕获错误, 没带的话, 使用 all 的 catch
+  console.log(err); // 执行完 catch 后, 也是 resolved
+  return "err!!"
+})
+
+// 这里的 p1 和 p2 实际上是各自执行完 then 与 catch 方法后返回的实例
+Promise.all([p1, p2]).then(res => {
+  console.log(res);
+}).catch(err => {
+  console.log(err)
+})
+```
+
+
+
 ### race
+
+看哪个实例最先改变状态, 变成它的状态, 并且返回其返回值.
+
+对于不是 Promise 实例的参数, 先使用 Promise.resolve 方法将其变为实例.
+
+#### 请求超时
+
+指定时间内, 没有完成请求, 就抛错.
+
+```javascript
+let p2 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    reject('timeout')
+  }, 5000)
+})
+
+let p = Promise.race([fetch(url), p2])
+
+p.then(res => {
+  // 请求返回结果
+  console.log(res);
+}).catch(err => {
+  // 超时报错
+  console.log(err)
+})
+```
 
 ### resolve
 
+将现有对象转为 Promise 对象
+
+```javascript
+Promise.resolve('foo')
+// 等价于
+new Promise(resolve => resolve('foo'))
+```
+
+1. 参数是 `Promise` 实例, 不做改动
+
+2. 参数是带有 `then` 方法的对象
+
+   将其转换为 `Promise` 实例并立即执行其 `then` 方法
+
+   ```javascript
+   let thenable = {
+     then: function(resolve, reject) {
+       resolve(42);
+     }
+   };
+   
+   let p1 = Promise.resolve(thenable); // p1 状态变为 resolved, 因为执行了 then 方法
+   // 从而立即执行下述 then 方法
+   p1.then(function(value) {
+     console.log(value);  // 42
+   });
+   ```
+
+3. 原始值/不具有 then 方法的对象
+
+   返回一个状态为 resolved 的新 Promise 对象
+
+   ```javascript
+   // p 一生成状态就是 resolved
+   let p = Promise.resolve('hello') // { '1': 2 }
+   // 从而立即执行下述 then 方法
+   p.then(val => console.log(val)) // hello  // { '1': 2 }
+   ```
+
+4. 不带有任何参数
+
+   直接返回一个状态为 resolved 的新 Promise 对象
+
+   ```javascript
+   let p = Promise.resolve()
+   p.then(val => console.log(val)) // undefined
+   ```
+
+因此甚至可以直接只用 Promise.resolve() 生成一个状态为 resolved 的新 Promise 对象
+
+> 注意事件循环
+
+```javascript
+setTimeout(function () {
+  console.log('three');
+}, 0);
+
+Promise.resolve().then(function () {
+  console.log('two');
+});
+
+console.log('one');
+
+// one
+// two
+// three
+```
+
 ### reject
+
+返回一个新实例, 状态为 `rejected`
+
+```javascript
+const p = Promise.reject('出错了');
+// 等同于
+const p = new Promise((resolve, reject) => reject('出错了'))
+
+// 回调函数会立即执行
+p.then(null, function (s) {
+  console.log(s)
+});
+// 出错了
+```
+
+其参数会原封不动地成为 reject 的理由.
+
+```javascript
+const thenable = {
+  then (resolve, reject) {
+    reject("error")
+  }
+}
+
+let p = Promise.reject(thenable)
+p.then(val => {
+  console.log(val)
+}).catch(err => {
+  console.log(err);
+})
+
+// 打印如下
+// { then: [Function: then] }
+```
+
+### 相关手写实现
+
+
 
 ## 事件绑定/观察者(EventEmitter)
 

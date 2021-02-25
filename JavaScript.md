@@ -8620,6 +8620,7 @@ worker 对象是 cluster.fork() 的返回值, 代表一个worker进程.
        process.send(msg);
      });
    }
+   ```
 ```
    
 上面代码的作用是，worker进程对主进程发出的每个消息，都做回声。
@@ -8631,9 +8632,9 @@ worker 对象是 cluster.fork() 的返回值, 代表一个worker进程.
      console.log(message);
    });
 ```
-   
+
 发出的消息可以字符串，也可以是JSON对象。下面是一个发送JSON对象的例子。
-   
+
    ```javascript
    worker.send({
      type: 'task 1',
@@ -8642,8 +8643,8 @@ worker 对象是 cluster.fork() 的返回值, 代表一个worker进程.
        // the data that you want to transfer
      }
    });
-```
-   
+   ```
+
    
 
 #### cluster.workers对象
