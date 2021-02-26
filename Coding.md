@@ -1309,18 +1309,6 @@ promise
 );
 ```
 
-#### 实现
-
-```javascript
-Promise.prototype.finally = function (callback) {
-  let P = this.constructor;
-  return this.then(
-    value  => P.resolve(callback()).then(() => value),
-    reason => P.resolve(callback()).then(() => { throw reason })
-  );
-};
-```
-
 ### all
 
 多个 Promise 实例, 包装成一个新的 Promise 实例. 
@@ -1504,44 +1492,58 @@ p.then(val => {
 实现链式调用
 
 ```javascript
-const checkPromise = (res, x, resolve, reject) => {
-  if (res === x) reject(new Error("promise 递归调用错误")); // promise 的值永远出不来
+const PENDING = "pending", RESOLVED = "fulfilled", REJECTED = "rejected"
+
+const resolvePromise = (res, x, resolve, reject) => {
+  // 防止循环引用
+  if (res === x) return reject(new Error("promise 递归调用错误")); // promise 的值永远出不来
   // 需要对返回值类型进行分类讨论
   // 对象/函数 & 普通值
-  let called = false;
-  if ((typeof x === 'object') && x !== null || typeof x === 'function') {
+  if (x instanceof Promise) {
+    if (x.status === PENDING) {
+      x.then(
+        val => resolvePromise(res, val, resolve, reject),
+        reject
+      )
+    } else if (x.status === RESOLVED) {
+      resolve(x.val);
+    } else {
+      reject(x.reason);
+    }
+  } else if ((typeof x === 'object') && x !== null || typeof x === 'function') {
     // 如果 x 是一个 Promise 对象, 则 res 的状态依赖于 x 的状态
     // 判断 x 的状态, 调用过 resolve 就获取其值, 调用过 reject 就获取其 err, 总之是获取其返回值
     // 如果其返回值也是一个 Promise 对象, 则需要继续判断该对象的状态及返回值
     // 执行该 x 的 then 方法并获取其返回值
-    try {
-      let then = x.then;
-      if (typeof then === 'function') {
+    let then = x.then;
+    if (typeof then === 'function') {
+      let called = false;
+      try {
         then.call(x, val => {
           if (called) return;
           called = true;
-          checkPromise(res, val, resolve, reject);
+          resolvePromise(res, val, resolve, reject);
         }, err => {
           if (called) return;
           called = true;
           reject(err);
         })
-      } else {
-        // 普通对象
-        resolve(x);
+      } catch (err) {
+        // 调用 then 方法出现异常
+        // 如果 then 传入的两个回调有一个已被调用, 则忽略
+        if (called) return;
+        called = true;
+        reject(err)
       }
-    } catch (err) {
-      if (called) return;
-      called = true;
-      reject(err)
+    } else {
+      // 无 then 方法的普通对象
+      resolve(x);
     }
   } else {
     // 普通值
     resolve(x);
   }
 }
-
-const PENDING = "pending", RESOLVED = "fulfilled", REJECTED = "rejected"
 
 // 根据规定 then 中执行的操作是微任务
 // 因此 then 返回的 Promise 是立即执行的 需要将其包装为微任务
@@ -1579,7 +1581,7 @@ class Promise {
   }
   // 实现 then 的链式调用和值穿透
   // then 创建新实例 并且将当前 then 的结果 传递给新建实例的then方法
-  then (onResolvedCallback, onRejectedCallback) {
+  then(onResolvedCallback, onRejectedCallback) {
     // 解决两者不是函数的问题, 不是函数要变成函数
     onResolvedCallback = typeof onResolvedCallback === "function" ? onResolvedCallback : v => v;
     onRejectedCallback = typeof onRejectedCallback === "function" ? onRejectedCallback : err => { throw err };
@@ -1591,7 +1593,7 @@ class Promise {
           try {
             let temp = onResolvedCallback(this.val)
             // 根据 temp 的类型判断是直接抛出还是做相关处理
-            checkPromise(res, temp, resolve, reject);
+            resolvePromise(res, temp, resolve, reject);
           } catch (err) {
             reject(err)
           }
@@ -1601,7 +1603,7 @@ class Promise {
         setTimeout(() => {
           try {
             let temp = onRejectedCallback(this.reason)
-            checkPromise(res, temp, resolve, reject);
+            resolvePromise(res, temp, resolve, reject);
           } catch (err) {
             reject(err)
           }
@@ -1617,7 +1619,7 @@ class Promise {
           setTimeout(() => {
             try {
               let temp = onResolvedCallback(this.val);
-              checkPromise(res, temp, resolve, reject);
+              resolvePromise(res, temp, resolve, reject);
             } catch (err) {
               reject(err)
             }
@@ -1627,7 +1629,7 @@ class Promise {
           setTimeout(() => {
             try {
               let temp = onRejectedCallback(this.reason)
-              checkPromise(res, temp, resolve, reject);
+              resolvePromise(res, temp, resolve, reject);
             } catch (err) {
               reject(err)
             }
@@ -1637,15 +1639,29 @@ class Promise {
     })
     return res;
   }
-  
-  catch (onRejectedCallback) {
-    return this.then(null, onRejectedCallback);
-  }
-  
 }
 ```
 
-#### Promise.resolve 基本实现
+#### Promise.prototype.catch 实现
+
+```javascript
+catch (onRejectedCallback) {
+    return this.then(null, onRejectedCallback);
+}
+```
+
+#### Promise.prototype.finally 实现
+
+```javascript
+Promise.prototype.finally = function (callback) {
+  return this.then(
+    value  => Promise.resolve(callback()).then(() => value),
+    reason => Promise.resolve(callback()).then(() => { throw reason })
+  );
+};
+```
+
+#### Promise.resolve 实现
 
 ```javascript
 static resolve(data) {
@@ -1656,7 +1672,7 @@ static resolve(data) {
 }
 ```
 
-#### Promise.reject 基本实现
+#### Promise.reject 实现
 
 ```javascript
 static reject(reason) {
@@ -1666,13 +1682,44 @@ static reject(reason) {
 }
 ```
 
-#### Promise.all 基本实现
+#### Promise.all 实现
 
+```javascript
+Promise.all = (promiseList) => {
+    let resPromise = new Promise((resolve, reject) => {
+        let count = 0, res = [], n = promiseList.length;
+        if (n === 0) return resolve(res);
+        promiseList.forEach((p, index) => {
+            Promise.resolve(p).then(val => {
+                count++;
+                res[index] = val;
+                if (count === n) resolve(res);
+            }).catch(err => {
+                reject(err);
+            })
+        });
+    })
+    return resPromise;
+}
+```
 
+#### Promise.race 实现
 
-#### Promise.race 基本实现
-
-
+```javascript
+Promise.race = (promiseList) => {
+    let resPromise = new Promise((resolve, reject) => {
+        if (n === 0) return resolve();
+        promiseList.forEach(p => {
+            Promise.resolve(p).then(val => {
+                return resolve(val);
+            }).catch(err => {
+                return reject(err);
+            })
+        });
+    })
+    return resPromise;
+}
+```
 
 ## 事件绑定/观察者(EventEmitter)
 

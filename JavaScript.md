@@ -7535,6 +7535,57 @@ I/O 观察者现在的行为就是取出`请求对象`的`存储结果`，同时
 1. `阻塞`和`非阻塞` I/O 其实是针对操作系统内核而言的。阻塞 I/O 的特点就是一定要**等到操作系统完成所有操作后才表示调用结束**，而非阻塞 I/O 是调用后立马返回，不用等操作系统内核完成操作。
 2. nodejs中的异步 I/O 采用多线程的方式，由 `EventLoop`、`I/O 观察者`，`请求对象`、`线程池`四大要素相互配合，共同实现。
 
+## 异常捕获
+
+### try/catch 限制
+
+try/catch 无法捕捉异步回调中的异常. 
+
+Node 原生提供 uncaughtException 事件挂到 process 对象上, 捕获所有未处理的异常
+
+- 无法知道错误的来源, 不好定位.
+- 整个 node 进程 crash 掉
+
+### 使用 domain 模块捕获异常
+
+`domain` 专门处理异步回调的异常
+
+```javascript
+import domain from 'domain';
+import fs from 'fs';
+
+process.on('uncaughtException', function (err) {
+  console.error('Error caught in uncaughtException event:', err);
+});
+
+var d = domain.create();
+
+d.on('error', function (err) {
+  console.error('Error caught by domain:', err);
+});
+
+d.run(function () {
+  process.nextTick(function () {
+    fs.readFile('non_existent.js', function (err, str) {
+      if (err) throw err;
+      else console.log(str);
+    });
+  });
+});
+
+/*
+Error caught by domain: [Error: ENOENT: no such file or directory, open 'non_existent.js'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'non_existent.js',
+  domainThrown: true
+}
+*/
+```
+
+注意 `uncaughtException` 回调并没有执行.
+
 
 
 ## 支持高并发
