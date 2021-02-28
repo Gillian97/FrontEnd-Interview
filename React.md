@@ -76,7 +76,39 @@
 
 - 是 React 使用的一种文件，它利用 JavaScript 的表现力和类似 HTML 的模板语法,这使得 HTML 文件非常容易理解。
 - 此文件能使应用非常可靠，并能够提高其性能。
-- 是 JS 的语法扩展，编译后转化成普通的 JS 对象。
+- 是 JS 的语法扩展，在 react 中可替换常规的 js, 使用 js 方式描述视图 编译后转化成普通的 JS 对象。
+
+**JSX 是什么?**
+
+是 JS 的语法扩展，在 react 中可替换常规的 js, 使用 js 方式描述视图
+
+为什么使用?
+
+- 更快的执行速度
+
+  使用该种方式容易出错, 需要详细了解 React.createElement
+
+  ```react
+  class HelloMessage extends React.Component {
+    render() {
+      return React.createElement(
+        "div",
+        null,
+        "Hello this.props.name}"
+      );
+    }
+  }
+  
+  ReactDOM.render(React.createElement(HelloMessage, { name: "Taylor" }), document.getElementById('hello-example'));
+  ```
+
+- 代码写的更快/开发效率
+
+- 编译器做严禁转换和类型检测
+
+- 类型安全
+
+vdom 描述 DOM 结构的 js 对象
 
 注意：
 
@@ -2173,6 +2205,8 @@ React 发现这类操作繁琐冗余，因为这些都是相同的节点，但�
 
 
 参考 [知乎](https://zhuanlan.zhihu.com/p/20346379)
+
+# 手写 React 核心 API
 
 
 

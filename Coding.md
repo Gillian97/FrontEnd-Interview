@@ -35,7 +35,7 @@ function sum (a, b) {
  */
 function upper_bound_( n ,  v ,  a ) {
     // 不存在目标元素
-    if(v>a[n-1]) return n+1;
+    if(v > a[n-1]) return n+1;
     let left = 0, right = n -1, mid;
     // 最后只有一个值符合条件
     // 注意修改二分查找的细微判断条件

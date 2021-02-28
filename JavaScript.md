@@ -6419,37 +6419,7 @@ Object.defineProperty(obj, prop, descriptor)
 | 数据描述符 | 可以 | 可以 | 可以 | 可以 | 不可以 | 不可以 |
 | 存取描述符 | 可以 | 可以 | 不可以 | 不可以 | 可以 | 可以 |
 
-# 设计模式
 
-## 发布订阅模式
-
-## 单例模式
-
-一个类只有一个实例, 并且可以全局访问。
-
-如下实现有以下缺点：
-
-1. 容易重名
-2. 容易覆盖
-
-```javascript
-// obj 唯一 & 可全局访问
-// 唯一是通过 let 变量不允许重复声明实现
-let obj = {
-  name : 'Bob', 
-  getName(){}
-}
-```
-
-先判断某类的实例是否存在, 存在则返回实例, 不存在则新建实例。
-
-## 观察者模式
-
-## 迭代器模式
-
-## 构造器模式
-
-## 外观模式
 
 
 
@@ -7586,7 +7556,116 @@ Error caught by domain: [Error: ENOENT: no such file or directory, open 'non_exi
 
 注意 `uncaughtException` 回调并没有执行.
 
+### 激活/退出 domain 模块
 
+enter 激活
+
+```javascript
+var d = domain.create();
+
+d.enter(); // 使用这句激活 domain 实例 d
+console.log(process.domain, domain.active);
+// 未激活的话, 均是 null
+
+// 激活后, 两者相同
+/*
+Domain {
+  _events: [Object: null prototype] {
+    removeListener: [Function: updateExceptionCapture],
+    newListener: [Function: updateExceptionCapture]
+  },
+  _eventsCount: 2,
+  _maxListeners: undefined,
+  members: [],
+  [Symbol(kCapture)]: false,
+  [Symbol(kWeak)]: WeakReference {}
+}
+*/
+```
+
+exit 退出
+
+exit 后,  使用 `d.run()` 方法仍然可以捕获错误.
+
+```javascript
+d.exit();
+console.log(process.domain,  domain.active);
+// undefined undefined
+d.run(...) // 仍然可以使用
+```
+
+### 直接使用的封装方法
+
+`run` 方法
+
+对 enter 和 exit 方法的简单封装
+
+```javascript
+// 使用 enter 和 exit 捕获回调中的错误
+var d = domain.create();
+
+d.enter()
+
+d.on('error', function (err) {
+  console.error('Error caught by domain:', err);
+});
+
+process.nextTick(function () {
+  fs.readFile('non_existent.js', function (err, str) {
+    if (err) throw err;
+    else console.log(str);
+  });
+});
+
+d.exit();
+
+// 不开启 enter, 则 uncaughtException 捕获错误
+/*
+Error caught in uncaughtException event: [Error: ENOENT: no such file or directory, open 'non_existent.js'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'non_existent.js'
+}
+*/
+
+// 直接使用 run 方法
+d.run(() => {
+  process.nextTick(function () {
+    fs.readFile('non_existent.js', function (err, str) {
+      if (err) throw err;
+      else console.log(str);
+    });
+  });
+})
+```
+
+`bind` 方法
+
+```javascript
+process.nextTick(function () {
+  fs.readFile('non_existent.js', d.bind(function (err, str) {
+    if (err) throw err;
+    else console.log(str);
+  }));
+});
+```
+
+`intercept` 方法
+
+不同的是, 将异步回调的错误直接拦截.
+
+```javascript
+process.nextTick(function () {
+  fs.readFile('non_existent.js', d.intercept(function (str) {
+    console.log(str);
+  }));
+});
+```
+
+### domain 隐式绑定
+
+### domain 显式绑定
 
 ## 支持高并发
 
