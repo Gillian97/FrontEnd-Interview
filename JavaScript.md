@@ -6421,8 +6421,6 @@ Object.defineProperty(obj, prop, descriptor)
 
 
 
-
-
 # 模块化
 
 ES6 引入模块化后, 通常**在浏览器中使用 ES6 的模块化支持, 在 Node 中使用 CommonJS 的模块化支持。**
