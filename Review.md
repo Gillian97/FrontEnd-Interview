@@ -126,3 +126,50 @@ git reset/git revert 区别
 
 bilibili
 
+
+
+
+
+腾讯面经
+
+[记一次腾讯社招前端面试（已入职）](https://blog.csdn.net/liuyan19891230/article/details/103626027)
+
+[面试经历: 毕业一年腾讯前端社招初探](https://blog.csdn.net/weixin_33984032/article/details/91371954)
+
+[你不知道的腾讯社招面试经验（已offer）](https://www.cnblogs.com/p2227/p/tencent-interview.html)
+
+
+
+阿里面经
+
+
+
+
+
+复习计划: 
+
+每天看一下之前熟知的知识点
+
+复习未知的知识点:
+
+react hooks 手写
+
+面试题集锦多看看
+
+熟悉API
+
+实现一些业务场景
+
+浏览器原生js
+
+原生的 ajax
+
+http头字段
+
+状态码含义
+
+每天十道算法题复习
+
+js 浮点数 大数
+
+await async

@@ -278,7 +278,7 @@ Tips:浏览器安全解析策略对解析HTML造成的影响：
 > 2. 抗压能力加强
 > 3. 提高 HTTP 并发
 
-![image-20210228154419342](images/server-split.jpg)
+![server-split](images/server-split.jpg)
 
 #### TCP 三次握手/四次挥手
 

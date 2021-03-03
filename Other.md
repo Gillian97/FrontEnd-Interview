@@ -119,6 +119,8 @@ SHA-256
 
 # 设计模式
 
+[参考文档](https://refactoringguru.cn/design-patterns/catalog)
+
 ## 创建型模式
 
 ### 单例模式

@@ -1721,6 +1721,137 @@ Promise.race = (promiseList) => {
 }
 ```
 
+## 异步事件执行顺序
+
+### 异步事件串行执行
+
+**场景**
+
+- 有a、b、c三个异步任务，要求必须先执行a，再执行b，最后执行c
+- 且下一次任务必须要拿到上一次任务执行的结果，才能做操作
+
+**思路**
+
+- 实现一个队列，将这些异步函数添加进队列并且管理它们的执行，队列具有`First In First Out`的特性，也就是先添加进去的会被先执行，接着才会执行下一个(注意跟栈作区别)
+- 大家也可以类比一下jQuery的animate方法，添加多个动画也会按顺序执行
+
+**实现**
+
+模拟三个异步函数
+
+```javascript
+let p1 = function () {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve('a')
+        }, 1000)
+    })
+}
+
+let p2 = function (data) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve(data + 'b')
+        }, 1000)
+    })
+}
+
+let p3 = function (data) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve(data + 'c')
+        }, 1000)
+    })
+}
+
+let arr = [p1, p2, p3];
+```
+
+#### 使用链式调用
+
+```javascript
+p1().then(val => {
+    console.log('1' + val);
+    return p2(val)
+}).then(val => {
+    console.log('2' + val);
+    return p3(val)
+}).then(val => {
+    console.log('3:' + val);
+})
+
+// 输出
+// 1:a
+// 2:ab
+// 3:abc
+```
+
+#### 循环构建队列
+
+queue 最后指向 p3 执行后返回的 Promise, 尽管前面没有变量指向, 但是之前声明的 Promise 实例都还在, 前面形成了链式调用.
+
+`()->then(p1)->[]->then(p2)->[]->then(p3)->[]`
+
+`[]` 表示函数生成的 Promise 实例, `[]` 执行完才会去指向写在其 `then` 方法中的 `p` 函数.
+
+```javascript
+function buildQueue(arr) {
+    // 一个状态为 resolved 的 Promise 对象
+    let queue = Promise.resolve();
+    for (let p of arr) {
+        // 不断执行 p 并返回新的 Promise 的过程
+        queue = queue.then(p);
+        console.log(queue);
+    }
+    return queue;
+}
+
+buildQueue(arr).then(val => {
+    console.log(val);
+})
+
+// 输出
+/*
+Promise { <pending> }
+Promise { <pending> }
+Promise { <pending> }
+abc
+*/
+```
+
+#### 使用 async/await 构建队列
+
+```javascript
+async function buildQueue(arr) {
+    let res = null;
+    for (let p of arr) {
+        // 上一轮抛出的值传给下一轮
+        res = await p(res);
+        console.log(res);
+    }
+    return await res;
+}
+
+buildQueue(arr).then(val => {
+    console.log(val);
+})
+
+// 输出
+// 最后两个 abc 是同时出现的, 即循环结束后的 res 是字符串 abc
+/*
+a
+ab
+abc
+abc
+*/
+```
+
+
+
+### 异步事件并行执行
+
+### 异步事件依赖执行
+
 ## 事件绑定/观察者(EventEmitter)
 
 ```javascript
@@ -2051,4 +2182,71 @@ var _const = function (key, val) {
     turncolor()
 </script>
 ```
+
+# 红包随机金额算法
+
+## 算法一
+
+`n>=2` 时, 每个红包的金额 `count = [min, 剩余金额/剩余人数*2]` 之间的随机数. 
+
+> 设剩余金额为 `c`, 剩余人数为 `n`
+>
+> 在 `n>=2` 时, `c/n*2<=c` 恒成立. 即在此区间的随机金额永远不会超过剩余金额.
+>
+> 同时, 能使金额方差更小, 因为如果直接在 (0, c] 之间随机的话, 方差较大.
+
+`n == 1`, 直接取剩余的金额.
+
+> 这里采取将小数扩大倍数然后再除以倍数的方法, 确保计算精度
+>
+> 由于最后的剩余值也可能存在精度问题, 因此使用 sum 存储红包金额
+
+```javascript
+// 先取精度, 再取倍数
+// 否则即使进行了倍数的扩大, 还有可能存在精度问题
+function money(money, size) {
+    const min = 0.01;
+    let list = [];
+    let sum = 0, initVal = money * 100;
+    while (size > 1) {
+        let max = money / size * 2; // max 的精度可能较高
+        // 随机金额 一开始 max 的精度无所谓, 生成随机数之后再进行精度的确认
+        let count = Math.random() * max;
+        count = count < min ? min : count;
+        // Math.round(x) 取 x 四舍五入之后最接近的整数(靠近x轴正方向)
+        count = Math.round(count * 100) / 100;
+        list.push(count);
+        // 准确的剩余值
+        // 注意: x 仍有可能不是整数,有小数部分
+        let x = money * 100, y = count * 100;
+        money = (x - y) / 100;
+        size--;
+        sum += y;
+    }
+    list.push((initVal - sum) / 100);
+    return list;
+}
+
+money(100, 10);
+```
+
+评价:
+
+优点:
+
+抽取的红包在剩余金额/剩余人数*2之间, 相对控制了红包的大小.
+
+缺点:
+
+前面抽的金额会影响后面的抽取金额.
+
+前面的人抽取小红包, 则后面的人抽取大红包的概率较大
+
+理论上来说, 每个红包的金额应该差不多, 在一开始的均值附近.
+
+## 算法二
+
+
+
+## HTML
 
