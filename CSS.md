@@ -1779,7 +1779,7 @@ CSS3 动画：动画是使元素从一种样式逐渐变化为另一种样式的
 | rotateZ(*angle*)                                             | 定义沿 Z 轴的 3D 旋转。                   |
 | perspective(*n*)                                             | 定义 3D 转换元素的透视视图。              |
 
-# link（html） 与 @import（CSS） 的区别
+# link 与 @import 的区别
 
 |              | link                                    | @import                                          |
 | ------------ | --------------------------------------- | ------------------------------------------------ |
@@ -1790,7 +1790,9 @@ CSS3 动画：动画是使元素从一种样式逐渐变化为另一种样式的
 | 功能         | 功能较多，可以定义 RSS，定义 Rel 等作用 | 只能用于加载 CSS                                 |
 | 使用 JS 引入 | 可以                                    | 不可以                                           |
 
-# CSS 预处理器(Sass/Less/Postcss)
+# CSS 预处理器
+
+Sass/Less/Postcss
 
 原理: 
 
@@ -1881,6 +1883,60 @@ CSS3 动画：动画是使元素从一种样式逐渐变化为另一种样式的
   ```
 
   
+
+# CSS 解决类名冲突
+
+**总结**
+
+1. 约定命名规范(同个文件相同类名避免冲突)
+2. 使用打包工具重命名类名(不同文件相同类名避免冲突)
+
+## 命名约定: BEM 规范
+
+> 类名定义遵规范
+
+BEM是一套针对 css 类样式的命名方法。其他命名方法还有：OOCSS、AMCSS、SMACSS等等
+
+BEM全称是：Block Element Modifier
+
+一个完整的BEM类名：block\_\_element_modifier，例如： banner__dot_selected，可以表示：轮播图中，处于选中状态的小圆点
+
+三个部分的具体含义为：
+
+- **Block**：页面中的大区域，表示最顶级的划分
+
+  例如：轮播图(`banner`)、布局(`layout`)、文章(`article`)等等
+
+- **element**：区域中的组成部分
+
+  例如：轮播图中的横幅图片(`banner__img`)、轮播图中的容器（`banner__container`）、布局中的头部(`layout__header`)、文章中的标题(`article_title`)
+
+- **modifier**：可选。通常表示状态.
+
+  例如：处于展开状态的布局左边栏（`layout__left_expand`）、处于选中状态的轮播图小圆点(`banner__dot_selected`)
+
+> 类名前缀表用途
+
+在某些大型工程中，如果使用BEM命名法，还可能会增加一个**前缀，来表示类名的用途**，常见的前缀有：
+
+- l: layout，表示这个样式是用于布局的
+- c: component，表示这个样式是一个组件，即一个功能区域
+- u: util，表示这个样式是一个通用的、工具性质的样式
+- j: javascript，表示这个样式没有实际意义，是专门提供给js获取元素使用的
+
+## CSS Module
+
+css module就是把css写在不同的文件中，最后通过webpack构建工具合并成一个文件。多个不同的文件有相同的类名，合并之后没有冲突的类名。
+
+![在这里插入图片描述](images/css_module.jpg)
+
+在webpack中，我们使用css-loader来处理css文件，它就实现了css module的思想（css-loader使用在webpack常用插件中有讲述）。要启用css module，需要将css-loader的配置modules设置为true。
+
+css module原理非常简单，css-loader 会将样式中的类名进行转换，转换为一个唯一的hash值。由于hash值是**根据模块路径和类名生成**的，因此，不同的css模块，哪怕具有相同的类名，转换后的hash值也不一样。
+
+![在这里插入图片描述](images/css_loader.jpg)
+
+因此css-loader使用css module后，源代码的类名和最终生成的类名是不一样的，而开发者只知道自己写的源代码中的类名，并不知道最终的类名是什么，css-loader会导出二者的对应关系，但还包括了很多其他信息。而style-loader就是去除其他信息，仅暴露类名和对应生成的hash值.
 
 
 
