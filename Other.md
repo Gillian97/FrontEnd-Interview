@@ -875,3 +875,107 @@ Array.prototype.slice() 浅拷贝
 ### 加权负载均衡
 
 权重高的服务器会收到更多的请求, 将硬件配置高并发能力强的服务器权重高一些, 更合理地利用服务器资源.
+
+
+
+# 网站被强制注入JS和弹窗广告如何解决
+
+产生原因:
+
+请求被路由器拦截, 由于页面内容未加密, 别人可以随意修改页面内容, 添加多余甚至有害内容.
+
+根本解决方案:
+
+[申请 SSL 证书, 配置 HTTPS](https://www.soscoon.com/article/10027)
+
+其余方法:
+
+弹窗广告一般用 iframe 标签进行显示, 页面可以禁止 iframe 标签的使用.
+
+1. `meta` 禁用 `iframe`
+
+   ```HTML
+   <meta http-equiv="X-Frame-Options" content="DENY">
+   ```
+
+   **X-Frame-Options 响应头：**
+
+   X-Frame-Options 有三个值:
+
+   `DENY：`表示该页面不允许在 frame 中展示，即便是在相同域名的页面中嵌套也不允许。
+
+   `SAMEORIGIN：`表示该页面可以在相同域名页面的 frame 中展示。
+
+   `ALLOW-FROM uri`表示该页面可以在指定来源的 frame 中展示。
+
+2. js 禁用 `iframe`
+
+   ```HTML
+   <script type="text/javascript"> 
+       // 前端检测 top 窗口是否就是 self 
+       if(top.location!=self.location){
+         // 存在页面嵌套
+         // TODO: 具体操作
+         top.location=self.location;     
+       }
+   </script>
+   ```
+
+3. css 让 `iframe` 显示为空白
+
+   ```HTML
+   <style type="text/css"> 
+       iframe{ v:expression(this.src='about:blank', this.outerHTML='');} 
+   </style>
+   ```
+
+
+
+# window.onload 和 DOMContentLoaded 的区别
+
+
+
+在 js 中 `DOMContentLoaded` 方法是在 `HTML` 文档被完全的加载和解析之后才会触发的事件，他并不需要等到（样式表/图像/子框架）加载完成之后再进行。再看load事件（onload事件），用于检测一个加载完全的页面。
+
+## DOM完整的解析过程：
+
+> 1. 解析HTML结构。
+> 2. 加载外部脚本和样式表文件。
+> 3. 解析并执行脚本代码。//js之类的
+> 4. DOM树构建完成。// 触发`DOMContentLoaded`
+> 5. 加载图片等外部文件。
+> 6. 页面加载完毕。// 触发`onload`
+
+### 触发
+
+1、当 `onload`事件触发时，页面上所有的DOM/样式表/脚本/图片/flash都已经加载完成了。
+ 2、当 `DOMContentLoaded` 事件触发时，仅当DOM加载完成，不包括样式表/图片/flash。
+
+```javascript
+<body>
+    <div id="bg"></div>
+    <p>测试</p>
+    <script>
+        console.log('观察脚本加载的顺序')
+        window.addEventListener("load", function () {
+            console.log('load事件回调')
+        }, false);
+        document.addEventListener("DOMContentLoaded", function () {
+            console.log('DOMContentLoaded回调') // 不兼容老的浏览器，兼容写法见[jQuery中ready与load事件] ，原理看下文
+        }, false);
+        for (var i = 0; i < 1000000000; i++) {i++}
+    </script>
+</body>
+```
+
+控制台输出顺序为/:
+
+观察脚本加载的顺序->(由于运算间隔了一会)->DOMContentLoaded回调->load事件回调
+
+### 为什么要区分？
+
+保证在页面中某些元素加载完成后, 再绑定事件的函数.
+
+开发中我们经常需要给一些元素的事件绑定处理函数。但问题是，如果那个元素还没有加载到页面上，但是绑定事件已经执行完了，是没有效果的。这两个事件大致就是用来避免这样一种情况，将绑定的函数放在这两个事件的回调中，保证能在页面的某些元素加载完毕之后再绑定事件的函数。
+当然 `DOMContentLoaded` 机制更加合理，因为我们可以容忍图片/`flash` 延迟加载，却不可以容忍看见内容后页面不可交互。
+

@@ -138,13 +138,17 @@ bilibili
 
 [你不知道的腾讯社招面试经验（已offer）](https://www.cnblogs.com/p2227/p/tencent-interview.html)
 
-
+[腾讯面试](https://www.jianshu.com/p/35a027c7e4d9)
 
 阿里面经
 
 
 
+面试汇总
 
+[前端面试汇总](https://juejin.cn/post/6844903734791634952)
+
+[前端面试题汇总大全（含答案）-- 持续更新](https://juejin.cn/post/6844903951620538376)
 
 复习计划: 
 
@@ -173,3 +177,18 @@ http头字段
 js 浮点数 大数
 
 await async
+
+window.location.href 路由
+
+css 画❌ 画常见的东西
+
+oauth2 第三方授权
+
+sso
+
+
+
+
+
+# this 题目
+
