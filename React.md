@@ -1,3 +1,215 @@
+# React 认识(视频0307)
+
+UI = React(state)
+
+React 这个函数接受 state 这个参数, 当函数调用(this.setState)的时候, 就会产生当前看见的 UI.
+
+state 计算状态变化, fn(React) 将状态变化渲染在视图中.
+
+state 被称为 `reconciler`, fn 被称为 `render`(渲染器). 
+
+- reconciler 中执行 reconcile 算法(diff). 
+- render 有 React Native 渲染器(状态变化渲染进原生APP), ReactDOM 渲染器(状态变化渲染进浏览器视图)
+
+## 一次状态更新
+
+用户交互触发了 `this.setState`
+
+![image](images/image-20210307172833274.png)
+
+代码在 reconcile 这部分时, 被称作 `render` 阶段, 因为组件的 `render` 函数在该阶段被调用
+
+ 代码在渲染器这部分执行时,  被称为 `commit` 阶段, 因为状态变化的提交就在这个阶段.
+
+![image-20210307173228030](images/render_commit.jpg)
+
+## 生命周期与两种阶段的对应关系
+
+### 大致划分
+
+![image-20210307173507406](images/image-20210307173507406.png)
+
+### 根据组件的四种状态进行划分, 首次挂载/更新/卸载/报错
+
+红色的是 React 17 中被废弃的, 绿色的是 React 17 新增的, 一个组件中同时使用红色与绿色钩子会报错.
+
+![image-20210307173858603](images/image-20210307173858603.png)
+
+首次渲染时
+
+- 会首先调用 constructor, 再调用 getDerivedStateFromProps , 再调用 render 函数结束后, render 阶段结束.
+
+- 进入 commit 阶段,  完成了对应的 DOM 渲染后, 调用 componentdDidMount.
+
+## 组件
+
+react 中组件以树的形式存在的, 组件会形成一棵组件树. 
+
+<img src="images/react_comp.jpg" alt="image" style="zoom:50%;" />
+
+
+
+### 组件的首次渲染
+
+![image-20210307175441325](images/image-20210307175441325.png)
+
+Fiber 树就是平时说的虚拟 Dom 树.
+
+Fiber 树的具体创建过程:
+
+1. 创建第一个节点 APP, 调用它的三个生命周期函数
+2. 查找 APP 有没有子节点,  发现了 P1 子节点, 创建并调用三个生命周期函数
+3. 查找 P1 有没有子节点,  发现了 C1 子节点, 创建并调用三个生命周期函数
+4. C1 没有自己的子节点, 于是寻找 C1 的兄弟节点, 找到 C2, 创建并调用三个生命周期函数
+5. C2 没有子节点也没有兄弟节点, 就回到自己的父级节点 P1
+6. P1 的所有子节点已经完成了 render 阶段, 于是寻找 P1 的兄弟节点, 找到了 P2 , 创建并调用三个生命周期函数
+7. P 2 没有子节点也没有兄弟节点, 于是回到 P2 的父级节点 APP
+
+`render` 阶段完成.
+
+进入 `commit` 阶段.
+
+首先会将整棵 fiber 树对应的 DOM 渲染到视图中, 渲染完成后, 会从**子节点**开始执行对应的生命周期函数. 
+
+![image-20210307180903944](images/commit_first.jpg)
+
+1. 第一个子节点是 C1, 执行 componentDidMount
+2. C2
+3. P1
+4. P2
+5. APP  
+
+至此, 首屏渲染的 render 阶段和 commit 阶段全部完成.
+
+### 组件交互触发 this.setState
+
+用户在 C2 节点进行了一次交互, 调用 `this.setState`, 交互结果是将  C2 节点从蓝色变成绿色.
+
+于是重新进入 `render` 阶段, 同样, 采用深度优先遍历的方式创建一棵 `fiber` 树.
+
+![image-20210307200723520](images/image-20210307200723520.png)
+
+先创建 APP, 再创建 P1, 再创建 C1, 由于这三个节点都没有更新, 所以不会调用对应的生命周期函数.
+
+每次调用 this.setState 时, 都会创建一棵完整的 fiber 树.
+
+当创建 C2 时, 经过 reconcile 算法发现 C2 从蓝色变成了绿色(和之前的树进行比较), 所以需要标记这次变化.
+
+<img src="images/image-20210307201331285.png" alt="image-20210307201607589" style="zoom:50%;" />
+
+接着调用 C2 对应的生命周期函数(getDerivedStateFromProps render). 然后继续 render 阶段, 创建 P2. 当 render 阶段结束之后, 进入 commit 阶段.
+
+<img src="images/image-20210307201607589.png" alt="image-20210307201607589" style="zoom:50%;" />
+
+执行步骤 4 中的变化对应的视图操作. 这里会将 C2 对应的 DOM 组件颜色从蓝色变成绿色, 再执行 C2 对应的生命周期函数.
+
+![image-20210307202252204](images/image-20210307202252204.png)
+
+执行完之后, 新创建的 fiber 树就会替换之前的那棵 fiber 树, 等待下一次调用 this.setState 再生成一棵新的 fiber 树.
+
+这就是源码中 render 阶段和 commit 阶段的完整流程, 以及在这个过程中调用的生命周期函数
+
+# this.setState 同步异步?
+
+获取渲染之后的值, 类组件可以在 `componentDidMount` 和 `componentDidUpdate` 获取, 函数组件可以在 `useEffect` 的回调函数中获取.
+
+## React 的不同模式表现不同
+
+- legacy 模式(ReactDOM.render)
+  - 异步, React 有批处理(batchedUpdates)的性能优化机制
+  - 使用 setTimeout 跳出 batchedUpdates, 则是同步
+- concurrent 模式: 都是异步
+
+## 异步更新
+
+<img src="images/image-20210307224749211.png" alt="image-20210307224749211" style="zoom:50%;" />
+
+更新合并
+
+<img src="images/image-20210307225145649.png" alt="image-20210307225145649" style="zoom:50%;" />
+
+## 同步更新
+
+使用 `setTimeout`
+
+<img src="images/image-20210307225548846.png" alt="image-20210307225548846" style="zoom:50%;" />
+
+# useEffect(fn, []) 和 componentDidMount 有什么区别?
+
+其实是问 fn 与 componentDidMount 的执行时机有什么不同, 且 useEffect(fn, []) 中 fn 的执行依赖于第二个参数.
+
+1. useEffect 第二个参数 [] 如何影响 fn 的执行
+2.  fn 与 componentDidMount 的执行时机
+
+React中, `render` 阶段通过 `effect` 数据结构(新版中叫 `flags`)将状态变化传递给 `commit` 阶段.
+
+- 对于要**插入 DOM** 的元素, 会在对应的 fiber 节点上添加 `Placement` 的 effect
+- 对于需要**更新 DOM** 的元素, 会在对应的 fiber 节点上添加 `Update` 的 effect
+- 对于需要**删除 DOM** 的元素, 会在对应的 fiber 节点上添加 `Deletion` 的 effect
+- 对于需要**更新 ref 属性**的 DOM, 会在对应的 fiber 节点上添加 `Ref` 的 effect
+- 对于**包含 useEffect 回调执行**的 fiber 来说, 会在对应的 fiber 节点上添加 `Passive` 的 effect
+
+即: 所有与视图有关的操作, 都有相关的 effect.
+
+<img src="images/image-20210307231312526.png" alt="image-20210307231312526" style="zoom:30%;" />
+
+
+
+> useEffect 第二个参数 [] 如何影响 fn 的执行
+>
+> 即: 如何影响对应的 fiber 创建 Passive effect ?
+
+`useEffect(fn)`
+
+函数组件使用该种 useEffect, 那么每次 `render` 时都会创建一个 Passive effect.
+
+`useEffect(fn, [])`
+
+会在 `mount` 时创建 Passive effect
+
+`useEffect(fn, [dep])`
+
+会在 `mount` 时以及`依赖项变化时`创建 Passive effect
+
+![image-20210307232019375](images/image-20210307232019375.png)
+
+类组件
+
+在 mount 时创建 placement 的 effect
+
+![image-20210307232409745](images/image-20210307232409745.png)
+
+`render` 阶段与 `commit` 阶段传递的是一条包含了不同 fiber 节点的 effect 的链表.
+
+> commit 阶段处理链表上的 effect
+
+将状态变化渲染在视图中->将 effect 渲染在视图中 , 大概分为三个阶段:
+
+- 渲染视图前(beforeMutation 阶段)
+- 渲染视图(mutation 阶段)
+- 渲染视图后(layout 阶段)
+
+Placement: 
+
+- 在 mutation 阶段执行对应 DOM 节点的 appendChild 操作, 这样 DOM 节点就会被插入到视图中.
+- 在 layout 阶段调用 componentDidMount 
+
+![image-20210307233119319](images/image-20210307233119319.png)
+
+Passive:
+
+三个子阶段执行完成以后, 异步调用 useEffect 的回调函数.
+
+因此总结:
+
+<img src="images/image-20210307233612058.png" alt="image" style="zoom:50%;" />
+
+调用时机与 cDM 一致的 hook
+
+<img src="images/image-20210307233809962.png" alt="image" style="zoom:50%;" />
+
+
+
 # React 项目创建
 
 使用官方脚手架
