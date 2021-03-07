@@ -293,7 +293,7 @@ console.log('end');
 
 p() 执行时, 宏任务可以直接看这里:
 
-<img src="image-20210302220246633.png" alt="image-20210302220246633" style="zoom:50%;" />
+<img src="images/image-20210302220246633.png" alt="image-20210302220246633" style="zoom:50%;" />
 
 第一个宏任务: 将 setTimeout 放进宏任务队列/p1状态改变, p1.then 放进微任务队列/return的promise 状态被改变, 值是4, 对应的 then 放进微任务队列
 
@@ -423,7 +423,7 @@ window.addEventListener('click', function(e){
 
 ### 事件捕获冒泡的执行顺序
 
-![image-20210303223953917](image-20210303223953917.png)
+![image](images/image-20210303223953917.png)
 
 ## 防抖节流
 
@@ -431,7 +431,7 @@ window.addEventListener('click', function(e){
 
 函数防抖: 当持续触发事件时，一定时间段内没有再触发事件，事件处理函数才会执行一次，如果设定的时间到来之前，又一次触发了事件，就重新开始延时。如下图，持续触发scroll事件时，并不执行handle函数，当1000毫秒内没有触发scroll事件时，才会延时触发scroll事件。 debounce.webp 
 
-![image-20210303225420565](images/%E9%98%B2%E6%8A%96.jpg)
+![image](images/%E9%98%B2%E6%8A%96.jpg)
 
 函数节流: 当持续触发事件时，保证一定时间段内只调用一次事件处理函数。节流通俗解释就比如我们水⻰头放水，阀⻔一打开，水哗哗的往下流，秉着勤俭节约的优良传统美德，我们要把水⻰头关小点，最好是如我们心意按照一定规律在某个时间间隔内一滴一滴的往下滴。如下图，持续触发scroll事件时，并不立即执行handle函数，每隔1000毫秒才会执行 一次handle函数。
 
@@ -562,7 +562,7 @@ function throttle (fn, wait) {
 
 是否通过示例?
 
-![image-20210303230128509](image-20210303230128509.png)
+![image](images/image-20210303230128509.png)
 
 ### 考点
 
@@ -624,7 +624,7 @@ promsie 实例化时已经执行了 -> 可以做 Promise 的缓存
 
 装饰器写法
 
-![image-20210303231807906](images/promiseCache.jpg)
+![image](images/promiseCache.jpg)
 
 需要配置 babel, 第一次执行需要请求
 

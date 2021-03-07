@@ -1947,6 +1947,8 @@ function deepClone<T>(data: T): T {
 
 ## 函数柯里化
 
+### 函数参数定长
+
 ```javascript
 function curry(fn, args) {
   var length = fn.length;
@@ -1959,6 +1961,24 @@ function curry(fn, args) {
       return fn.apply(this, newArgs);
     }
   };
+}
+```
+
+### 函数参数不定长
+
+```javascript
+function curry (fn) {
+  return function () {
+    let args = [].slice.call(arguments);
+    let inner = function () {
+      args.push(...arguments);
+      return inner;
+    }
+    inner.toString = function () {
+      return fn.apply(null, args);
+    }
+    return inner;
+  }
 }
 ```
 
