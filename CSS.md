@@ -571,6 +571,56 @@ img {
 
 # 等比宽高
 
+`vm` 视窗宽度
+
+`vh` 视窗高度
+
+`vmin` 浏览器宽高中较小的值
+
+`vmax` 浏览器宽高中较大的值
+
+> calc 计算函数
+
+宽高 2:1 固定
+
+```javascript
+<html>
+
+<head>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    .box {
+      /* 宽度等比 50vw 是百分之五十的意思*/
+      width: 50vw;
+      /* height: 25vw; */
+      height: calc(50vw/2);
+      background: red;
+    }
+  </style>
+</head>
+
+<body>
+  <div class='box'></div>
+</body>
+</html>
+```
+
+vmin vmax 的使用
+
+```css
+.box {
+    width: 50vmin;
+    height: calc(50vmax/2);
+    background: red;
+}
+```
+
+
+
 # 单位
 
 ## 相对长度

@@ -592,6 +592,7 @@ var detectCycle = function (head) {
 // leetcode 160
 var getIntersectionNode = function (a, b) {
     let curr1 = a, curr2 = b;
+    // 结束后从对方的起始节点开始
     while (curr1 != curr2) {
         curr1 = curr1 ? curr1.next : b;
         curr2 = curr2 ? curr2.next : a;

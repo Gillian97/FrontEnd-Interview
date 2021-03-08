@@ -353,6 +353,62 @@ Tips:浏览器安全解析策略对解析HTML造成的影响：
 
 # Hybrid
 
+Hybrid App: 原生 APP 嵌入H5页面
+
+js 代码给原生代码发消息
+
+1. 弹窗拦截
+
+   js 发出弹窗, 弹窗会被原生代码所拦截, 不仅可以获得弹窗中的消息, 还可以阻止弹窗弹出
+
+   因此可以借用弹窗让原生获得传递的消息
+
+   ![image-20210308220147612](images/image-20210308220147612.png) 
+
+   - alert
+
+   - confirm: 返回 true/false
+
+   - prompt: 返回字符串结果
+
+     ![image-20210308220108322](images/image-20210308220108322.png)
+
+     示例使用:
+
+     在播放视频前查看当前网络情况.
+
+     web 写入消息并发送弹窗, 原生拦截到并输入对应的数据, 之后 web 通过返回值拿到对应的数据.
+
+     <img src="images/image-20210308220447226.png" alt="image-20210308220447226" style="zoom:50%;" />
+
+     但是不好的地方是, 这种方式是同步的, 如果原生不写入信息, 页面就会一直是阻塞状态, 如果原生需要做比较多的计算的话, 就会比较耗时.
+
+     改变弹窗写法: `alert("hello native, this is web, now network used is ? please tell me by networkState callback")`
+
+     问题:
+
+     原生如何执行 js 并调用回调函数
+
+     原生代码可以在 web 页面注入 js 语句, 从而调用 js 声明好的回调函数.
+
+     ![image-20210308223512034](images/image-20210308223512034.png)
+
+     
+
+2. url 拦截
+
+   使用 `location.href = "https://www.baidu.com"`实现网站的跳转
+
+   url 的请求也可以被原生代码截获
+
+   ```javascript
+   location.href="jssdk://getNetworkState?callback=networkState"
+   ```
+
+   通过自定义协议以及内容, 让原生读取对应的信息, 协议后是需要做的事情, 即 js 需要获取网络状态, 原生获取网络状态后调用指定的回调 networkState 进行状态的回传.
+
+   现在已经有现成的轮子: jsBridge dsBridge 不用关心实现细节, 只需要注意使用.
+
 ​	混合方案
 ​	交互原理
 ​	接入方案
