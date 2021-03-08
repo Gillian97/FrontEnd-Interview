@@ -896,6 +896,119 @@ Child.prototype.constructor = Child;
 
 ## 防抖节流
 
+### 防抖
+
+```javascript
+// 非立即执行版
+function debounce(func, wait) {
+    let timeout;
+    return function () {
+        // 确保返回的函数 this 指向不变以及参数的传递
+        let context = this;
+        let args = arguments;
+
+        if (timeout) clearTimeout(timeout);
+      
+        timeout = setTimeout(() => {
+            func.apply(context, args)
+        }, wait);
+    }
+}
+
+// 立即执行版
+function debounce(func, wait) {
+    let timeout;
+    return function () {
+        let context = this;
+        let args = arguments;
+
+        if (timeout) clearTimeout(timeout);
+
+        let callNow = !timeout;
+        timeout = setTimeout(() => {
+            timeout = null;
+        }, wait)
+
+        if (callNow) func.apply(context, args)
+    }
+}
+```
+
+### 节流
+
+```javascript
+// 因为第一次触发事件时, last = 0, 肯定会 > wait
+// 因此是 立即执行
+function throttle (fn, wait) {
+  let last = 0;
+  return function () {
+    let now = Date.now();
+    if (now - last >= wait) {
+      // 需要修改 fn 的 this 指向为 全局对象
+      // 而普通函数中, 此时 this 就是全局对象
+      fn.call(this, ...arguments)
+      last = now;
+    }
+  }
+}
+
+
+// 不立即执行
+function throttle (fn, wait) {
+  let timer = null;
+  return function () {
+    // 要用到 setTimeout, 涉及 this 不共通
+    let that = this;
+    let args = arguments;
+    if (!timer) {
+      timer = setTimeout(function () {
+        fn.call(that, ...args);
+        timer = null;
+      }, wait);
+    }
+  }
+}
+
+// 使用箭头函数 可以直接用 this
+function throttle (fn, wait) {
+  let timer = null;
+  return function () {
+    let args = arguments;
+    if (!timer) {
+      timer = setTimeout(() => {
+        fn.call(this, ...args);
+        timer = null;
+      }, wait);
+    }
+  }
+}
+```
+
+合体版
+
+```javascript
+function throttle (fn, wait) {
+  let timer = null;
+  let startTime = Date.now();
+  return function () {
+    let currTime = Date.now();
+    // 计算剩余时间 即还剩下多少时间执行 fn
+    let remainning = wait - (currTime - startTime);
+    let that = this;
+    let args = arguments;
+    clearTimeout(timer);
+    if (remainning <= 0) {
+      fn.call(that, ...args);
+      startTime = Date.now();
+    } else {
+      timer = setTimeout(fn, remainning);
+    }
+  }
+}
+```
+
+
+
 ## Promise
 
 一个包装异步操作的容器

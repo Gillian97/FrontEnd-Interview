@@ -46,7 +46,8 @@
 ## 应用
 
 - 阻止`margin`重叠
-  - 同一个 BFC 的两个相邻 Box 会发生重叠，将某一个 Box 激活为 BFC 就可以避免 margin 重叠
+  - 上下的 div 均设置 margin 时, 会发生边距重叠
+  - 将某一个 Box 激活为 BFC 就可以避免 margin 重叠
 - 可以包含浮动元素 —— 清除内部浮动(清除浮动的原理是两个`div`都位于同一个 BFC 区域之中)
   - 父节点激活 BFC，可以包含浮动元素，不会发生高度塌陷
 - 自适应两栏布局
@@ -157,8 +158,268 @@
 
 直接看 FE-Essay 里的
 
-- `absolute + transform`
-- `flex + justify-content + align-items`
+### absolute + 负margin
+
+```html
+<style>
+  .outer {
+    /* 为了作为子元素位置的参照 */
+    position: relative;
+    width: 300px;
+    height: 300px;
+    background: red;
+  }
+  
+  .inner {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: yellow;
+    /* 这里移动的是 子元素的左上角 */
+    left: 50%;
+    top: 50%;
+    /* 具体的值是自身宽高的一半*/
+    margin-left: -50px;
+    margin-top: -50px;
+  }
+</style>
+<div class="outer">
+  <div class="inner">
+    12345
+  </div>
+</div>
+```
+
+优点：
+
+*   兼容性好
+*   易于理解
+
+缺点：
+
+*   需要知道子元素的宽高
+    *   没有宽高无法设置具体的 margin 的值
+
+
+
+### absolute + auto margin
+
+```html
+<style>
+  .outer {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    background: red;
+  }
+
+  .inner {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: yellow;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+  }
+</style>
+<div class="outer">
+  <div class="inner">
+    12345
+  </div>
+</div>
+```
+
+优点：
+
+*   易于理解
+*   兼容性好
+
+缺点：
+
+*   子元素需要设置宽高
+    *   尽管在设置居中时, 没有用到子元素宽高的具体数值, 但是需要存在, 否则会存在拉伸的现象
+
+
+
+### absolute + calc
+
+```css
+.outer {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  background: red;
+}
+
+.inner {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background: yellow;
+  left: calc(50% - 100px);
+  right: calc(50% - 100px);
+}
+```
+
+优点：
+
+*   易于理解
+
+缺点：
+
+*   兼容性依赖于 calc，只支持 IE9及以上
+*   需要知道子元素宽高
+
+
+
+> 从这里开始, 后面的方法都不需要知道子元素的宽高, 甚至可以不设置(如果的话)
+
+
+
+### absolute + transform
+
+```css
+.outer {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  background: red;
+}
+
+.inner {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background: yellow;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+```
+
+优点：
+
+*   易于理解
+*   实现简单
+*   无需知道子元素宽高
+    *   子元素即使不设置宽高, 也会根据内容撑开的宽高进行垂直居中
+
+缺点：
+
+*   兼容性依赖于 `transform`，只支持 IE9 及以上
+
+
+
+### table
+
+这种方式原本是对文本做垂直居中处理, 不是对盒子, 但可以将盒子设置为 `inline-block`, 达到文本(行内元素)的效果.
+
+```css
+.outer {
+  width: 300px;
+  height: 300px;
+  background: red;
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+}
+.inner {
+  display: inline-block;
+  width: 200px;
+  height: 200px;
+  background: yellow;
+}
+```
+
+优点：
+
+*   兼容性好
+*   易于实现
+*   不需要知道子元素宽高
+    *   子元素即使不设置宽高, 也会根据内容撑开的宽高进行垂直居中
+*   可读性强
+
+
+
+>  CSS3 方式
+
+### flex
+
+```css
+.outer {
+  display: flex;
+  width: 300px;
+  height: 300px;
+  justify-content: center;
+  align-items: center;
+  background: red;
+}
+
+.inner {
+  width: 100px;
+  height: 100px;
+  background: yellow;
+}
+```
+
+优点：
+
+*   实现简单
+*   不需要知道子元素宽高
+    *   子元素即使不设置宽高, 也会根据内容撑开的宽高进行垂直居中
+
+缺点：
+
+*   兼容性依赖于 flex
+
+
+
+### grid
+
+```css
+/* 父元素指定子元素对齐方式 */
+.outer {
+  display: grid;
+  align-content: center;
+  justify-content: center;
+  width: 300px;
+  height: 300px;
+  background: red;
+}
+.inner {
+  width: 200px;
+  height: 200px;
+  background: yellow;
+}
+
+/* 子元素自己指定对齐方式 */
+.outer {
+  display: grid;
+  width: 300px;
+  height: 300px;
+  background: red;
+}
+.inner {
+  width: 200px;
+  height: 200px;
+  align-self: center;
+  justify-self: center;
+  background: yellow;
+}
+```
+
+优点：
+
+*   实现简单
+*   不需要知道子元素宽高(两种方式均是)
+    *   子元素即使不设置宽高, 也会根据内容撑开的宽高进行垂直居中
+
+缺点：
+
+*   兼容性依赖于 grid
 
 # 选择器优先级
 
@@ -177,7 +438,7 @@
 
 **CSS 优先规则3：**优先级关系：内联样式 > ID 选择器 > 类选择器 = 属性选择器 = 伪类选择器 > 标签选择器 = 伪元素选择器
 
-## 伪类和伪元素
+# 伪类和伪元素
 
 # 浮动
 
