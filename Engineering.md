@@ -434,3 +434,132 @@ js 代码给原生代码发消息
 
 # 项目监控
 
+# PWA
+
+## 定义
+
+PWA（Progressive web apps，渐进式 Web 应用）运用现代的 Web API 以及传统的渐进式增强策略来创建跨平台 Web 应用程序。这些应用无处不在、功能丰富，使其具有与原生应用相同的用户体验优势。 这组文档和指南告诉您有关 PWA 的所有信息。
+
+> 自我总结: 即将网站包装在一个拥有浏览器内核的应用中, 使之拥有与app接近的用户体验优势.
+
+网站的打开次数是 APP 的数倍.
+
+优势: PWA 是可被发现、易安装、可链接、独立于网络、渐进式、可重用、响应性和安全的
+
+打开 web app 方式:
+
+- 浏览器书签/网址收藏
+- 浏览器地址栏输入地址
+- 搜索引擎
+- ...
+
+没有 native 快速, 想要做到点击 icon 就能打开网站. 
+
+M3C 提出了 Web App Manifest 的技术标准. 
+
+使用这个技术可以有以下特性:
+
+- 唯一图标与名称与其他站点区分
+- 控制从主屏幕启动时的内容, 避免生硬的过渡
+- 隐藏浏览器相关的 UI
+
+达到与 Native App 类似的体验.
+
+Web App Manifest
+
+json 文件, 设置网站的相关信息.
+
+![image-20210309233547344](images/webapp_manifest.jpg)
+
+需要一个属性为 minifest 的 link 标签,  引入到网站 html 头部, 就完成 manifest 的部署, 浏览器就可以实现类似 native 的打开效果.
+
+
+
+调试 web app manifest
+
+- 在 Chrome 的开发者工具中查看 web app menifest 设置
+
+  <img src="images/image-20210309234119584.png" alt="image-20210309234119584" style="zoom:50%;" />
+
+- 某些 ROM 下, 需要到系统中查看浏览器是不是打开添加到桌面快捷方式的权限
+
+- 手机通过 Charles / Fiddler等设置代理, 则可以在手机上查看本地站点
+
+ 
+
+实际例子:
+
+将某个网站添加到桌面的效果(没有使用 menifest)
+
+没有使用 menifest 的站点, 添加到主屏后 , 浏览器显示默认图标和名称, 也没有隐藏浏览相关的 UI.
+
+<img src="images/image-20210309234625910.png" alt="image-20210309234625910" style="zoom:50%;" />
+
+新建 menifest 的 json 文件, 通过 link 标签部署到示例站点的 head 头部中.
+
+![image-20210309234848763](images/image-20210309234848763.png)
+
+刷新浏览器, 发现部署成功.
+
+![image-20210309235001877](image-20210309235001877.png)
+
+添加名称
+
+```json
+{
+  "name": "PWA Demo Name", // 应用名称, 用于安装横幅提示的名称, 和启动画面中的文字
+  "short_name": "PWA Demo", // 应用短名称, 用于主屏幕显示
+  "display": "standalone", // 显示类型, 用于启动画面的类型
+  // 主要有四种类型(推荐前两种):
+  // fullscreen: 网站 应用占满整个屏幕
+  // standalone: 浏览器相关 UI (导航栏/工具栏等) 将会被隐藏
+  // minimal-ui: 显示形式与 standalone 类似, 不同浏览器在显示效果上略有不同.
+  // browser: 与普通网页在浏览器中打开的显示一致
+  "start_url": "/", // 用于指定应用打开时的网址
+  // 注意:
+  // 可以在后面添加参数用于来源统计, 比如: "/?from=homescreen"
+  // 如果设置为空, 则默认使用用户打开的当前页面为首屏, 即: ""
+  // icons 可以设置一组, 浏览器根据 icon 的 sizes 进行选择
+  // 对于桌面图标, 会找到密度匹配并且调整到 48 dp
+  // 启动画面, 128 dp
+  // 修改该icons,会在用户重新添加到桌面时, 才会更新
+  "icons": [{
+      "src": "/assets/i/icon-96*96.png",
+      "sizes":"96*96",
+      "type": "image/png"
+    },{
+      "src": "/assets/i/icon-144*144.png",
+      "sizes":"144*144",
+      "type": "image/png"
+    },{
+      "src": "/assets/i/icon-192*192.png",
+      "sizes":"144*144",
+      "type": "image/png"
+    }
+  ],
+  "background_color": "#1976d2", // 启动背景色
+  "theme_color": "#2F3BA2" // 启动时顶部状态栏颜色
+}
+```
+
+<img src="images/image-20210309235145444.png" alt="image-20210309235145444" style="zoom:30%;" />
+
+
+
+<img src="images/image-20210309235340131.png" alt="short_name" style="zoom:30%;" />
+
+<img src="images/image-20210309235550537.png" alt="display" style="zoom:20%;" >
+
+![image-20210310000032129](images/image-20210310000032129.png)
+
+设置 menifist 之后, 有名称和启动画面
+
+![image-20210310000155226](images/image-20210310000155226.png)
+
+浏览器对于 manifest 的支持度有待提高
+
+![image-20210310001401317](images/image-20210310001401317.png)
+
+弹出横幅
+
+![image-20210310001557139](image-20210310001557139.png)

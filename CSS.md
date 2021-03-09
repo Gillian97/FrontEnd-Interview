@@ -21,18 +21,212 @@
 
 > IE下为 Layout，可通过 zoom:1 触发
 
-## 触发条件
+## 创建 BFC 
 
-- 根元素（或其他包含它的元素）
-- 浮动元素（元素的 `float != none`）
-- 绝对定位元素（元素具有 `position = absolute/fixed`）
-- 内联块（元素具有 `display: inline-block`）
-- 表格单元格（元素具有 `display: table-cell`，HTML 表格单元格默认属性）
-- 表格标题（元素具有 `display: table-caption`，HTML 表格标题默认属性）
-- 具有 `overflow` 且值不是 `visible` 的块元素
-- 弹性盒子（`flex` 或 `inline-flex`）
-- `display: flow-root`
-- `column-span: all`
+1. float 不为 none
+2. position 为 absolute/fixed
+3. display 为 inline-block/table-cell/table-caption/flex/inline-flex/flow-root
+4. overflow 为 hidden auto scroll(块元素)
+5. column-span: all
+
+## 解决问题
+
+1. 消除边距重叠问题
+
+```html
+<html>
+
+<head>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    div {
+      width: 100px;
+      height: 100px;
+      background: red;
+    }
+
+    .top {
+      margin-bottom: 20px;
+    }
+
+    .bottom {
+      margin-top: 10px;
+    }
+    
+    /* p 标签激活为 BFC*/
+    p { overflow: hidden; }
+  </style>
+</head>
+
+<body>
+  <div class='top'></div>
+  <div class='bottom'></div>
+  
+  <!-- 修改 -->
+  <!-- 将 p 标签激活为 BFC, 包裹 div -->
+  <p>
+    <div class='bottom'></div>
+  </p>
+</body>
+
+</html>
+```
+
+上述代码中的 top div 和 bottom div 边距会重叠, 两个 div 最终只距离 20 px, 而不是 30 px. 
+
+解决: bottom 外包裹激活为 BFC 的 p 标签, 即可不与外面元素边距重叠. 
+
+2. 盒子塌陷问题
+
+```html
+<html>
+
+<head>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    .father {
+      width: 200px;
+      height: 200px;
+      background-color: aqua;
+      overflow: hidden; /* 解决 */
+    }
+
+    .son {
+      width: 100px;
+      height: 100px;
+      background-color: blanchedalmond;
+      /* 想让子盒子距离父盒子 20 px, 结果父盒子随着子盒子一起向下移了 20 px*/
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class='father'>
+    <div class='son'></div>
+  </div>
+</body>
+
+</html>
+```
+
+解决:  将父节点激活为 BFC , 父节点就不会与子节点一起向下滑动(盒子塌陷).
+
+3. 清除浮动
+
+问题: 父节点包含浮动元素, 但是没有设置宽高的情况下, 自身高度为 0.
+
+<img src="images/image-20210309230534821.png" alt="image-20210309230534821" style="zoom:50%;" />
+
+```html
+<html>
+
+<head>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    .son {
+      width: 100px;
+      height: 100px;
+      background-color: blanchedalmond;
+      float: left;
+    }
+    
+    /* 底部添加盒子后, 浮动的元素会挡住 box*/
+    .box {
+      width: 200px;
+      height: 200px;
+      background: red;
+    }
+  </style>
+</head>
+
+<body>
+  <div class='father'>
+    <div class='son'></div>
+    <div class='son'></div>
+  </div>
+  <div class="box"></div>
+</body>
+
+</html>
+```
+
+需要清除浮动(挡住 box 的元素)
+
+激活 father 节点为 BFC, 可以包含浮动元素.
+
+```css
+.father {
+   overflow: hidden;
+}
+```
+
+清除浮动后的效果
+
+<img src="images/image-20210309231446316.png" alt="image-20210309231446316" style="zoom:50%;" />
+
+4. 浮动环绕文字(此思路也可以做自适应两栏布局)
+
+```html
+<html>
+
+<head>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    .box {
+      height: 100px;
+      width: 100px;
+      background-color: aquamarine;
+      float: left;
+    }
+
+    .father {
+      height: 200px;
+      width: 200px;
+      background-color: bisque;
+    }
+    
+    /* 将文本区域激活为 BFC, 就不会围绕浮动元素 */
+    .msg {
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <div class='father'>
+    <div class='box'></div>
+    <div class='msg'>this is text!this is text!this is text!this is text!this is text!this is text!this is text!this is
+      text!</div>
+  </div>
+</body>
+
+</html>
+```
+
+现象: 文字围绕在图片周围
+
+![image-20210309232040853](images/image-20210309232040853.png)
+
+清除浮动之后效果
+
+![image-20210309232204391](images/image-20210309232204391.png)
 
 ## 规则
 
@@ -43,18 +237,7 @@
 - 计算 BFC 的高度时，浮动子元素也参与计算
 - 文字层不会被浮动层覆盖，环绕于周围
 
-## 应用
 
-- 阻止`margin`重叠
-  - 上下的 div 均设置 margin 时, 会发生边距重叠
-  - 将某一个 Box 激活为 BFC 就可以避免 margin 重叠
-- 可以包含浮动元素 —— 清除内部浮动(清除浮动的原理是两个`div`都位于同一个 BFC 区域之中)
-  - 父节点激活 BFC，可以包含浮动元素，不会发生高度塌陷
-- 自适应两栏布局
-  - BFC 不会覆盖浮动元素（左侧布局为浮动元素）
-- 可以阻止元素被浮动元素覆盖
-
-参考：https://blog.csdn.net/sinat_36422236/article/details/88763187
 
 # 层叠上下文
 
