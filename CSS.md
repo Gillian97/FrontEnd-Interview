@@ -13,15 +13,13 @@
 
 > Tips: 理论上是有上面 4 种盒子，但现在 w3c 与 mdn 规范中均只支持 `content-box` 与 `border-box`；
 
-
-
 # BFC
 
 **块级格式化上下文**，是一个独立的渲染区域，让处于 BFC 内部的元素与外部的元素相互隔离，使内外元素的定位不会相互影响。
 
 > IE下为 Layout，可通过 zoom:1 触发
 
-## 创建 BFC 
+## 创建 BFC
 
 1. float 不为 none
 2. position 为 absolute/fixed
@@ -56,7 +54,7 @@
     .bottom {
       margin-top: 10px;
     }
-    
+  
     /* p 标签激活为 BFC*/
     p { overflow: hidden; }
   </style>
@@ -76,9 +74,9 @@
 </html>
 ```
 
-上述代码中的 top div 和 bottom div 边距会重叠, 两个 div 最终只距离 20 px, 而不是 30 px. 
+上述代码中的 top div 和 bottom div 边距会重叠, 两个 div 最终只距离 20 px, 而不是 30 px.
 
-解决: bottom 外包裹激活为 BFC 的 p 标签, 即可不与外面元素边距重叠. 
+解决: bottom 外包裹激活为 BFC 的 p 标签, 即可不与外面元素边距重叠.
 
 2. 盒子塌陷问题
 
@@ -142,7 +140,7 @@
       background-color: blanchedalmond;
       float: left;
     }
-    
+  
     /* 底部添加盒子后, 浮动的元素会挡住 box*/
     .box {
       width: 200px;
@@ -201,7 +199,7 @@
       width: 200px;
       background-color: bisque;
     }
-    
+  
     /* 将文本区域激活为 BFC, 就不会围绕浮动元素 */
     .msg {
       overflow: hidden;
@@ -237,8 +235,6 @@
 - 计算 BFC 的高度时，浮动子元素也参与计算
 - 文字层不会被浮动层覆盖，环绕于周围
 
-
-
 # 层叠上下文
 
 元素提升为一个比较特殊的图层，在三维空间中 **(z轴)** 高出普通元素一等。
@@ -263,7 +259,6 @@
 - 在同一层叠上下文中，层叠等级才有意义
 - `z-index`的优先级最高
 
-
 ![img](images/层叠上下文.jpg)
 
 # 居中布局
@@ -273,7 +268,6 @@
 - （类）行内元素: `text-align: center`
 
   - 将一段文字置于容器的水平中点，只要设置text-align属性即可：
-
 - 块级元素: `margin: 0 auto`
 
   - 先为该容器设置一个明确宽度，然后将margin的水平值设为auto即可。
@@ -284,9 +278,7 @@
     　　margin:0 auto;
     }
     ```
-
 - `absolute + transform`
-
 - `flex + justify-content: center`
 
 ## 垂直居中
@@ -303,11 +295,8 @@
     ```
 
     如果有n行文字，那么将行高设为容器高度的n分之一即可。
-
 - `absolute + transform`
-
 - `flex + align-items: center`
-
 - `table`
 
   - 通过为元素设置 `table-cell` 的父级容器，再使用 `vertical-align` 属性
@@ -317,7 +306,7 @@
       background: #f06d06;
       font-size: 80%;
     }
-    
+
     table {
       background: white;
       width: 240px;
@@ -325,7 +314,7 @@
       margin: 20px;
       height: 250px;
     }
-    
+
     table td {
       background: black;
       color: white;
@@ -334,8 +323,6 @@
       /* default is vertical-align: middle; */
     }
     ```
-
-    
 
 ## 水平垂直居中
 
@@ -375,15 +362,13 @@
 
 优点：
 
-*   兼容性好
-*   易于理解
+* 兼容性好
+* 易于理解
 
 缺点：
 
-*   需要知道子元素的宽高
-    *   没有宽高无法设置具体的 margin 的值
-
-
+* 需要知道子元素的宽高
+  * 没有宽高无法设置具体的 margin 的值
 
 ### absolute + auto margin
 
@@ -417,15 +402,13 @@
 
 优点：
 
-*   易于理解
-*   兼容性好
+* 易于理解
+* 兼容性好
 
 缺点：
 
-*   子元素需要设置宽高
-    *   尽管在设置居中时, 没有用到子元素宽高的具体数值, 但是需要存在, 否则会存在拉伸的现象
-
-
+* 子元素需要设置宽高
+  * 尽管在设置居中时, 没有用到子元素宽高的具体数值, 但是需要存在, 否则会存在拉伸的现象
 
 ### absolute + calc
 
@@ -449,18 +432,14 @@
 
 优点：
 
-*   易于理解
+* 易于理解
 
 缺点：
 
-*   兼容性依赖于 calc，只支持 IE9及以上
-*   需要知道子元素宽高
-
-
+* 兼容性依赖于 calc，只支持 IE9及以上
+* 需要知道子元素宽高
 
 > 从这里开始, 后面的方法都不需要知道子元素的宽高, 甚至可以不设置(如果的话)
-
-
 
 ### absolute + transform
 
@@ -485,16 +464,14 @@
 
 优点：
 
-*   易于理解
-*   实现简单
-*   无需知道子元素宽高
-    *   子元素即使不设置宽高, 也会根据内容撑开的宽高进行垂直居中
+* 易于理解
+* 实现简单
+* 无需知道子元素宽高
+  * 子元素即使不设置宽高, 也会根据内容撑开的宽高进行垂直居中
 
 缺点：
 
-*   兼容性依赖于 `transform`，只支持 IE9 及以上
-
-
+* 兼容性依赖于 `transform`，只支持 IE9 及以上
 
 ### table
 
@@ -519,15 +496,13 @@
 
 优点：
 
-*   兼容性好
-*   易于实现
-*   不需要知道子元素宽高
-    *   子元素即使不设置宽高, 也会根据内容撑开的宽高进行垂直居中
-*   可读性强
+* 兼容性好
+* 易于实现
+* 不需要知道子元素宽高
+  * 子元素即使不设置宽高, 也会根据内容撑开的宽高进行垂直居中
+* 可读性强
 
-
-
->  CSS3 方式
+> CSS3 方式
 
 ### flex
 
@@ -550,15 +525,13 @@
 
 优点：
 
-*   实现简单
-*   不需要知道子元素宽高
-    *   子元素即使不设置宽高, 也会根据内容撑开的宽高进行垂直居中
+* 实现简单
+* 不需要知道子元素宽高
+  * 子元素即使不设置宽高, 也会根据内容撑开的宽高进行垂直居中
 
 缺点：
 
-*   兼容性依赖于 flex
-
-
+* 兼容性依赖于 flex
 
 ### grid
 
@@ -596,13 +569,13 @@
 
 优点：
 
-*   实现简单
-*   不需要知道子元素宽高(两种方式均是)
-    *   子元素即使不设置宽高, 也会根据内容撑开的宽高进行垂直居中
+* 实现简单
+* 不需要知道子元素宽高(两种方式均是)
+  * 子元素即使不设置宽高, 也会根据内容撑开的宽高进行垂直居中
 
 缺点：
 
-*   兼容性依赖于 grid
+* 兼容性依赖于 grid
 
 # 选择器优先级
 
@@ -652,12 +625,13 @@
 
 ### float 属性
 
-| 值      | 描述                                                 |
-| :------ | :--------------------------------------------------- |
-| left    | 元素向左浮动。                                       |
-| right   | 元素向右浮动。                                       |
-| none    | 默认值。元素不浮动，并会显示在其在文本中出现的位置。 |
-| inherit | 规定应该从父元素继承 float 属性的值。                |
+
+| 值 | 描述 |
+| :- | :- |
+| left | 元素向左浮动。 |
+| right | 元素向右浮动。 |
+| none | 默认值。元素不浮动，并会显示在其在文本中出现的位置。 |
+| inherit | 规定应该从父元素继承 float 属性的值。 |
 
 ```css
 /* 把图像向右浮动 */
@@ -700,8 +674,6 @@ img {
 <h3 class="text_line">第二行</h3>
 ```
 
-
-
 ## 清除浮动
 
 ### 高度塌陷问题
@@ -711,32 +683,29 @@ img {
 为了防止高度塌陷，因此需要清除浮动。
 
 1. 给父元素定义高度
+
    * 优点：操作简单
    * 缺点：高度定死
-   
 2. 添加一个空元素 `<div class="clear"></div> (.clear { clear: both })`
+
    * 优点：浏览器支持好
    * 缺点：凭空多出很多无用空节点
-   
 3. 让父元素也一起浮动
-   
+
    * 缺点：无法解决实际问题
-   
 4. 父元素设置为 `display: table`
-   
+
    * 缺点：会产生新的问题
-   
 5. 父元素设置 `overflow: hidden auto`
-   
+
    * 缺点：无法显示溢出的元素
-   
 6. 父元素伪元素设置清除浮动
 
    ```css
    .father {
      ...
    }
-   
+
    .father:: after {
      content: ' ';
      display: block;
@@ -745,8 +714,6 @@ img {
      visibility: hidden;
    }
    ```
-
-   
 
 - 通过增加尾元素清除浮动
   - `:after / <br> : clear: both`
@@ -802,36 +769,292 @@ vmin vmax 的使用
 }
 ```
 
-
-
 # 单位
 
 ## 相对长度
 
 相对长度单位指定了一个长度相对于另一个长度的属性。对于不同的设备相对长度更适用。
 
-| 单位    | 描述                                                         |
-| ------- | :----------------------------------------------------------- |
-| **em**  | 它是描述相对于应用在当前元素的字体尺寸，所以它也是相对长度单位。一般浏览器字体大小默认为16px，则2em == 32px； |
-| ex      | 依赖于英文字母小 x 的高度                                    |
-| ch      | 数字 0 的宽度                                                |
+
+| 单位 | 描述 |
+| - | :- |
+| **em** | 它是描述相对于应用在当前元素的字体尺寸，所以它也是相对长度单位。一般浏览器字体大小默认为16px，则2em == 32px； |
+| ex | 依赖于英文字母小 x 的高度 |
+| ch | 数字 0 的宽度 |
 | **rem** | rem 是根 em（root em）的缩写，rem作用于非根元素时，相对于根元素字体大小(默认的 16 px)；rem作用于根元素字体大小时，相对于其出初始字体大小。 |
-| **vw**  | viewpoint width，视窗宽度，1vw=视窗宽度的1%                  |
-| vh      | viewpoint height，视窗高度，1vh=视窗高度的1%                 |
-| vmin    | vw和vh中较小的那个。                                         |
-| vmax    | vw和vh中较大的那个。                                         |
-| **%**   |                                                              |
+| **vw** | viewpoint width，视窗宽度，1vw=视窗宽度的1% |
+| vh | viewpoint height，视窗高度，1vh=视窗高度的1% |
+| vmin | vw和vh中较小的那个。 |
+| vmax | vw和vh中较大的那个。 |
+| **%** |   |
 
 ## 绝对长度
 
-| 单位 | 描述                       |
-| ---- | -------------------------- |
+
+| 单位 | 描述 |
+| - | - |
 | px * | 像素 (1px = 1/96th of 1in) |
-| in   | 英寸 (1in = 96px = 2.54cm) |
+| in | 英寸 (1in = 96px = 2.54cm) |
 
 像素或许被认为是最好的"设备像素"，而这种像素长度和你在显示器上看到的文字屏幕像素无关。px实际上是一个按角度度量的单位。
 
-# rem 适配方案
+# 移动端适配方案
+
+开发过程: 设计稿->开发->适配不同的手机屏幕, 显得合理
+
+原则:
+
+1. 开发时方便，写代码时设置的值要和标注的 160px 相关
+2. 方案要适配大多数手机屏幕，并且无 BUG
+3. 用户体验要好，页面看着没有不适感
+
+思路
+
+1. 先固定, 再缩放. -> 写页面时，按照设计稿写固定宽度，最后再统一缩放处理，在不同手机上都能用
+2. 等比缩放. -> 按照设计稿的标准开发页面，在手机上部分内容根据屏幕宽度等比缩放，部分内容按需要变化，需要缩放的元素使用 rem, vw 相对单位，不需要缩放的使用 px
+3. 固定尺寸+弹性布局，不需要缩放
+
+## 媒体查询
+
+查询设备宽度设置不同的 css 样式
+
+```css
+@media screen and (max-width: 600px) { /*当屏幕尺寸小于600px时，应用下面的CSS样式*/
+  /*你的css代码*/
+}
+```
+
+
+优点
+
+* media query可以做到设备像素比的判断，方法简单，成本低，特别是对移动和PC维护同一套代码的时候。目前像Bootstrap等框架使用这种方式布局
+* 图片便于修改，只需修改css文件
+
+* 调整屏幕宽度的时候不用刷新页面即可响应式展示
+
+
+缺点
+
+- 代码量比较大，维护不方便
+- 为了兼顾大屏幕或高清设备，会造成其他设备资源浪费，特别是加载图片资源
+- 为了兼顾移动端和PC端各自响应式的展示效果，难免会损失各自特有的交互方式
+
+
+## viewport 适配(全部等比缩放)
+
+主要步骤:
+
+根据设计稿标准（750px 宽度）开发页面，写完后页面及元素自动缩小，适配 375 宽度的屏幕
+
+
+
+在 head 里设置如下代码
+
+```html
+<meta name="viewport" content="width=750,initial-scale=0.5">
+```
+
+`initial-scale = 屏幕的宽度 / 设计稿的宽度`, 即屏幕是设计稿的几倍/几分之几
+
+为了适配其他屏幕，需要动态的设置 `initial-scale` 的值
+
+```HTML
+<head>
+  <script>
+    const WIDTH = 750
+    const mobileAdapter = () => {
+      let scale = screen.width / WIDTH
+      let content = `width=${WIDTH}, initial-scale=${scale}, maximum-scale=${scale}, minimum-scale=${scale}`
+      let meta = document.querySelector('meta[name=viewport]')
+      if (!meta) {
+        meta = document.createElement('meta')
+        meta.setAttribute('name', 'viewport')
+        document.head.appendChild(meta)
+      }
+      meta.setAttribute('content',content)
+    }
+    mobileAdapter()
+    window.onorientationchange = mobileAdapter //屏幕翻转时再次执行
+  </script>
+</head>
+```
+
+缺点:
+
+边线问题，不同尺寸下，边线的粗细是不一样的（等比缩放后），全部元素都是等比缩放，实际显示效果可能不太好
+
+## vm 适配(部分等比缩放)
+
+主要步骤:
+
+1. 开发者拿到设计稿（假设设计稿尺寸为750px，设计稿的元素标注是基于此宽度标注）
+2. 开始开发，对设计稿的标注进行转换，把 px 换成 vw。比如页面元素字体标注的大小是32px，换成vw为 (100/750)*32 vw, 即计算缩放后的元素应该是设计元素大小的几分之几.
+3. 对于需要等比缩放的元素，CSS 使用转换后的单位
+4. 对于不需要缩放的元素，比如边框阴影，使用固定单位px
+
+关于换算，为了开发方便，利用自定义属性，CSS变量
+
+```HTML
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1">
+  <script>
+    const WIDTH = 750
+    //:root { --width: 0.133333 } 1像素等于多少 vw
+    document.documentElement.style.setProperty('--width', (100 / WIDTH)) 
+  </script>
+</head>
+```
+
+注意此时，meta 里就不要去设置缩放了.
+
+业务代码里就可以写
+
+```css
+header {
+  font-size: calc(28vw * var(--width))
+}
+```
+
+实现了按需缩放
+
+## rem 适配(部分等比缩放)
+
+实现原理:
+
+根据rem将页面放大`dpr`倍, 然后viewport设置为`1/dpr`.
+
+如iphone6 plus的dpr为3, 则页面整体放大3倍, 1px(css单位)在plus下默认为3px(物理像素)
+然后viewport设置为1/3, 这样页面整体缩回原始大小. 从而实现高清。
+
+这样整个网页在设备内显示时的页面宽度就会等于设备逻辑像素大小，也就是device-width。
+这个device-width的计算公式为：设备的物理分辨率/(devicePixelRatio * scale)，
+在scale为1的情况下，device-width = 设备的物理分辨率/devicePixelRatio .
+
+主要步骤:
+
+1. 开发者拿到设计稿（假设设计稿尺寸为750px，设计稿的元素标是基于此宽度标注）
+2. 开始开发，对设计稿的标注进行转换
+3. 对于需要等比缩放的元素，CSS使用转换后的单位
+4. 对于不需要缩放的元素，比如边框阴影，使用固定单位px
+
+根据不同屏幕宽度，设置 html 的 font-size 值
+
+```HTML
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1">
+  <script>
+    const WIDTH = 750 //设计稿尺寸
+    const setView = () => {
+      document.documentElement.style.fontSize = (100 * screen.width / WIDTH) + 'px'
+    }
+    window.onorientationchange = setView
+    setView()
+  </script>
+</head>
+```
+
+对于需要等比缩放的元素，CSS使用转换后的单位
+
+```css
+header {
+  font-size: .28rem;
+}
+```
+
+对于不需要缩放的元素，比如边框阴影，使用固定单位px
+
+```css
+header > span.active {
+  color: #fff;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+}
+```
+
+
+## 弹性盒适配（合理布局）
+
+```html
+<meta name="viewport" content="width=device-width">
+```
+
+使用 flex 布局
+
+```css
+section {
+  display: flex;
+}
+```
+
+## 适合做适配(等比缩放)的页面
+
+1. 页面布局栅格化(很多格子)
+2. 头屏大图, 宽度高度自适应
+
+## 适配 1px
+
+### 原因
+
+移动端造成 `1px` 的边框变粗的原因是因为：
+
+> CSS 中的 `1px` 并不等于移动设备的 `1px`，这是由于不同手机有不同的像素密度。在 `window` 对象中有一个 `devicePixelRatio` 属性，它可以反映 CSS 中的像素和设备的像素比。
+
+> devicePixelRatio 的官方定义：设备物理像素和设备独立像素的比例
+
+### 解决方法
+
+#### 直接使用 `0.5px` 边框
+
+WWWDC 对 IOS 的建议：直接使用 `0.5px` 边框
+
+缺点：仅支持 IOS 8+，不支持安卓。
+
+#### 使用边框图片 `border-image`
+
+```css
+.border-image-1px {
+  border: 1px solid transparent;
+  border-image: url('../img/border') 2 repeat;
+}
+```
+
+优点：可以设置单条、多条边框
+
+缺点：修改颜色麻烦，圆角需要特殊处理
+
+#### 使用 `box-shadow` 模拟
+
+```css
+.box-shadow-1px {
+  box-shadow: inset 0 -1px 1px -1px #e5e5e5;
+}
+```
+
+优点：使用简单，圆角也能实现
+
+缺点：边框有阴影，百分百过不了视觉走查
+
+#### 伪类 + transform + 绝对定位实现
+
+```css
+.scale-1px {
+  position: relative;
+}
+
+.scale-1px::after {
+  content: ' ';
+  width: 100%;
+  height: 1px; /* no */
+  background: #e5e5e5;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  transform: scaleY(0.5);
+}
+```
+
+优点：所有场景都能满足，支持圆角
+
+缺点：伪类冲突
 
 # position 取值
 
@@ -842,15 +1065,12 @@ position 属性值的含义：
 - static
 
   元素框正常生成。块级元素生成一个矩形框，作为文档流的一部分，行内元素则会创建一个或多个行框，置于其父元素中。
-
 - relative
 
   元素框偏移某个距离，相对于它原来应该在的位置。元素仍保持其未定位前的形状，它原本所占的空间仍保留。
-
 - absolute
 
   元素框从文档流完全删除，并相对于**其包含块**定位（相对于其父元素定位）。包含块可能是文档中的另一个元素或者是初始包含块。元素原先在正常文档流中所占的空间会关闭，就好像元素原来不存在一样。元素定位后生成一个块级框，而不论原来它在正常流中生成何种类型的框。
-
 - fixed
 
   元素框的表现类似于将 position 设置为 absolute，不过其包含块是**视窗**本身。
@@ -875,12 +1095,13 @@ position 属性值的含义：
 
 ## CSS3 多媒体类型
 
-| 值     | 描述                             |
-| :----- | :------------------------------- |
-| all    | 用于所有多媒体类型设备           |
-| print  | 用于打印机                       |
+
+| 值 | 描述 |
+| :- | :- |
+| all | 用于所有多媒体类型设备 |
+| print | 用于打印机 |
 | screen | 用于电脑屏幕，平板，智能手机等。 |
-| speech | 用于屏幕阅读器                   |
+| speech | 用于屏幕阅读器 |
 
 示例：
 
@@ -937,8 +1158,6 @@ position 属性值的含义：
 </html>
 ```
 
-
-
 # CSS Modules
 
 出现背景：解决全局样式覆盖以及想要不被覆盖时的选择器过深问题
@@ -960,8 +1179,6 @@ position 属性值的含义：
 - `j3xk`：随机的hash值
 
 <img src="images/css-modules-diagram.png" width = "300" height = "300" alt="图片名称" align=center />
-
-
 
 具体示例：
 
@@ -1207,8 +1424,6 @@ module.exports = {
   background-color: blue;
 }
 ```
-
-
 
 参考： http://www.ruanyifeng.com/blog/2016/06/css_modules.html
 
@@ -1613,25 +1828,11 @@ grid-auto-flow: column;
 
 > grid-column-start 属性， grid-column-end 属性， grid-row-start 属性， grid-row-end 属性
 
-
-
-
-
 > grid-column 属性， grid-row 属性
-
-
-
-
 
 > grid-area 属性
 
-
-
-
-
 > justify-self 属性， align-self 属性， place-self 属性
-
-
 
 # Flex 布局
 
@@ -1739,32 +1940,35 @@ Webkit 内核的浏览器，必须加上`-webkit`前缀。
 
 ### 基本选择器
 
-| 序号 | 选择器      | 含义                                           |
-| ---- | ----------- | ---------------------------------------------- |
-| 1.   | *****       | 通用元素选择器，匹配任何元素                   |
-| 2.   | **E**       | 标签选择器，匹配所有使用E标签的元素            |
-| 3.   | **.info**   | class选择器，匹配所有class属性中包含info的元素 |
-| 4.   | **#footer** | id选择器，匹配所有id属性等于footer的元素       |
+
+| 序号 | 选择器 | 含义 |
+| - | - | - |
+| 1. | ***** | 通用元素选择器，匹配任何元素 |
+| 2. | **E** | 标签选择器，匹配所有使用E标签的元素 |
+| 3. | **.info** | class选择器，匹配所有class属性中包含info的元素 |
+| 4. | **#footer** | id选择器，匹配所有id属性等于footer的元素 |
 
 ### 多元素的组合选择器
 
-| 序号 | 选择器 | 含义                                                         |
-| ---- | ------ | ------------------------------------------------------------ |
-| 5.   | E,F    | 多元素选择器，同时匹配所有E元素或F元素，E和F之间用逗号分隔   |
-| 6.   | E F    | **后代元素**选择器，匹配所有属于E元素后代的F元素，E和F之间用空格分隔 |
-| 7.   | E > F  | **子元素**选择器，匹配所有E元素的子元素F                     |
-| 8.   | E + F  | 毗邻元素选择器，匹配所有**紧随**E元素之后的同级元素F         |
+
+| 序号 | 选择器 | 含义 |
+| - | - | - |
+| 5. | E,F | 多元素选择器，同时匹配所有E元素或F元素，E和F之间用逗号分隔 |
+| 6. | E F | **后代元素**选择器，匹配所有属于E元素后代的F元素，E和F之间用空格分隔 |
+| 7. | E > F | **子元素**选择器，匹配所有E元素的子元素F |
+| 8. | E + F | 毗邻元素选择器，匹配所有**紧随**E元素之后的同级元素F |
 
 ## CSS 2.1
 
 ### 属性选择器
 
-| 序号 | 选择器       | 含义                                                         |
-| ---- | ------------ | ------------------------------------------------------------ |
-| 9.   | E[att]       | 匹配所有具有att属性的E元素，不考虑它的值。（注意：E在此处可以省略，比如"[cheacked]"。以下同。） |
-| 10.  | E[att=val]   | 匹配所有att属性等于"val"的E元素                              |
-| 11.  | E[att~=val]  | 匹配所有att属性具有多个空格分隔的值、其中一个值等于"val"的E元素 |
-| 12.  | E[att\|=val] | 匹配所有att属性具有多个连字号分隔（hyphen-separated）的值、其中一个值以"val"开头的E元素，主要用于lang属性，比如"en"、"en-us"、"en-gb"等等 |
+
+| 序号 | 选择器 | 含义 |
+| - | - | - |
+| 9. | E[att] | 匹配所有具有att属性的E元素，不考虑它的值。（注意：E在此处可以省略，比如"[cheacked]"。以下同。） |
+| 10. | E[att=val] | 匹配所有att属性等于"val"的E元素 |
+| 11. | E[att~=val] | 匹配所有att属性具有多个空格分隔的值、其中一个值等于"val"的E元素 |
+| 12. | E[att\|=val] | 匹配所有att属性具有多个连字号分隔（hyphen-separated）的值、其中一个值以"val"开头的E元素，主要用于lang属性，比如"en"、"en-us"、"en-gb"等等 |
 
 ### 伪类
 
@@ -1772,15 +1976,16 @@ Webkit 内核的浏览器，必须加上`-webkit`前缀。
 
 伪类用于当已有元素处于某种状态时，为其添加对应的样式，这个状态是根据用户行为而动态变化的。
 
-| 序号 | 选择器        | 含义                                    |
-| ---- | ------------- | --------------------------------------- |
-| 13.  | E:first-child | 匹配父元素的第一个子元素                |
-| 14.  | E:link        | 匹配所有未被点击的链接                  |
-| 15.  | E:visited     | 匹配所有已被点击的链接                  |
-| 16.  | E:active      | 匹配鼠标已经其上按下、还没有释放的E元素 |
-| 17.  | E:hover       | 匹配鼠标悬停其上的E元素                 |
-| 18.  | E:focus       | 匹配获得当前焦点的E元素                 |
-| 19.  | E:lang(c)     | 匹配lang属性等于c的E元素                |
+
+| 序号 | 选择器 | 含义 |
+| - | - | - |
+| 13. | E:first-child | 匹配父元素的第一个子元素 |
+| 14. | E:link | 匹配所有未被点击的链接 |
+| 15. | E:visited | 匹配所有已被点击的链接 |
+| 16. | E:active | 匹配鼠标已经其上按下、还没有释放的E元素 |
+| 17. | E:hover | 匹配鼠标悬停其上的E元素 |
+| 18. | E:focus | 匹配获得当前焦点的E元素 |
+| 19. | E:lang(c) | 匹配lang属性等于c的E元素 |
 
 > link的四种状态，需要按照下面的前后顺序进行设置：
 >
@@ -1801,12 +2006,13 @@ Webkit 内核的浏览器，必须加上`-webkit`前缀。
 
 比如：`:before ` 来为一个元素前增加一些文本，并为这些文本增加样式。用户虽然可以看到这些文本，但是这些文本实际并不在文档树中。
 
-| 序号 | 选择器         | 含义                      |
-| ---- | -------------- | ------------------------- |
-| 20.  | E:first-line   | 匹配E元素的第一行         |
-| 21.  | E:first-letter | 匹配E元素的第一个字母     |
-| 22.  | E:before       | 在E元素之前插入生成的内容 |
-| 23.  | E:after        | 在E元素之后插入生成的内容 |
+
+| 序号 | 选择器 | 含义 |
+| - | - | - |
+| 20. | E:first-line | 匹配E元素的第一行 |
+| 21. | E:first-letter | 匹配E元素的第一个字母 |
+| 22. | E:before | 在E元素之前插入生成的内容 |
+| 23. | E:after | 在E元素之后插入生成的内容 |
 
 **伪元素**是对元素中的特定内容进行操作，它所操作的层次比伪类更深了一层，也因此它的动态性比伪类要低得多。实际上，设计伪元素的目的就是去选取诸如元素内容第一个字（母）、第一行，选取某些内容前面或后面这种普通的选择器无法完成的工作。它控制的内容实际上和元素是相同的，但是它本身只是基于元素的抽象，并不存在于文档中，所以叫伪元素。
 
@@ -1816,58 +2022,64 @@ Webkit 内核的浏览器，必须加上`-webkit`前缀。
 >
 > CSS3 规范中要求使用双冒号(::) 表示伪元素，单冒号(:) 表示伪类
 
-## CSS3 
+## CSS3
 
 ### 同级元素通用选择器
 
-| 序号 | 选择器 | 含义                                         |
-| ---- | ------ | -------------------------------------------- |
-| 24.  | E ~ F  | 匹配任何在E元素之后的同级F元素（不要求紧随） |
+
+| 序号 | 选择器 | 含义 |
+| - | - | - |
+| 24. | E ~ F | 匹配任何在E元素之后的同级F元素（不要求紧随） |
 
 ### 属性选择器
 
-| 序号 | 选择器        | 含义                                                         |
-| ---- | ------------- | ------------------------------------------------------------ |
-| 25.  | E[att^="val"] | 属性att的值以"val"开头的元素                                 |
-| 26.  | E[att$="val"] | 属性att的值以"val"结尾的元素                                 |
-| 27.  | E[att*="val"] | 属性att的值包含"val"字符串的元素（只要包含，不要求完全相等） |
+
+| 序号 | 选择器 | 含义 |
+| - | - | - |
+| 25. | E[att^="val"] | 属性att的值以"val"开头的元素 |
+| 26. | E[att$="val"] | 属性att的值以"val"结尾的元素 |
+| 27. | E[att*="val"] | 属性att的值包含"val"字符串的元素（只要包含，不要求完全相等） |
 
 ### 与用户界面有关的伪类
 
-| 序号 | 选择器       | 含义                                                      |
-| ---- | ------------ | --------------------------------------------------------- |
-| 28.  | E:enabled    | 匹配表单中激活的元素                                      |
-| 29.  | E:disabled   | 匹配表单中禁用的元素                                      |
-| 30.  | E:checked    | 匹配表单中被选中的radio（单选框）或checkbox（复选框）元素 |
-| 31.  | E::selection | 匹配用户当前选中的元素                                    |
+
+| 序号 | 选择器 | 含义 |
+| - | - | - |
+| 28. | E:enabled | 匹配表单中激活的元素 |
+| 29. | E:disabled | 匹配表单中禁用的元素 |
+| 30. | E:checked | 匹配表单中被选中的radio（单选框）或checkbox（复选框）元素 |
+| 31. | E::selection | 匹配用户当前选中的元素 |
 
 ### 结构性伪类
 
-| 序号 | 选择器                | 含义                                                         |
-| ---- | --------------------- | ------------------------------------------------------------ |
-| 32.  | E:root                | 匹配文档的根元素，对于HTML文档，就是HTML元素                 |
-| 33.  | E:nth-child(n)        | 匹配其父元素的第n个子元素，第一个编号为1                     |
-| 34.  | E:nth-last-child(n)   | 匹配其父元素的倒数第n个子元素，第一个编号为1                 |
-| 35.  | E:nth-of-type(n)      | 与:nth-child()作用类似，但是仅匹配使用同种标签的元素         |
-| 36.  | E:nth-last-of-type(n) | 与:nth-last-child() 作用类似，但是仅匹配使用同种标签的元素   |
-| 37.  | E:last-child          | 匹配父元素的最后一个子元素，等同于:nth-last-child(1)         |
-| 38.  | E:first-of-type       | 匹配父元素下使用同种标签的第一个子元素，等同于:nth-of-type(1) |
-| 39.  | E:last-of-type        | 匹配父元素下使用同种标签的最后一个子元素，等同于:nth-last-of-type(1) |
-| 40.  | E:only-child          | 匹配父元素下仅有的一个子元素，等同于:first-child:last-child或 :nth-child(1):nth-last-child(1) |
-| 41.  | E:only-of-type        | 匹配父元素下使用同种标签的唯一一个子元素，等同于:first-of-type:last-of-type或 :nth-of-type(1):nth-last-of-type(1) |
-| 42.  | E:empty               | 匹配一个不包含任何子元素的元素，注意，文本节点也被看作子元素 |
+
+| 序号 | 选择器 | 含义 |
+| - | - | - |
+| 32. | E:root | 匹配文档的根元素，对于HTML文档，就是HTML元素 |
+| 33. | E:nth-child(n) | 匹配其父元素的第n个子元素，第一个编号为1 |
+| 34. | E:nth-last-child(n) | 匹配其父元素的倒数第n个子元素，第一个编号为1 |
+| 35. | E:nth-of-type(n) | 与:nth-child()作用类似，但是仅匹配使用同种标签的元素 |
+| 36. | E:nth-last-of-type(n) | 与:nth-last-child() 作用类似，但是仅匹配使用同种标签的元素 |
+| 37. | E:last-child | 匹配父元素的最后一个子元素，等同于:nth-last-child(1) |
+| 38. | E:first-of-type | 匹配父元素下使用同种标签的第一个子元素，等同于:nth-of-type(1) |
+| 39. | E:last-of-type | 匹配父元素下使用同种标签的最后一个子元素，等同于:nth-last-of-type(1) |
+| 40. | E:only-child | 匹配父元素下仅有的一个子元素，等同于:first-child:last-child或 :nth-child(1):nth-last-child(1) |
+| 41. | E:only-of-type | 匹配父元素下使用同种标签的唯一一个子元素，等同于:first-of-type:last-of-type或 :nth-of-type(1):nth-last-of-type(1) |
+| 42. | E:empty | 匹配一个不包含任何子元素的元素，注意，文本节点也被看作子元素 |
 
 ### 反选伪类
 
-| 序号 | 选择器   | 含义                           |
-| ---- | -------- | ------------------------------ |
-| 43.  | E:not(s) | 匹配不符合当前选择器的任何元素 |
+
+| 序号 | 选择器 | 含义 |
+| - | - | - |
+| 43. | E:not(s) | 匹配不符合当前选择器的任何元素 |
 
 ### :target 伪类
 
-| 序号 | 选择器   | 含义                           |
-| ---- | -------- | ------------------------------ |
-| 44.  | E:target | 匹配文档中特定"id"点击后的效果 |
+
+| 序号 | 选择器 | 含义 |
+| - | - | - |
+| 44. | E:target | 匹配文档中特定"id"点击后的效果 |
 
 参考：https://ruanyifeng.com/blog/2009/03/css_selectors.html
 
@@ -1987,8 +2199,6 @@ background-clip: 规定背景的绘制区域
 
 <div class="container" />
 ```
-
-
 
 <img src="images/bg-clip1.jpg" alt="image-20210126190547962" />
 
@@ -2165,7 +2375,6 @@ CSS3 动画：动画是使元素从一种样式逐渐变化为另一种样式的
 1. @keyframes 规则
 
    创建动画。@keyframes 规则内指定一个 CSS 样式和动画将逐步从目前的样式更改为新的样式。
-
 2. 绑定到选择器上才有效果。
 
    CSS 文件
@@ -2179,13 +2388,13 @@ CSS3 动画：动画是使元素从一种样式逐渐变化为另一种样式的
    	animation:myfirst 5s;
    	-webkit-animation:myfirst 5s; /* Safari and Chrome */
    }
-   
+
    @keyframes myfirst
    {
    	from {background:red;}
    	to {background:yellow;}
    }
-   
+
    @-webkit-keyframes myfirst /* Safari and Chrome */
    {
    	from {background:red;}
@@ -2200,29 +2409,26 @@ CSS3 动画：动画是使元素从一种样式逐渐变化为另一种样式的
    ```
 
    > 注意: 必须定义动画的名称和动画的持续时间。如果省略的持续时间，动画将无法运行，因为默认值是0。
+   >
 
 #### animation 属性
 
 - `animation-name`: 动画名称，对应`@keyframes`
-
 - `animation-duration`: 间隔（规定动画完成一个周期所花费的秒或毫秒。默认是 0。）
-
 - `animation-timing-function`: 曲线（规定动画的速度曲线。默认是 "ease"。）
-
 - `animation-delay`: 延迟（动画何时开始。默认是 0。）
-
 - `animation-iteration-count`: 次数（默认 1）
-  - `infinite`: 循环动画
 
+  - `infinite`: 循环动画
 - `animation-direction`: 方向（默认是 "normal"）
+
   - `alternate`: 反向播放
   - `normal`：默认（正向）
-
 - `animation-fill-mode`: 静止模式
+
   - `forwards`: 停止时，保留最后一帧
   - `backwards`: 停止时，回到第一帧
 - `both`: 同时运用 `forwards / backwards`
-
 - 常用钩子: `animationend`
 
 ### 动画属性
@@ -2240,55 +2446,58 @@ CSS3 动画：动画是使元素从一种样式逐渐变化为另一种样式的
 
 ### 2D 转换
 
-| 函数                            | 描述                                     |
-| :------------------------------ | :--------------------------------------- |
-| matrix(*n*,*n*,*n*,*n*,*n*,*n*) | 定义 2D 转换，使用六个值的矩阵。         |
-| translate(*x*,*y*)              | 定义 2D 转换，沿着 X 和 Y 轴移动元素。   |
-| translateX(*n*)                 | 定义 2D 转换，沿着 X 轴移动元素。        |
-| translateY(*n*)                 | 定义 2D 转换，沿着 Y 轴移动元素。        |
-| scale(*x*,*y*)                  | 定义 2D 缩放转换，改变元素的宽度和高度。 |
-| scaleX(*n*)                     | 定义 2D 缩放转换，改变元素的宽度。       |
-| scaleY(*n*)                     | 定义 2D 缩放转换，改变元素的高度。       |
-| rotate(*angle*)                 | 定义 2D 旋转，在参数中规定角度。         |
-| skew(*x-angle*,*y-angle*)       | 定义 2D 倾斜转换，沿着 X 和 Y 轴。       |
-| skewX(*angle*)                  | 定义 2D 倾斜转换，沿着 X 轴。            |
-| skewY(*angle*)                  | 定义 2D 倾斜转换，沿着 Y 轴。            |
+
+| 函数 | 描述 |
+| :- | :- |
+| matrix(*n*,*n*,*n*,*n*,*n*,*n*) | 定义 2D 转换，使用六个值的矩阵。 |
+| translate(*x*,*y*) | 定义 2D 转换，沿着 X 和 Y 轴移动元素。 |
+| translateX(*n*) | 定义 2D 转换，沿着 X 轴移动元素。 |
+| translateY(*n*) | 定义 2D 转换，沿着 Y 轴移动元素。 |
+| scale(*x*,*y*) | 定义 2D 缩放转换，改变元素的宽度和高度。 |
+| scaleX(*n*) | 定义 2D 缩放转换，改变元素的宽度。 |
+| scaleY(*n*) | 定义 2D 缩放转换，改变元素的高度。 |
+| rotate(*angle*) | 定义 2D 旋转，在参数中规定角度。 |
+| skew(*x-angle*,*y-angle*) | 定义 2D 倾斜转换，沿着 X 和 Y 轴。 |
+| skewX(*angle*) | 定义 2D 倾斜转换，沿着 X 轴。 |
+| skewY(*angle*) | 定义 2D 倾斜转换，沿着 Y 轴。 |
 
 ### 3D 转换
 
-| 函数                                                         | 描述                                      |
-| :----------------------------------------------------------- | :---------------------------------------- |
-| matrix3d(*n*,*n*,*n*,*n*,*n*,*n*, *n*,*n*,*n*,*n*,*n*,*n*,*n*,*n*,*n*,*n*) | 定义 3D 转换，使用 16 个值的 4x4 矩阵。   |
-| translate3d(*x*,*y*,*z*)                                     | 定义 3D 转化。                            |
-| translateX(*x*)                                              | 定义 3D 转化，仅使用用于 X 轴的值。       |
-| translateY(*y*)                                              | 定义 3D 转化，仅使用用于 Y 轴的值。       |
-| translateZ(*z*)                                              | 定义 3D 转化，仅使用用于 Z 轴的值。       |
-| scale3d(*x*,*y*,*z*)                                         | 定义 3D 缩放转换。                        |
-| scaleX(*x*)                                                  | 定义 3D 缩放转换，通过给定一个 X 轴的值。 |
-| scaleY(*y*)                                                  | 定义 3D 缩放转换，通过给定一个 Y 轴的值。 |
-| scaleZ(*z*)                                                  | 定义 3D 缩放转换，通过给定一个 Z 轴的值。 |
-| rotate3d(*x*,*y*,*z*,*angle*)                                | 定义 3D 旋转。                            |
-| rotateX(*angle*)                                             | 定义沿 X 轴的 3D 旋转。                   |
-| rotateY(*angle*)                                             | 定义沿 Y 轴的 3D 旋转。                   |
-| rotateZ(*angle*)                                             | 定义沿 Z 轴的 3D 旋转。                   |
-| perspective(*n*)                                             | 定义 3D 转换元素的透视视图。              |
+
+| 函数 | 描述 |
+| :- | :- |
+| matrix3d(*n*,*n*,*n*,*n*,*n*,*n*, *n*,*n*,*n*,*n*,*n*,*n*,*n*,*n*,*n*,*n*) | 定义 3D 转换，使用 16 个值的 4x4 矩阵。 |
+| translate3d(*x*,*y*,*z*) | 定义 3D 转化。 |
+| translateX(*x*) | 定义 3D 转化，仅使用用于 X 轴的值。 |
+| translateY(*y*) | 定义 3D 转化，仅使用用于 Y 轴的值。 |
+| translateZ(*z*) | 定义 3D 转化，仅使用用于 Z 轴的值。 |
+| scale3d(*x*,*y*,*z*) | 定义 3D 缩放转换。 |
+| scaleX(*x*) | 定义 3D 缩放转换，通过给定一个 X 轴的值。 |
+| scaleY(*y*) | 定义 3D 缩放转换，通过给定一个 Y 轴的值。 |
+| scaleZ(*z*) | 定义 3D 缩放转换，通过给定一个 Z 轴的值。 |
+| rotate3d(*x*,*y*,*z*,*angle*) | 定义 3D 旋转。 |
+| rotateX(*angle*) | 定义沿 X 轴的 3D 旋转。 |
+| rotateY(*angle*) | 定义沿 Y 轴的 3D 旋转。 |
+| rotateZ(*angle*) | 定义沿 Z 轴的 3D 旋转。 |
+| perspective(*n*) | 定义 3D 转换元素的透视视图。 |
 
 # link 与 @import 的区别
 
-|              | link                                    | @import                                          |
-| ------------ | --------------------------------------- | ------------------------------------------------ |
-| 语法类型     | html                                    | CSS                                              |
-| 兼容问题     | 无                                      | @import 是 css2.1 加入的语法，只有 IE5+ 才可识别 |
-| 加载方式     | 浏览器**加载页面时**同步加载 CSS        | 浏览器**页面加载完成后**再加载@import的CSS       |
-| 优先级       | 高                                      | 低                                               |
-| 功能         | 功能较多，可以定义 RSS，定义 Rel 等作用 | 只能用于加载 CSS                                 |
-| 使用 JS 引入 | 可以                                    | 不可以                                           |
+
+|   | link | @import |
+| - | - | - |
+| 语法类型 | html | CSS |
+| 兼容问题 | 无 | @import 是 css2.1 加入的语法，只有 IE5+ 才可识别 |
+| 加载方式 | 浏览器**加载页面时**同步加载 CSS | 浏览器**页面加载完成后**再加载@import的CSS |
+| 优先级 | 高 | 低 |
+| 功能 | 功能较多，可以定义 RSS，定义 Rel 等作用 | 只能用于加载 CSS |
+| 使用 JS 引入 | 可以 | 不可以 |
 
 # CSS 预处理器
 
 Sass/Less/Postcss
 
-原理: 
+原理:
 
 将类 CSS 语言通过 **Webpack 编译** 转成浏览器可读的真正 CSS。在这层编译之上，便可以赋予 CSS 更多更强大的功能，常用功能:
 
@@ -2308,21 +2517,17 @@ Sass/Less/Postcss
         }
   }
   ```
-
-  
-
 - 变量
 
   ```css
   // 定义变量
   @bgColor: #f5f5f5;
-  
+
   // 引用变量
   body{
       background-color: @bgColor;
   }
   ```
-
 - import
 
   main.css
@@ -2333,22 +2538,17 @@ Sass/Less/Postcss
   PS2：_button1.less里可以引用main.css里的自定义变量。
   */
   @btnColor: red;
-  
+
   @import url(`_button1.less:');    //这里的路径写的是相对路径
-  
+
   body{
     width: 1024px;
   }
   ```
-
 - 循环语句
-
 - 条件语句
-
 - 自动前缀
-
 - 单位转换
-
 - mixin 复用
 
   ```css
@@ -2358,7 +2558,7 @@ Sass/Less/Postcss
     -webkit-border-radius: @radius;
     border-radius: @radius;
   }
-  
+
   #header {
     .roundedCorners;
   }
@@ -2366,7 +2566,6 @@ Sass/Less/Postcss
     .roundedCorners(10px);
   }
   ```
-
 - 内置函数
 
   ```css
@@ -2375,8 +2574,6 @@ Sass/Less/Postcss
     color: darken(#fff, 10%);               // 让白色变暗 10%
   }
   ```
-
-  
 
 # CSS 解决类名冲突
 
@@ -2400,11 +2597,9 @@ BEM全称是：Block Element Modifier
 - **Block**：页面中的大区域，表示最顶级的划分
 
   例如：轮播图(`banner`)、布局(`layout`)、文章(`article`)等等
-
 - **element**：区域中的组成部分
 
   例如：轮播图中的横幅图片(`banner__img`)、轮播图中的容器（`banner__container`）、布局中的头部(`layout__header`)、文章中的标题(`article_title`)
-
 - **modifier**：可选。通常表示状态.
 
   例如：处于展开状态的布局左边栏（`layout__left_expand`）、处于选中状态的轮播图小圆点(`banner__dot_selected`)
@@ -2432,21 +2627,8 @@ css module原理非常简单，css-loader 会将样式中的类名进行转换�
 
 因此css-loader使用css module后，源代码的类名和最终生成的类名是不一样的，而开发者只知道自己写的源代码中的类名，并不知道最终的类名是什么，css-loader会导出二者的对应关系，但还包括了很多其他信息。而style-loader就是去除其他信息，仅暴露类名和对应生成的hash值.
 
-
-
 面试中一般不会重点考察该点，一般介绍下自己在实战项目中的经验即可~
 
 # 经验
 
 通常，CSS 并不是重点的考察领域，但这其实是由于现在国内业界对 CSS 的专注不够导致的，真正精通并专注于 CSS 的团队和人才并不多。因此如果能在 CSS 领域有自己的见解和经验，反而会为相当的加分和脱颖而出。
-
-
-
-
-
-
-
-
-
-
-

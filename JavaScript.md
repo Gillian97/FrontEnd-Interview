@@ -2386,6 +2386,8 @@ console.log(Array.isArray([1, 2, 3])) // true
 
 ### 使用 instanceof 判断对象
 
+instanceof 用于判断一个变量是否是某个对象的实例.
+
 使用 typeof 无法判断对象数据类型, 使用 instanceof 更好, 在对象的原型链上查找函数的原型, 找到即为 true
 
 ```javascript
