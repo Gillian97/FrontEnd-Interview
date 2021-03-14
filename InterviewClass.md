@@ -31,7 +31,7 @@ while 循环
 
 不知道循环多少次, 条件达到即可.
 
-ForEach(fn, thisVal) 
+ForEach(fn, thisVal)
 
 比 for 性能差一些, 推荐的原因是看中其函数式编程(更多看中结果, 对过程进行封装, 使用方便, 但是无法管控过程, 性能有所消耗, 多做很多操作). 与之对应的是命令式编程, 看中过程, 对过程掌控更好.
 
@@ -45,7 +45,7 @@ for in 性能最差
 
 迭代当前对象的所有可迭代对象, 私有属性基本上是可迭代, 某些公有属性{出现在原型链上的属性}也可迭代. 因此查找时一定会遍历原型链的所有属性(可或者不可迭代属性).
 
-问题: 
+问题:
 
 - 遍历顺序以数字优先
 - 无法遍历 Symbol 属性
@@ -63,7 +63,7 @@ for of 循环
 
 比 for in 好一点. 按照迭代器规范进行规范.
 
- 迭代器: 一种规范, 想迭代当前结构该怎么迭代. 部分数据结构实现了迭代器规范, 所有有 [Symbol.iterator] 属性的数据结构都实现了迭代器规范.
+迭代器: 一种规范, 想迭代当前结构该怎么迭代. 部分数据结构实现了迭代器规范, 所有有 [Symbol.iterator] 属性的数据结构都实现了迭代器规范.
 
 实现的数据结构: 数组/部分类数组(arguments)/Set/Map...[对象没有实现]
 
@@ -120,7 +120,7 @@ JavaScript的主要用途是与用户互动以及操作DOM。如果它是多线�
 
 实现非阻塞: 事件循环
 
-**事件循环定义:** 
+**事件循环定义:**
 
 js 是单线程, 采用非阻塞机制, 一些延迟执行的任务被放在任务队列中, 执行完主线程再去执行任务队列整个的循环机制called 事件循环.
 
@@ -130,9 +130,9 @@ js 是单线程, 采用非阻塞机制, 一些延迟执行的任务被放在任�
 
 宏任务 微任务
 
-宏任务(task): setTimeout、setInterval、script（整体代码）、 I/O 操作、UI 渲染等。 
+宏任务(task): setTimeout、setInterval、script（整体代码）、 I/O 操作、UI 渲染等。
 
-微任务(micro-task): Process.nextTick() 、new Promise().then(**回调**)、MutationObserver(html5新特性)等。 
+微任务(micro-task): Process.nextTick() 、new Promise().then(**回调**)、MutationObserver(html5新特性)等。
 
 > 为什么一定要区分出两种, 只有一种任务不行吗?
 
@@ -140,25 +140,25 @@ js 是单线程, 采用非阻塞机制, 一些延迟执行的任务被放在任�
 
 > 浏览器中事件循环的具体机制
 
-执行一只task（宏任务） 
+执行一只task（宏任务）
 
-执行完 micro-task 队列 （微任务） 
+执行完 micro-task 队列 （微任务）
 
 再执行宏任务队列中的下一个宏任务
 
-如此循环往复下去 
+如此循环往复下去
 
 ### Node 事件循环
 
 > Node中的事件循环阶段
 
-宏任务(task): setTimeout、setInterval、script（整体代码）、 I/O 操作等。 
+宏任务(task): setTimeout、setInterval、script（整体代码）、 I/O 操作等。
 
 微任务(micro-task): new Promise().then(**回调**)、Process.nextTick()等。
 
 **宏任务 task 的执行顺序**
 
-1. timers 定时器: 本阶段执行已经安排的 setTimeout() 和 setInterval() 的回调函数。 
+1. timers 定时器: 本阶段执行已经安排的 setTimeout() 和 setInterval() 的回调函数。
 2. pending callback 待定回调: 执行延迟到下一个循环迭代的I/O回调
 3. idle, prepare: 仅系统内部使用.
 4. poll: 检索新的 I/O 事件;执行与 I/O 相关的回调（几乎所有情况下，除了关闭的回调函数，它们由计时器和 setImmediate() 排定的之外），其余情况 node 将在此处阻塞。
@@ -167,15 +167,15 @@ js 是单线程, 采用非阻塞机制, 一些延迟执行的任务被放在任�
 
 > 微任务与宏任务在 node 中的执行顺序(node10及以前, node10 后)
 
-Node 10以前： 
+Node 10以前：
 
-1. 执行完一个阶段的所有任务 
-2. 执行完 nextTick 队列里面的内容 
-3. 执行完微任务队列的内容 
+1. 执行完一个阶段的所有任务
+2. 执行完 nextTick 队列里面的内容
+3. 执行完微任务队列的内容
 
-Node 11以后： 
+Node 11以后：
 
-和浏览器的行为统一了，都是每执行一个宏任务就执行完微任务队列。 
+和浏览器的行为统一了，都是每执行一个宏任务就执行完微任务队列。
 
 ### 看题写答案
 
@@ -374,6 +374,8 @@ for (let i = 0; i < lilist.length; i++) {
 方法二: 使用事件委托
 
 ```javascript
+// querySelector 方法返回文档中匹配指定 css 选择器的一个元素
+// 若要返回所有元素, 使用 querySelectorAll 方法
 const ul = document.querySelector('ul');
 ul.addEventListener('click', function (e) {
   const target = e.target;
@@ -408,9 +410,7 @@ ul.addEventListener('click', function (e) {
   `banner === true` 或者 `banner === 0`, 业务代码保证可读性, 其他人能知道类型, 或者用 ts 就可以不用
 
   第三方库可以直接写, 因为注意性能.
-
 - 整个页面添加透明遮罩
-
 - 在每个元素的 click 事件中判断(太繁琐, 元素太多)
 
 ```javascript
@@ -429,13 +429,13 @@ window.addEventListener('click', function(e){
 
 ### 基本概念
 
-函数防抖: 当持续触发事件时，一定时间段内没有再触发事件，事件处理函数才会执行一次，如果设定的时间到来之前，又一次触发了事件，就重新开始延时。如下图，持续触发scroll事件时，并不执行handle函数，当1000毫秒内没有触发scroll事件时，才会延时触发scroll事件。 debounce.webp 
+函数防抖: 当持续触发事件时，一定时间段内没有再触发事件，事件处理函数才会执行一次，如果设定的时间到来之前，又一次触发了事件，就重新开始延时。如下图，持续触发scroll事件时，并不执行handle函数，当1000毫秒内没有触发scroll事件时，才会延时触发scroll事件。 debounce.webp
 
 ![image](images/%E9%98%B2%E6%8A%96.jpg)
 
 函数节流: 当持续触发事件时，保证一定时间段内只调用一次事件处理函数。节流通俗解释就比如我们水⻰头放水，阀⻔一打开，水哗哗的往下流，秉着勤俭节约的优良传统美德，我们要把水⻰头关小点，最好是如我们心意按照一定规律在某个时间间隔内一滴一滴的往下滴。如下图，持续触发scroll事件时，并不立即执行handle函数，每隔1000毫秒才会执行 一次handle函数。
 
-![image-20210303225429167](images/%E8%8A%82%E6%B5%81.jpg) 
+![image-20210303225429167](images/%E8%8A%82%E6%B5%81.jpg)
 
 ### 使用场景
 
@@ -546,8 +546,6 @@ function throttle (fn, wait) {
 }
 ```
 
-
-
 ## Promise + 手写 all
 
 > Promise.all 你知道有什么特性吗?
@@ -576,11 +574,9 @@ function throttle (fn, wait) {
 1. 判断 promise 类型太麻烦
 
    ![image-20210303230422161](images/promise%E5%8F%8D%E4%BE%8B1.jpg)
-
 2. 同步执行, 可能永远都不会 resolve. 该种写法不行.
 
    ![image-20210303231023485](images/promise%E5%8F%8D%E4%BE%8B2.jpg)
-
 3. 如果最后一个异步操作最先返回结果, res.length 会立即满足要求. 该种写法不行.
 
    ![image-20210303231057904](images/promise%E5%8F%8D%E4%BE%8B3.jpg)
@@ -681,7 +677,7 @@ var trap = function (height) {
     let right_max = new Array(n);
     left_max[0] = height[0];
     right_max[n - 1] = height[n - 1];
-    
+  
     // 注意这里计算最大值的不同之处在于
     // 位置 i 的左边最大值是前一个位置的左边最大值与 height[i] 比较
     // 右边最大值同理
@@ -689,7 +685,7 @@ var trap = function (height) {
     for (let i = n - 2; i >= 0; i--) right_max[i] = Math.max(right_max[i + 1], height[i]);
     // 每个位置接的雨水求和
     for (let i = 1; i < n - 1; i++) res += Math.min(left_max[i], right_max[i]) - height[i];
-    
+  
     return res;
 };
 ```
@@ -701,8 +697,6 @@ var trap = function (height) {
 ## 双指针
 
 ![image-20210303233942424](images/%E6%8E%A5%E9%9B%A8%E6%B0%B4.jpg)
-
-
 
 ```javascript
 var trap = function (height) {
@@ -734,3 +728,221 @@ var trap = function (height) {
 时间复杂度：O(N)
 
 空间复杂度：O(1)
+
+# 0314 面试直播课
+
+一. 有做过性能加载优化相关的工作吗? 都做过哪些努力?
+
+性能优化目的?
+
+1. 首屏时间
+2. 首次可交互时间
+3. 首次有意义内容渲染时间
+
+
+
+1. 只请求当前需要的资源
+
+   异步加载/懒加载/polyfill(对高级语法进行转译, 包比较大)
+
+   [实现对polyfill的按需加载](https://polyfill.io/v3/url-builder/)
+
+2. 缩减资源体积
+
+   打包压缩 (webpack4 内置)
+
+   gzip 压缩算法(node/nginx gzip on)减少静态资源体积, 压缩效率高
+
+   图片格式的优化(是否需要那么高分辨率)/[压缩](http://tinypng.com)/根据屏幕分辨率展示不同分辨率的图片/webp
+
+   尽量控制 cookie 大小, request header, 同域请求都会带上 cookie, 每个请求额外耗费很多体积, 尽量减少
+
+3. 时序优化
+
+   js promise.all 并行执行 promise, 没有依赖/关联的请求
+
+   SSR 通过在服务端直接做好渲染输出到客户端, 利于 seo
+
+   prefetch, prerender, preload
+
+   ```html
+   <link rel="dns-prefetch" href="xxx1.com"></link>
+   <link rel="preconnect" href="xxx1.com"></link>
+   /* 需要声明文件类型 */
+   <link rel="preload" as="image" href="https://aaa.com/p.png"></link>
+   ```
+
+   
+
+4. 合理利用缓存
+
+   cdn cdn预热(源站分发内容到节点上) cdn刷新(节点去源站拉取新内容)
+
+   cdn 域名与业务域名不同 douyin.com cdn-douyin.com(避免无用cookie携带)
+
+   
+
+> js 执行时间非常长, 怎么分析?
+
+使用装饰器实现函数运行时间的计算
+
+![image-20210314193000617](images/image-20210314193000617.png)
+
+示例使用:
+
+![image-20210314193112450](images/image-20210314193112450.png)
+
+webp
+
+场景设计/优化
+
+> 阿里云oss支持通过链接后面拼参数来做图片的格式转换, 尝试写一下, 把任意图片格式转换为 webp, 需要注意什么?
+
+webp 是高级特性, 注意浏览器适配.
+
+浏览器是否支持 webp
+
+![image-20210314193824036](images/image-20210314193824036.png)
+
+```javascript
+const supportWebp = checkWebp();
+// 判断图片是否在 oss 上
+export function getWebpImageUrl (url) {
+  if (!url) {
+    throw Error('url null')
+  }
+
+  if (url.startsWith('data:')) {
+    return url
+  }
+
+  if (!supportWebp) {
+    return url;
+  }
+
+  return url + '?x-oss-processxxxxxxxx'
+}
+```
+
+
+
+> 有巨量图片需要展示, 除了懒加载方式, 有没有其他方法限制一下同时加载的图片数量?
+
+代码题: 实现 promise 并发控制
+
+
+
+![image-20210314195326292](images/image-20210314195326292.png)
+
+二.前端内存处理
+
+1. 内存的生命周期
+
+   内存分配: js里如何分配内存(声明变量/函数/对象时, js会自动分配内存)
+
+   内存使用: 读写内存(声明的变量/函数再去使用/调用的时候)
+
+   内存回收: 垃圾回收机制
+
+2. js 垃圾回收机制
+
+   用过的变量被垃圾回收判断用不到, 则这块内存会被回收
+
+   - 引用计数
+
+     对象a对对象b有访问权限, 那么称为a引用对象b, 不再被使用的对象
+
+     缺点: 循环引用 a<->b, 两个并没有被其他对象引用, 造成内存泄露
+
+   - 标记清除
+
+     无法达到的对象
+
+     1. 运行的时候, 给存储在内存的所有变量加上标记
+     2. 从根部出发, 能触及的对象, 把标记清除
+     3. 哪些有标记的就被视为即将要删除的变量
+
+3. js 中常见的内存泄漏
+
+   - 全局变量(不会被回收)
+
+     window.a = 'aaa'
+
+     window.a = null
+
+   - 未被清除的定时器和回调
+
+     ```javascript
+     const timer = setTimeout(()=>{
+       
+     }, 1000);
+     clearTimeout(timer);
+     // interval 同理
+     ```
+
+     
+
+   - 闭包
+
+     一个内部函数能够访问外部函数的内部变量
+
+   - DOM的引用
+
+     ```javascript
+     // 只要 elements 的属性 image 没有被回收, 对元素的引用就一直在
+     const elements = {
+       image: document.getElementById('image');
+     }
+     
+     document.body.removeChild(document.getElementById('image'));
+     elements.image = null;
+     ```
+
+> 减少内存泄露的方法
+
+- 减少不必要的全局变量
+- 使用完数据后, 及时解除引用
+
+> 实现 sizeOf 函数, 传入一个参数 object, 计算这个 Object 占用多少 bytes?
+
+每种类型占用的空间不一样.
+
+![image-20210314203130699](image-20210314203130699.png)
+
+三.前端HTTP请求相关
+
+1. 跨域问题
+
+   - jsonp
+   - cors
+   - img
+   - node 正向代理, / api -> 同域 node 服务 -> /api -> 前端
+   - nginx 反向代理, proxy_pass
+
+2. 做过全局请求处理吗? 比如统一处理登录态? 统一处理全局错误?
+
+   axios
+
+   adaptar
+
+   interceptor request response
+
+3. 代码题, 你能给 xhr 添加 hooks, 实现在各个阶段打日志吗?
+
+   new XMLHTTPRequest()
+
+   onload
+
+   onerror
+
+   open
+
+   onreadystatechange
+
+4. ll
+
+四.发布订阅模式
+
+![image-20210314211516316](image-20210314211516316.png)
+
+五.算法题 01背包

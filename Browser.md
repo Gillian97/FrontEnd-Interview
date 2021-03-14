@@ -216,8 +216,6 @@ name=Mary&message=Yes%3F
 - 微任务 `microtask(jobs)`: `promise / ajax / Object.observe(该方法已废弃)`
 - 宏任务 `macrotask(task)`: `setTimout / script / IO / UI Rendering`
 
-
-
 ## 架构
 
 - 用户界面
@@ -320,11 +318,12 @@ defer 表示延迟，例如掘金的源码中就有大量的 defer 出现：
 
 #### 总结
 
-| script 标签      | JS 执行顺序      | 是否阻塞解析 HTML                                            |
-| ---------------- | ---------------- | ------------------------------------------------------------ |
-| `<script>`       | 在 HTML 中的顺序 | 是                                                           |
+
+| script 标签 | JS 执行顺序 | 是否阻塞解析 HTML |
+| - | - | - |
+| `<script>` | 在 HTML 中的顺序 | 是 |
 | `<script async>` | 网络请求返回顺序 | 在 HTML 解析完成前请求返回，是；在 HTML 解析完成后请求返回，否 |
-| `<script defer>` | 在 HTML 中的顺序 | 否                                                           |
+| `<script defer>` | 在 HTML 中的顺序 | 否 |
 
 `defer`与`async`的区别是：`defer`要等到整个页面在内存中正常渲染结束（DOM 结构完全生成，以及其他脚本执行完成），才会执行；`async`一旦下载完，渲染引擎就会中断渲染，执行这个脚本以后，再继续渲染。
 
@@ -351,7 +350,7 @@ document.head.appendChild(script);
 
 ## 预加载
 
- [`link`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/link) 元素的 `rel` 属性的属性值`preload`能够让你在你的HTML页面中 [`head`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/head)元素内部书写一些声明式的资源获取请求，可以指明哪些资源是在页面加载完成后即刻需要的。对于这种即刻需要的资源，你可能**希望在页面加载的生命周期的早期阶段就开始获取，在浏览器的主渲染机制介入前就进行预加载**。这一机制使得资源可以更早的得到加载并可用，且更不易阻塞页面的初步渲染，进而提升性能。
+[`link`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/link) 元素的 `rel` 属性的属性值`preload`能够让你在你的HTML页面中 [`head`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/head)元素内部书写一些声明式的资源获取请求，可以指明哪些资源是在页面加载完成后即刻需要的。对于这种即刻需要的资源，你可能**希望在页面加载的生命周期的早期阶段就开始获取，在浏览器的主渲染机制介入前就进行预加载**。这一机制使得资源可以更早的得到加载并可用，且更不易阻塞页面的初步渲染，进而提升性能。
 
 ***想实现: 需要的资源在页面渲染前就获取, 不影响页面初步渲染, 提升性能***.
 
@@ -365,7 +364,7 @@ Preload 是一个新的控制特定资源如何被加载的新的 Web 标准，�
 
 这不要与浏览器预加载混淆，**浏览器预加载只预先加载在HTML中声明的资源**。preload 指令事实上克服了这个限制并且允许预加载在 CSS 和JavaScript 中定义的资源，并允许决定何时应用每个资源。
 
-即: 
+即:
 
 preload 可加载在 js 和 css 中声明的资源, 而浏览器预加载只能预加载html中声明的资源.
 
@@ -403,11 +402,8 @@ preload 不会阻塞 `window` 的 `onload` 事件.
 - 允许浏览器来设定资源加载的优先级
 
   允许前端开发者来优化指定资源的加载。
-
 - 匹配未来的加载需求，在适当的情况下，重复利用同一资源。
-
 - 浏览器可以通过指定 `as` 属性来决定这个请求是否符合 content security policy。
-
 - 浏览器可以基于资源的类型（比如 image/webp）来发送适当的 `accept` 头。
 
 **举例**
@@ -547,17 +543,11 @@ document.body.appendChild(preloadedScript);
 
 当你需要预加载一个脚本，但需要推迟到需要的时候才令其执行时，这种方式会特别有用。
 
-
-
 ### prefetch
 
 当前页面加载完毕后, 在浏览器空闲时提前加载下一个页面可能需要的资源. 当前页面有许多 prefetch hint,  空闲时加载这些 hint 需要的资源并存在浏览器缓存中. 当用户点击某一个 prefetched document 时, 直接返回资源.
 
 一个低优先级的资源提示，允许浏览器在后台（空闲时）获取将来可能用得到的资源，并且将他们存储在浏览器的缓存中。一旦一个页面加载完毕就会开始下载其他的资源，然后当用户点击了一个带有 prefetched 的连接，它将可以立刻从缓存中加载内容。有三种不同的 prefetch 的类型，link，DNS 和 prerendering，下面来详细分析。
-
-
-
-
 
 ## 渲染过程
 
@@ -578,8 +568,6 @@ https://juejin.cn/post/6844904021308735502
 
 1. 找到所有的 CSS 样式
 2. 将其标准化
-
-
 
 给 DOM 树节点添加 CSS 样式，生成带样式的 DOM 树
 
@@ -700,8 +688,6 @@ class RenderObject{
   - 极限优化时，修改样式可将其`display: none`后修改
   - 避免多次触发上面提到的那些会触发回流的方法，可以的话尽量用 **变量存住**
   - 对具有复杂动画的元素使用绝对定位，使其脱离文档流，否则会引起父元素及后续元素频繁回流
-
-
 
 #### 合成
 
@@ -1405,6 +1391,66 @@ document.body.addEventListener("click", () => {
 
 * 使用 `DOM0` 事件处理程序，`event` 对象是全局对象 `window` 的一个属性。
 * 使用 `attachEvent()`/HTML 属性方法设置事件处理程序，event 会作为唯一参数传递给事件处理函数（`event` 仍然是 `window` 的属性，为了方便将其作参数传入）
+
+### 事件委托
+
+将一个元素的响应事件的函数委托给另一个元素, 一般是父级或者更外层的元素上, 真正绑定事件的是外层元素. 事件通过冒泡传播到外层元素然后触发事件, 即利用事件冒泡的机制.
+
+优点:
+
+1. 减少内存消耗
+
+   不用每个元素都去绑定事件处理函数
+
+2. 动态绑定事件
+
+   在频繁增删元素的情况下, 需要手动给元素增加/解除绑定事件. 如果事件委托在父级元素, 则省去这些操作, 与元素增删无关, 因此事件委托可以减少重复工作.
+
+示例使用:
+
+实现一个需求, 点击每个 li 元素时, 弹框显示该元素中的内容.
+
+```html
+<body>
+  <ul>
+    <li>1</li>
+    <li>2</li>
+    <li>3</li>
+    <li>4</li>
+    <li>5</li>
+    <li>6</li>
+    <li>7</li>
+    <li>8</li>
+  </ul>
+</body>
+<script text="text/javascript">
+  // TO DO
+</script>
+```
+
+使用事件委托:
+
+```javascript
+// querySelector 方法返回文档中匹配指定 css 选择器的一个元素
+// 若要返回所有元素, 使用 querySelectorAll 方法
+const ul = document.querySelector('ul');
+ul.addEventListener('click', function (e) {
+  const target = e.target;
+  // 确保点击的是 li 元素, 可能还有其他元素存在
+  if (target.tagName.toLowerCase() === 'li') {
+    // 这里 this 默认指向绑定事件的元素
+    const lilist = this.querySelectorAll('li');
+    console.log(typeof lilist, lilist);
+    // 获取目标元素的下标
+    const index = Array.prototype.indexOf.call(lilist, target);
+    alert(`内容为 ${target.innerHTML}, 索引为${index}`)
+  }
+}, false)
+```
+
+javascript注意: `lilist` 类型是 `NodeList`
+
+![NodeList](images/NodeList.jpg)
 
 ### 阻止事件穿透
 

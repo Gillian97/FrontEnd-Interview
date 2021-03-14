@@ -1084,6 +1084,7 @@ console.log(arr2, arr);
 无法 `break`, 可以用 `try/catch` 中 `throw new Error` 来停止。
 
 ```javascript
+
 let arr = [1, 2, 'ok', 'fine', 'you', 'bye']
 let s = '';
 // 该函数的参数1为数组元素, 参数2为数组元素下标, 参数3为该数组本身
